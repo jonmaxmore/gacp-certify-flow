@@ -12,6 +12,7 @@ import ApplicationWizard from '@/pages/applicant/ApplicationWizard';
 import PaymentsPage from '@/pages/applicant/PaymentsPage';
 import CertificatesPage from '@/pages/applicant/CertificatesPage';
 import ApplicationsListPage from '@/pages/applicant/ApplicationsListPage';
+import SchedulePage from '@/pages/applicant/SchedulePage';
 import ReviewerDashboard from '@/pages/reviewer/ReviewerDashboard';
 import ReviewQueue from '@/pages/reviewer/ReviewQueue';
 import ReviewDetail from '@/pages/reviewer/ReviewDetail';
@@ -48,6 +49,7 @@ function App() {
                       <Route path="applications" element={<ApplicationsListPage />} />
                       <Route path="payments" element={<PaymentsPage />} />
                       <Route path="certificates" element={<CertificatesPage />} />
+                      <Route path="schedule" element={<SchedulePage />} />
                     </Routes>
                   </DashboardLayout>
                 </ProtectedRoute>
