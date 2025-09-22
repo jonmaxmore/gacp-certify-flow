@@ -241,79 +241,107 @@
   }
 }
 
-/* Apple Design System - Professional GACP Platform
-Clean, minimal, trustworthy design following Apple Human Interface Guidelines
+/* Japanese Machinery Factory + Apple Design System - Professional GACP Platform
+Clean, minimal, precision-focused design combining Apple's elegance with Japanese industrial aesthetics
+Emphasis on clarity, reliability, and professional agricultural certification
 */
 
 @layer base {
   :root {
-    /* Apple-inspired base colors */
-    --background: 0 0% 98%; /* Apple near-white */
-    --foreground: 0 0% 13%; /* Rich black */
+    /* Apple-inspired base colors with industrial precision */
+    --background: 0 0% 98%; /* Clean factory floor white */
+    --foreground: 215 15% 15%; /* Industrial charcoal */
 
-    --card: 0 0% 100%; /* Pure white with translucency */
-    --card-foreground: 0 0% 13%;
+    --card: 0 0% 100%; /* Pure white precision surfaces */
+    --card-foreground: 215 15% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 13%;
+    --popover-foreground: 215 15% 15%;
 
-    /* Apple system blue - trust and professionalism */
-    --primary: 211 100% 50%; /* Apple blue */
+    /* Primary - Precision Blue (inspired by Japanese machinery displays) */
+    --primary: 214 84% 56%; /* Precision blue */
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 211 100% 65%;
+    --primary-glow: 214 84% 70%;
+    --primary-muted: 214 50% 90%;
 
-    /* Apple system green - agriculture and approval */
-    --secondary: 142 79% 49%; /* Apple green */
+    /* Secondary - Agricultural Green with industrial precision */
+    --secondary: 142 69% 45%; /* Industrial green */
     --secondary-foreground: 0 0% 100%;
-    --secondary-light: 142 60% 85%;
+    --secondary-light: 142 50% 85%;
+    --secondary-muted: 142 30% 92%;
 
-    /* Status colors following Apple HIG */
-    --success: 142 79% 49%; /* Apple green */
+    /* Industrial Color Palette */
+    --steel-gray: 200 15% 55%; /* Machined steel */
+    --steel-gray-light: 200 15% 85%;
+    --steel-gray-dark: 200 15% 35%;
+    
+    --precision-blue: 214 84% 56%; /* Digital display blue */
+    --precision-blue-light: 214 84% 90%;
+    
+    --safety-orange: 25 95% 58%; /* Industrial warning orange */
+    --safety-orange-light: 25 95% 90%;
+    
+    --machine-yellow: 45 90% 65%; /* Caution yellow */
+    --machine-yellow-light: 45 90% 92%;
+    
+    --industrial-red: 355 75% 55%; /* Alert red */
+    --industrial-red-light: 355 75% 90%;
+
+    /* Status colors following Japanese industrial standards */
+    --success: 142 69% 45%; /* Industrial green */
     --success-foreground: 0 0% 100%;
-    --warning: 35 100% 50%; /* Apple orange */
+    --warning: 25 95% 58%; /* Safety orange */
     --warning-foreground: 0 0% 100%;
-    --pending: 35 100% 92%; /* Light orange */
-    --approved: 142 60% 90%; /* Light green */
-    --certified: 165 83% 53%; /* Apple mint */
+    --pending: 45 90% 92%; /* Light machine yellow */
+    --approved: 142 50% 90%; /* Light industrial green */
+    --certified: 165 73% 50%; /* Quality seal teal */
 
-    /* Apple neutral grays */
-    --muted: 0 0% 95%; /* Apple light gray */
-    --muted-foreground: 0 0% 56%; /* Apple secondary label */
+    /* Apple neutral grays with industrial precision */
+    --muted: 200 10% 95%; /* Clean industrial surface */
+    --muted-foreground: 200 15% 50%; /* Secondary industrial text */
 
-    --accent: 253 78% 60%; /* Apple purple for highlights */
+    --accent: 214 84% 56%; /* Precision blue accent */
     --accent-foreground: 0 0% 100%;
 
-    /* Apple system red */
-    --destructive: 355 83% 60%; /* Apple red */
+    /* Industrial alert red */
+    --destructive: 355 75% 55%; /* Industrial red */
     --destructive-foreground: 0 0% 100%;
 
-    /* Apple separator colors */
-    --border: 0 0% 82%; /* Apple separator */
-    --input: 0 0% 82%;
-    --ring: 211 100% 50%; /* Apple focus ring */
+    /* Industrial separator colors */
+    --border: 200 15% 80%; /* Machine panel borders */
+    --input: 200 15% 80%;
+    --ring: 214 84% 56%; /* Precision blue focus */
 
-    /* Apple corner radius - generous for modern feel */
-    --radius: 16px;
+    /* Japanese-inspired corner radius - clean geometric precision */
+    --radius: 12px;
 
-    /* Apple-inspired gradients */
+    /* Japanese industrial gradients - clean precision aesthetics */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-glow)) 100%);
     --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)) 0%, hsl(var(--secondary-light)) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(0 0% 97%) 100%);
-    --gradient-glass: linear-gradient(145deg, hsla(0, 0%, 100%, 0.1) 0%, hsla(0, 0%, 100%, 0.05) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--precision-blue)) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(var(--muted)) 100%);
+    --gradient-glass: linear-gradient(145deg, hsla(0, 0%, 100%, 0.15) 0%, hsla(0, 0%, 100%, 0.08) 100%);
+    --gradient-steel: linear-gradient(145deg, hsl(var(--steel-gray-light)) 0%, hsl(var(--steel-gray)) 100%);
+    --gradient-machine: linear-gradient(180deg, hsl(var(--muted)) 0%, hsl(0 0% 100%) 100%);
+    --gradient-precision: linear-gradient(90deg, hsl(var(--precision-blue-light)) 0%, hsl(var(--precision-blue)) 100%);
 
-    /* Apple shadow system - subtle and layered */
-    --shadow-minimal: 0 1px 3px hsla(0, 0%, 0%, 0.1);
-    --shadow-soft: 0 4px 6px -1px hsla(0, 0%, 0%, 0.1), 0 2px 4px -1px hsla(0, 0%, 0%, 0.06);
-    --shadow-medium: 0 10px 15px -3px hsla(0, 0%, 0%, 0.1), 0 4px 6px -2px hsla(0, 0%, 0%, 0.05);
-    --shadow-large: 0 20px 25px -5px hsla(0, 0%, 0%, 0.1), 0 10px 10px -5px hsla(0, 0%, 0%, 0.04);
-    --shadow-focus: 0 0 0 4px hsl(var(--primary) / 0.2);
+    /* Japanese industrial shadow system - precise and controlled */
+    --shadow-minimal: 0 1px 2px hsla(0, 0%, 0%, 0.08), 0 1px 1px hsla(0, 0%, 0%, 0.06);
+    --shadow-soft: 0 2px 4px hsla(0, 0%, 0%, 0.08), 0 1px 2px hsla(0, 0%, 0%, 0.06);
+    --shadow-medium: 0 4px 8px hsla(0, 0%, 0%, 0.08), 0 2px 4px hsla(0, 0%, 0%, 0.06);
+    --shadow-large: 0 8px 16px hsla(0, 0%, 0%, 0.10), 0 4px 8px hsla(0, 0%, 0%, 0.08);
+    --shadow-focus: 0 0 0 3px hsl(var(--primary) / 0.15);
+    --shadow-panel: inset 0 1px 0 hsla(0, 0%, 100%, 0.1), 0 1px 3px hsla(0, 0%, 0%, 0.1);
+    --shadow-control: inset 0 -1px 0 hsla(0, 0%, 0%, 0.1), inset 0 1px 0 hsla(0, 0%, 100%, 0.1);
+    --shadow-pressed: inset 0 2px 4px hsla(0, 0%, 0%, 0.15);
 
-    /* Apple motion timing - smooth and natural */
-    --transition-quick: 150ms cubic-bezier(0.4, 0, 0.2, 1); /* Apple standard ease */
-    --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-elegant: 500ms cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-spring: 350ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Japanese precision timing - mechanical and precise */
+    --transition-quick: 120ms cubic-bezier(0.4, 0, 0.2, 1); /* Precise mechanical timing */
+    --transition-smooth: 250ms cubic-bezier(0.4, 0, 0.2, 1); /* Smooth machinery operation */
+    --transition-elegant: 400ms cubic-bezier(0.4, 0, 0.2, 1); /* Elegant precision movement */
+    --transition-spring: 300ms cubic-bezier(0.175, 0.885, 0.32, 1.175); /* Controlled spring */
+    --transition-mechanical: 180ms cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Mechanical precision */
+    --transition-factory: 200ms cubic-bezier(0.165, 0.84, 0.44, 1); /* Factory automation */
 
     /* Sidebar system */
     --sidebar-background: var(--background);
@@ -327,64 +355,89 @@ Clean, minimal, trustworthy design following Apple Human Interface Guidelines
   }
 
   .dark {
-    /* Apple dark mode */
-    --background: 0 0% 0%; /* Pure black */
-    --foreground: 0 0% 100%; /* Pure white */
+    /* Industrial dark mode - night shift factory */
+    --background: 215 25% 8%; /* Deep industrial darkness */
+    --foreground: 0 0% 95%; /* Clean display white */
 
-    --card: 0 0% 11%; /* Apple dark card */
-    --card-foreground: 0 0% 100%;
+    --card: 215 20% 12%; /* Dark machinery panel */
+    --card-foreground: 0 0% 95%;
 
-    --popover: 0 0% 11%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 215 20% 12%;
+    --popover-foreground: 0 0% 95%;
 
-    /* Apple dark blue */
-    --primary: 211 100% 60%; /* Apple blue in dark */
-    --primary-foreground: 0 0% 0%;
-    --primary-glow: 211 100% 75%;
+    /* Dark precision blue */
+    --primary: 214 84% 65%; /* Bright display blue */
+    --primary-foreground: 215 25% 8%;
+    --primary-glow: 214 84% 80%;
+    --primary-muted: 214 40% 25%;
 
-    /* Apple dark green */
-    --secondary: 142 79% 59%; /* Apple green in dark */
-    --secondary-foreground: 0 0% 0%;
-    --secondary-light: 142 60% 85%;
+    /* Dark industrial green */
+    --secondary: 142 69% 55%; /* Industrial green in dark */
+    --secondary-foreground: 215 25% 8%;
+    --secondary-light: 142 50% 75%;
+    --secondary-muted: 142 30% 25%;
+
+    /* Dark industrial colors */
+    --steel-gray: 200 15% 65%;
+    --steel-gray-light: 200 15% 75%;
+    --steel-gray-dark: 200 15% 25%;
+    
+    --precision-blue: 214 84% 65%;
+    --precision-blue-light: 214 84% 80%;
+    
+    --safety-orange: 25 95% 68%;
+    --safety-orange-light: 25 95% 80%;
+    
+    --machine-yellow: 45 90% 75%;
+    --machine-yellow-light: 45 90% 85%;
+    
+    --industrial-red: 355 75% 65%;
+    --industrial-red-light: 355 75% 80%;
 
     /* Dark status colors */
-    --success: 142 79% 59%;
-    --success-foreground: 0 0% 0%;
-    --warning: 35 100% 60%;
-    --warning-foreground: 0 0% 0%;
-    --pending: 35 100% 20%;
-    --approved: 142 60% 20%;
-    --certified: 165 83% 63%;
+    --success: 142 69% 55%;
+    --success-foreground: 215 25% 8%;
+    --warning: 25 95% 68%;
+    --warning-foreground: 215 25% 8%;
+    --pending: 45 90% 30%;
+    --approved: 142 50% 25%;
+    --certified: 165 73% 60%;
 
-    /* Apple dark grays */
-    --muted: 0 0% 17%; /* Apple secondary grouped background */
-    --muted-foreground: 0 0% 56%;
+    /* Dark industrial grays */
+    --muted: 215 15% 18%; /* Dark control panel */
+    --muted-foreground: 200 15% 65%;
 
-    --accent: 253 78% 70%; /* Apple purple in dark */
-    --accent-foreground: 0 0% 0%;
+    --accent: 214 84% 65%; /* Precision blue accent */
+    --accent-foreground: 215 25% 8%;
 
-    /* Apple dark red */
-    --destructive: 355 83% 70%; /* Apple red in dark */
+    /* Dark industrial red */
+    --destructive: 355 75% 65%; /* Industrial red in dark */
     --destructive-foreground: 0 0% 100%;
 
-    /* Dark separators */
-    --border: 0 0% 23%; /* Apple separator in dark */
-    --input: 0 0% 23%;
-    --ring: 211 100% 60%;
+    /* Dark industrial separators */
+    --border: 215 15% 25%; /* Dark panel borders */
+    --input: 215 15% 25%;
+    --ring: 214 84% 65%;
 
-    /* Dark gradients */
+    /* Dark industrial gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-glow)) 100%);
     --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)) 0%, hsl(var(--secondary-light)) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 11%) 0%, hsl(0 0% 8%) 100%);
-    --gradient-glass: linear-gradient(145deg, hsla(0, 0%, 100%, 0.05) 0%, hsla(0, 0%, 100%, 0.02) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--precision-blue)) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(var(--card)) 0%, hsl(215 20% 10%) 100%);
+    --gradient-glass: linear-gradient(145deg, hsla(0, 0%, 100%, 0.08) 0%, hsla(0, 0%, 100%, 0.03) 100%);
+    --gradient-steel: linear-gradient(145deg, hsl(var(--steel-gray)) 0%, hsl(var(--steel-gray-dark)) 100%);
+    --gradient-machine: linear-gradient(180deg, hsl(var(--muted)) 0%, hsl(var(--card)) 100%);
+    --gradient-precision: linear-gradient(90deg, hsl(var(--precision-blue)) 0%, hsl(var(--precision-blue-light)) 100%);
 
-    /* Dark shadows */
-    --shadow-minimal: 0 1px 3px hsla(0, 0%, 0%, 0.3);
-    --shadow-soft: 0 4px 6px -1px hsla(0, 0%, 0%, 0.3), 0 2px 4px -1px hsla(0, 0%, 0%, 0.2);
-    --shadow-medium: 0 10px 15px -3px hsla(0, 0%, 0%, 0.3), 0 4px 6px -2px hsla(0, 0%, 0%, 0.2);
-    --shadow-large: 0 20px 25px -5px hsla(0, 0%, 0%, 0.4), 0 10px 10px -5px hsla(0, 0%, 0%, 0.3);
-    --shadow-focus: 0 0 0 4px hsl(var(--primary) / 0.3);
+    /* Dark industrial shadows */
+    --shadow-minimal: 0 1px 2px hsla(0, 0%, 0%, 0.4), 0 1px 1px hsla(0, 0%, 0%, 0.3);
+    --shadow-soft: 0 2px 4px hsla(0, 0%, 0%, 0.4), 0 1px 2px hsla(0, 0%, 0%, 0.3);
+    --shadow-medium: 0 4px 8px hsla(0, 0%, 0%, 0.4), 0 2px 4px hsla(0, 0%, 0%, 0.3);
+    --shadow-large: 0 8px 16px hsla(0, 0%, 0%, 0.5), 0 4px 8px hsla(0, 0%, 0%, 0.4);
+    --shadow-focus: 0 0 0 3px hsl(var(--primary) / 0.25);
+    --shadow-panel: inset 0 1px 0 hsla(0, 0%, 100%, 0.05), 0 1px 3px hsla(0, 0%, 0%, 0.4);
+    --shadow-control: inset 0 -1px 0 hsla(0, 0%, 0%, 0.2), inset 0 1px 0 hsla(0, 0%, 100%, 0.05);
+    --shadow-pressed: inset 0 2px 4px hsla(0, 0%, 0%, 0.3);
 
     /* Sidebar dark */
     --sidebar-background: var(--background);
@@ -412,46 +465,78 @@ Clean, minimal, trustworthy design following Apple Human Interface Guidelines
   }
 }
 
-/* Apple-style utility classes */
+/* Japanese Industrial + Apple Utility Classes */
 @layer utilities {
+  /* Glass effects with industrial precision */
   .glass-effect {
     background: var(--gradient-glass);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid hsla(0, 0%, 100%, 0.1);
   }
   
-  .shadow-apple-minimal {
+  .glass-panel {
+    background: var(--gradient-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border) / 0.5);
+  }
+  
+  /* Industrial shadow system */
+  .shadow-minimal {
     box-shadow: var(--shadow-minimal);
   }
   
-  .shadow-apple-soft {
+  .shadow-soft {
     box-shadow: var(--shadow-soft);
   }
   
-  .shadow-apple-medium {
+  .shadow-medium {
     box-shadow: var(--shadow-medium);
   }
   
-  .shadow-apple-large {
+  .shadow-large {
     box-shadow: var(--shadow-large);
   }
   
-  .transition-apple-quick {
+  .shadow-panel {
+    box-shadow: var(--shadow-panel);
+  }
+  
+  .shadow-control {
+    box-shadow: var(--shadow-control);
+  }
+  
+  .shadow-pressed {
+    box-shadow: var(--shadow-pressed);
+  }
+  
+  /* Japanese precision transitions */
+  .transition-quick {
     transition: var(--transition-quick);
   }
   
-  .transition-apple-smooth {
+  .transition-smooth {
     transition: var(--transition-smooth);
   }
   
-  .transition-apple-elegant {
+  .transition-elegant {
     transition: var(--transition-elegant);
   }
   
-  .transition-apple-spring {
+  .transition-spring {
     transition: var(--transition-spring);
   }
   
+  .transition-mechanical {
+    transition: var(--transition-mechanical);
+  }
+  
+  .transition-factory {
+    transition: var(--transition-factory);
+  }
+  
+  /* Industrial gradients */
   .gradient-primary {
     background: var(--gradient-primary);
   }
@@ -466,5 +551,81 @@ Clean, minimal, trustworthy design following Apple Human Interface Guidelines
   
   .gradient-card {
     background: var(--gradient-card);
+  }
+  
+  .gradient-steel {
+    background: var(--gradient-steel);
+  }
+  
+  .gradient-machine {
+    background: var(--gradient-machine);
+  }
+  
+  .gradient-precision {
+    background: var(--gradient-precision);
+  }
+  
+  /* Japanese industrial components */
+  .control-panel {
+    @apply bg-card border border-border rounded-lg shadow-panel;
+    background: var(--gradient-machine);
+  }
+  
+  .machine-button {
+    @apply px-4 py-2 rounded-md font-medium transition-mechanical;
+    @apply bg-gradient-to-b from-white to-gray-50 border border-border;
+    @apply hover:from-gray-50 hover:to-gray-100 active:shadow-pressed;
+    box-shadow: var(--shadow-control);
+  }
+  
+  .status-indicator {
+    @apply inline-flex items-center justify-center w-3 h-3 rounded-full;
+    box-shadow: inset 0 1px 0 hsla(0, 0%, 100%, 0.3), 0 1px 2px hsla(0, 0%, 0%, 0.1);
+  }
+  
+  .precision-grid {
+    background-image: 
+      linear-gradient(to right, hsl(var(--border) / 0.3) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--border) / 0.3) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  
+  .factory-card {
+    @apply bg-card border border-border rounded-xl shadow-soft transition-smooth;
+    @apply hover:shadow-medium hover:border-border/60;
+    background: var(--gradient-card);
+  }
+  
+  .industrial-focus {
+    @apply focus:outline-none focus:ring-3 focus:ring-primary/15 focus:border-primary;
+    transition: var(--transition-quick);
+  }
+  
+  /* Japanese typography emphasis */
+  .text-precision {
+    font-feature-settings: "tnum" 1, "kern" 1;
+    letter-spacing: 0.01em;
+  }
+  
+  .text-mono-industrial {
+    font-family: "SF Mono", "Monaco", "Cascadia Code", "Roboto Mono", monospace;
+    font-feature-settings: "tnum" 1;
+  }
+  
+  /* Ma (negative space) utilities */
+  .ma-sm {
+    @apply p-3;
+  }
+  
+  .ma-md {
+    @apply p-6;
+  }
+  
+  .ma-lg {
+    @apply p-8;
+  }
+  
+  .ma-xl {
+    @apply p-12;
   }
 }

@@ -23,11 +23,35 @@ export default {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
           glow: "hsl(var(--primary-glow))",
+          muted: "hsl(var(--primary-muted))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
           light: "hsl(var(--secondary-light))",
+          muted: "hsl(var(--secondary-muted))",
+        },
+        // Industrial color palette
+        steel: {
+          DEFAULT: "hsl(var(--steel-gray))",
+          light: "hsl(var(--steel-gray-light))",
+          dark: "hsl(var(--steel-gray-dark))",
+        },
+        precision: {
+          DEFAULT: "hsl(var(--precision-blue))",
+          light: "hsl(var(--precision-blue-light))",
+        },
+        safety: {
+          DEFAULT: "hsl(var(--safety-orange))",
+          light: "hsl(var(--safety-orange-light))",
+        },
+        machine: {
+          DEFAULT: "hsl(var(--machine-yellow))",
+          light: "hsl(var(--machine-yellow-light))",
+        },
+        industrial: {
+          DEFAULT: "hsl(var(--industrial-red))",
+          light: "hsl(var(--industrial-red-light))",
         },
         success: {
           DEFAULT: "hsl(var(--success))",
@@ -85,44 +109,58 @@ export default {
         'gradient-hero': 'var(--gradient-hero)',
         'gradient-card': 'var(--gradient-card)',
         'gradient-glass': 'var(--gradient-glass)',
+        'gradient-steel': 'var(--gradient-steel)',
+        'gradient-machine': 'var(--gradient-machine)',
+        'gradient-precision': 'var(--gradient-precision)',
       },
       boxShadow: {
-        'apple-minimal': 'var(--shadow-minimal)',
-        'apple-soft': 'var(--shadow-soft)',
-        'apple-medium': 'var(--shadow-medium)',
-        'apple-large': 'var(--shadow-large)',
-        'apple-focus': 'var(--shadow-focus)',
+        'minimal': 'var(--shadow-minimal)',
+        'soft': 'var(--shadow-soft)',
+        'medium': 'var(--shadow-medium)',
+        'large': 'var(--shadow-large)',
+        'focus': 'var(--shadow-focus)',
+        'panel': 'var(--shadow-panel)',
+        'control': 'var(--shadow-control)',
+        'pressed': 'var(--shadow-pressed)',
       },
       transitionTimingFunction: {
-        'apple-quick': 'var(--transition-quick)',
-        'apple-smooth': 'var(--transition-smooth)',
-        'apple-elegant': 'var(--transition-elegant)',
-        'apple-spring': 'var(--transition-spring)',
+        'quick': 'var(--transition-quick)',
+        'smooth': 'var(--transition-smooth)',
+        'elegant': 'var(--transition-elegant)',
+        'spring': 'var(--transition-spring)',
+        'mechanical': 'var(--transition-mechanical)',
+        'factory': 'var(--transition-factory)',
       },
       fontFamily: {
         'apple': ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+        'industrial': ['"SF Pro Display"', '"Roboto"', '"Helvetica Neue"', 'Arial', 'system-ui', 'sans-serif'],
+        'mono-industrial': ['"SF Mono"', '"Monaco"', '"Cascadia Code"', '"Roboto Mono"', 'monospace'],
       },
       keyframes: {
         "accordion-down": {
           from: {
             height: "0",
+            opacity: "0",
           },
           to: {
             height: "var(--radix-accordion-content-height)",
+            opacity: "1",
           },
         },
         "accordion-up": {
           from: {
             height: "var(--radix-accordion-content-height)",
+            opacity: "1",
           },
           to: {
             height: "0",
+            opacity: "0",
           },
         },
         "fade-in": {
           from: {
             opacity: "0",
-            transform: "translateY(10px)",
+            transform: "translateY(8px)",
           },
           to: {
             opacity: "1",
@@ -132,19 +170,77 @@ export default {
         "slide-in": {
           from: {
             opacity: "0",
-            transform: "translateX(-20px)",
+            transform: "translateX(-16px)",
           },
           to: {
             opacity: "1",
             transform: "translateX(0)",
           },
         },
+        "slide-up": {
+          from: {
+            opacity: "0",
+            transform: "translateY(16px)",
+          },
+          to: {
+            opacity: "1",
+            transform: "translateY(0)",
+          },
+        },
+        "scale-in": {
+          from: {
+            opacity: "0",
+            transform: "scale(0.95)",
+          },
+          to: {
+            opacity: "1",
+            transform: "scale(1)",
+          },
+        },
+        "machine-pulse": {
+          "0%, 100%": {
+            opacity: "1",
+          },
+          "50%": {
+            opacity: "0.7",
+          },
+        },
+        "precision-scan": {
+          "0%": {
+            transform: "translateX(-100%)",
+          },
+          "100%": {
+            transform: "translateX(100%)",
+          },
+        },
+        "factory-spin": {
+          from: {
+            transform: "rotate(0deg)",
+          },
+          to: {
+            transform: "rotate(360deg)",
+          },
+        },
+        "conveyor-belt": {
+          "0%": {
+            transform: "translateX(0)",
+          },
+          "100%": {
+            transform: "translateX(24px)",
+          },
+        },
       },
       animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in": "fade-in 0.5s ease-out",
-        "slide-in": "slide-in 0.3s ease-out",
+        "accordion-down": "accordion-down 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+        "accordion-up": "accordion-up 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+        "fade-in": "fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+        "slide-in": "slide-in 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        "slide-up": "slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        "scale-in": "scale-in 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+        "machine-pulse": "machine-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "precision-scan": "precision-scan 2s linear infinite",
+        "factory-spin": "factory-spin 1s linear infinite",
+        "conveyor-belt": "conveyor-belt 3s linear infinite",
       },
     },
   },
