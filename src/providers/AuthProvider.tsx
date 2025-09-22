@@ -306,10 +306,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     try {
       setLoading(true);
+      
+      // First, try normal logout
       const { error } = await supabase.auth.signOut();
       
+      // If logout fails due to session issues, force local logout
+      if (error && (error.message?.includes('session_not_found') || error.message?.includes('Session from session_id'))) {
+        console.warn('Session not found on server, clearing local session');
+        // Force local logout only
+        await supabase.auth.signOut({ scope: 'local' });
+        
+        // Clear local state
+        setUser(null);
+        setSession(null);
+        
+        toast({
+          title: "ออกจากระบบสำเร็จ",
+          description: "ขอบคุณที่ใช้บริการ",
+        });
+        
+        return { error: null };
+      }
+      
+      // If other error occurred, throw it
       if (error) throw error;
       
+      // Normal successful logout
       setUser(null);
       setSession(null);
       
@@ -321,12 +343,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error: null };
     } catch (error: any) {
       console.error('Sign out error:', error);
-      toast({
-        title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถออกจากระบบได้",
-        variant: "destructive",
-      });
-      return { error };
+      
+      // As a last resort, clear local session anyway
+      try {
+        await supabase.auth.signOut({ scope: 'local' });
+        setUser(null);
+        setSession(null);
+        
+        toast({
+          title: "ออกจากระบบสำเร็จ",
+          description: "ขอบคุณที่ใช้บริการ",
+        });
+        
+        return { error: null };
+      } catch (localError) {
+        console.error('Local sign out also failed:', localError);
+        toast({
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถออกจากระบบได้ กรุณาลองรีเฟรชหน้าเว็บ",
+          variant: "destructive",
+        });
+        return { error };
+      }
     } finally {
       setLoading(false);
     }
