@@ -29,28 +29,36 @@ export const useAuth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log('Auth hook initializing...');
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
         setSession(session);
         
         if (session?.user) {
-          // Fetch user profile
-          await fetchUserProfile(session.user);
+          console.log('User found, fetching profile...');
+          // Use setTimeout to avoid blocking auth state change
+          setTimeout(() => {
+            fetchUserProfile(session.user);
+          }, 0);
         } else {
+          console.log('No user found');
           setUser(null);
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session?.user?.id);
       setSession(session);
       if (session?.user) {
+        console.log('Initial session has user, fetching profile...');
         fetchUserProfile(session.user);
       } else {
+        console.log('No initial session found');
         setLoading(false);
       }
     });
@@ -60,6 +68,7 @@ export const useAuth = () => {
 
   const fetchUserProfile = async (authUser: User) => {
     try {
+      console.log('Fetching profile for user:', authUser.id);
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('*')
@@ -68,8 +77,8 @@ export const useAuth = () => {
 
       if (error) {
         console.error('Error fetching profile:', error);
-        // If profile fetch fails, try to create one from user metadata
-        await createMissingProfile(authUser);
+        setUser(authUser as AuthUser);
+        setLoading(false);
         return;
       }
 
@@ -79,15 +88,18 @@ export const useAuth = () => {
         return;
       }
 
+      console.log('Profile found:', profile);
       const userWithProfile: AuthUser = {
         ...authUser,
         profile: profile
       };
 
       setUser(userWithProfile);
+      setLoading(false);
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
       setUser(authUser as AuthUser);
+      setLoading(false);
     }
   };
 
@@ -113,6 +125,7 @@ export const useAuth = () => {
       if (error) {
         console.error('Error creating profile:', error);
         setUser(authUser as AuthUser);
+        setLoading(false);
         return;
       }
 
@@ -122,6 +135,7 @@ export const useAuth = () => {
       };
 
       setUser(userWithProfile);
+      setLoading(false);
       
       toast({
         title: "ยินดีต้อนรับ",
