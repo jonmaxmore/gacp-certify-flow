@@ -229,7 +229,7 @@ export type Database = {
           organization_name: string | null
           phone: string | null
           position: string | null
-          role: Database["public"]["Enums"]["user_role"] | null
+          role: Database["public"]["Enums"]["user_role"]
           thai_id_number: string | null
           updated_at: string | null
         }
@@ -243,7 +243,7 @@ export type Database = {
           organization_name?: string | null
           phone?: string | null
           position?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
+          role?: Database["public"]["Enums"]["user_role"]
           thai_id_number?: string | null
           updated_at?: string | null
         }
@@ -257,7 +257,7 @@ export type Database = {
           organization_name?: string | null
           phone?: string | null
           position?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
+          role?: Database["public"]["Enums"]["user_role"]
           thai_id_number?: string | null
           updated_at?: string | null
         }
