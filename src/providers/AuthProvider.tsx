@@ -217,12 +217,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setLoading(true);
       
+      // Check rate limiting before attempting sign in
+      const { data: rateLimitCheck } = await supabase.rpc('check_rate_limit', {
+        identifier_val: email,
+        action_type_val: 'login_attempt',
+        max_attempts: 5,
+        window_minutes: 15
+      });
+
+      if (!rateLimitCheck) {
+        toast({
+          title: "พยายามเข้าสู่ระบบหลายครั้งเกินไป",
+          description: "กรุณารอ 15 นาที ก่อนพยายามอีกครั้ง",
+          variant: "destructive",
+        });
+        return { data: null, error: { message: "Rate limit exceeded" } };
+      }
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        // Log authentication failure
+        await supabase.rpc('log_auth_failure', {
+          email_attempt: email,
+          failure_reason: error.message
+        });
+        throw error;
+      }
 
       toast({
         title: "เข้าสู่ระบบสำเร็จ",

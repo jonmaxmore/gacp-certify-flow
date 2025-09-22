@@ -575,6 +575,36 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limits: {
+        Row: {
+          action_type: string
+          attempt_count: number | null
+          blocked_until: string | null
+          created_at: string | null
+          id: string
+          identifier: string
+          window_start: string | null
+        }
+        Insert: {
+          action_type: string
+          attempt_count?: number | null
+          blocked_until?: string | null
+          created_at?: string | null
+          id?: string
+          identifier: string
+          window_start?: string | null
+        }
+        Update: {
+          action_type?: string
+          attempt_count?: number | null
+          blocked_until?: string | null
+          created_at?: string | null
+          id?: string
+          identifier?: string
+          window_start?: string | null
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           application_id: string
@@ -672,6 +702,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_rate_limit: {
+        Args: {
+          action_type_val: string
+          identifier_val: string
+          max_attempts?: number
+          window_minutes?: number
+        }
+        Returns: boolean
+      }
       generate_application_number: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -700,6 +739,10 @@ export type Database = {
         }
         Returns: string
       }
+      log_auth_failure: {
+        Args: { email_attempt: string; failure_reason: string }
+        Returns: undefined
+      }
       update_application_status: {
         Args: {
           p_application_id: string
@@ -708,6 +751,17 @@ export type Database = {
           p_user_id: string
         }
         Returns: boolean
+      }
+      update_user_role: {
+        Args: {
+          new_role: Database["public"]["Enums"]["user_role"]
+          target_user_id: string
+        }
+        Returns: boolean
+      }
+      verify_certificate: {
+        Args: { cert_number: string }
+        Returns: Json
       }
     }
     Enums: {

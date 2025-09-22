@@ -6,6 +6,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
+import CertificateVerificationPage from '@/pages/public/CertificateVerificationPage';
 import ApplicantDashboard from '@/pages/applicant/ApplicantDashboard';
 import ApplicationWizard from '@/pages/applicant/ApplicationWizard';
 import ReviewerDashboard from '@/pages/reviewer/ReviewerDashboard';
@@ -21,6 +22,7 @@ function App() {
             {/* Public routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/verify-certificate" element={<CertificateVerificationPage />} />
             
             {/* Protected routes */}
             <Route
