@@ -20,6 +20,9 @@ import AssessmentManagement from '@/pages/auditor/AssessmentManagement';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import UserManagement from '@/pages/admin/UserManagement';
 import SystemSettings from '@/pages/admin/SystemSettings';
+import AssessmentCalendar from '@/pages/auditor/AssessmentCalendar';
+import OnlineAssessment from '@/pages/auditor/OnlineAssessment';
+import AssessmentReport from '@/pages/auditor/AssessmentReport';
 
 function App() {
   return (
@@ -74,6 +77,9 @@ function App() {
                     <Routes>
                       <Route path="dashboard" element={<AuditorDashboard />} />
                       <Route path="assessments" element={<AssessmentManagement />} />
+                      <Route path="calendar" element={<AssessmentCalendar />} />
+                      <Route path="assessment/:id" element={<OnlineAssessment />} />
+                      <Route path="report/:id" element={<AssessmentReport />} />
                     </Routes>
                   </DashboardLayout>
                 </ProtectedRoute>

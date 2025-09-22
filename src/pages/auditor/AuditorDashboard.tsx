@@ -227,7 +227,7 @@ const AuditorDashboard = () => {
 
           <Card 
             className="hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => navigate('/auditor/assessments')}
+            onClick={() => navigate('/auditor/calendar')}
           >
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -257,7 +257,7 @@ const AuditorDashboard = () => {
                     รายการการประเมินที่กำหนดการไว้
                   </CardDescription>
                 </div>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => navigate('/auditor/calendar')}>
                   <Calendar className="h-4 w-4 mr-2" />
                   ดูปฏิทิน
                 </Button>
@@ -297,22 +297,34 @@ const AuditorDashboard = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          {assessment.type === 'ONLINE' && (
-                            <Button variant="default" size="sm">
-                              <Video className="h-4 w-4 mr-2" />
-                              เข้าร่วม
-                            </Button>
-                          )}
-                          {assessment.type === 'ONSITE' && (
-                            <Button variant="outline" size="sm">
-                              <MapPin className="h-4 w-4 mr-2" />
-                              ดูรายละเอียด
-                            </Button>
-                          )}
-                          <Button variant="outline" size="sm">
-                            <FileText className="h-4 w-4 mr-2" />
-                            รายงาน
+                        {assessment.type === 'ONLINE' && (
+                          <Button 
+                            variant="default" 
+                            size="sm"
+                            onClick={() => navigate(`/auditor/assessment/${assessment.id}`)}
+                          >
+                            <Video className="h-4 w-4 mr-2" />
+                            เข้าร่วม
                           </Button>
+                        )}
+                        {assessment.type === 'ONSITE' && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => navigate(`/auditor/assessment/${assessment.id}`)}
+                          >
+                            <MapPin className="h-4 w-4 mr-2" />
+                            ดูรายละเอียด
+                          </Button>
+                        )}
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => navigate(`/auditor/report/${assessment.id}`)}
+                        >
+                          <FileText className="h-4 w-4 mr-2" />
+                          รายงาน
+                        </Button>
                         </div>
                       </div>
                     </div>

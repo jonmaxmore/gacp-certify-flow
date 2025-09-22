@@ -224,7 +224,11 @@ const AssessmentManagement = () => {
                           </Button>
                         )}
                         {assessment.type === 'ONLINE' && assessment.status === 'IN_PROGRESS' && (
-                          <Button variant="default" size="sm">
+                          <Button 
+                            variant="default" 
+                            size="sm"
+                            onClick={() => navigate(`/auditor/assessment/${assessment.id}`)}
+                          >
                             <Video className="h-4 w-4 mr-2" />
                             เข้าร่วม
                           </Button>
