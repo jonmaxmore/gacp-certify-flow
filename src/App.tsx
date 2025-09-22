@@ -22,6 +22,7 @@ import AssessmentManagement from '@/pages/auditor/AssessmentManagement';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import NewAdminDashboard from '@/pages/admin/NewAdminDashboard';
 import ProductManagement from '@/pages/admin/ProductManagement';
+import PlatformAnalytics from '@/pages/admin/PlatformAnalytics';
 import UserManagement from '@/pages/admin/UserManagement';
 import SystemSettings from '@/pages/admin/SystemSettings';
 import AssessmentCalendar from '@/pages/auditor/AssessmentCalendar';
@@ -103,6 +104,7 @@ function App() {
                       <Route path="products" element={<ProductManagement />} />
                       <Route path="users" element={<UserManagement />} />
                       <Route path="applications" element={<ApplicationsListPage />} />
+                      <Route path="analytics" element={<PlatformAnalytics />} />
                       <Route path="certificates" element={<CertificateManagement />} />
                       <Route path="settings" element={<SystemSettings />} />
                     </Routes>
