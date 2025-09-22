@@ -140,7 +140,7 @@ const AdminDashboard = () => {
                 <div className="text-sm text-muted-foreground">
                   ผู้ใช้ใหม่วันนี้: 0
                 </div>
-                <Button className="w-full" onClick={() => console.log('User management')}>
+                <Button className="w-full" onClick={() => navigate('/admin/users')}>
                   จัดการผู้ใช้
                 </Button>
               </div>
@@ -163,7 +163,7 @@ const AdminDashboard = () => {
                 <div className="text-sm text-muted-foreground">
                   รอดำเนินการ: 0
                 </div>
-                <Button variant="outline" className="w-full" onClick={() => console.log('View applications')}>
+                <Button variant="outline" className="w-full" onClick={() => navigate('/reviewer/queue')}>
                   ดูรายการทั้งหมด
                 </Button>
               </div>
@@ -186,7 +186,7 @@ const AdminDashboard = () => {
                 <div className="text-sm text-muted-foreground">
                   รายได้เดือนนี้: 0 บาท
                 </div>
-                <Button variant="outline" className="w-full" onClick={() => console.log('Financial reports')}>
+                <Button variant="outline" className="w-full" onClick={() => navigate('/applicant/payments')}>
                   ดูรายงานการเงิน
                 </Button>
               </div>
@@ -209,7 +209,7 @@ const AdminDashboard = () => {
                 <div className="text-sm text-muted-foreground">
                   ออกใบรับรองแล้ว: 0
                 </div>
-                <Button variant="outline" className="w-full" onClick={() => console.log('Manage certificates')}>
+                <Button variant="outline" className="w-full" onClick={() => navigate('/applicant/certificates')}>
                   จัดการใบรับรอง
                 </Button>
               </div>
@@ -229,10 +229,10 @@ const AdminDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <Button variant="outline" className="w-full" onClick={() => console.log('General settings')}>
+                <Button variant="outline" className="w-full" onClick={() => navigate('/admin/settings')}>
                   ตั้งค่าทั่วไป
                 </Button>
-                <Button variant="outline" className="w-full" onClick={() => console.log('Manage templates')}>
+                <Button variant="outline" className="w-full" onClick={() => navigate('/admin/settings')}>
                   จัดการเทมเพลต
                 </Button>
               </div>
@@ -255,7 +255,7 @@ const AdminDashboard = () => {
                 <div className="text-sm text-muted-foreground">
                   การเข้าถึงล่าสุด: ไม่มีข้อมูล
                 </div>
-                <Button variant="outline" className="w-full" onClick={() => console.log('View audit logs')}>
+                <Button variant="outline" className="w-full" onClick={() => navigate('/admin/settings')}>
                   ดูบันทึกการใช้งาน
                 </Button>
               </div>

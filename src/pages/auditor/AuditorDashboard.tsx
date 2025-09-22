@@ -176,7 +176,7 @@ const AuditorDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card 
             className="hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => console.log('Start assessment')}
+            onClick={() => navigate('/auditor/assessments')}
           >
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -193,7 +193,7 @@ const AuditorDashboard = () => {
 
           <Card 
             className="hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => console.log('Record evidence')}
+            onClick={() => navigate('/auditor/assessments')}
           >
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -210,7 +210,7 @@ const AuditorDashboard = () => {
 
           <Card 
             className="hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => console.log('Upload report')}
+            onClick={() => navigate('/auditor/assessments')}
           >
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -227,7 +227,7 @@ const AuditorDashboard = () => {
 
           <Card 
             className="hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => console.log('Manage schedule')}
+            onClick={() => navigate('/auditor/assessments')}
           >
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -319,7 +319,7 @@ const AuditorDashboard = () => {
                   ))}
                   {assessments.length > 0 && (
                     <div className="text-center pt-4">
-                      <Button variant="outline">ดูรายการทั้งหมด</Button>
+                      <Button variant="outline" onClick={() => navigate('/auditor/assessments')}>ดูรายการทั้งหมด</Button>
                     </div>
                   )}
                 </div>

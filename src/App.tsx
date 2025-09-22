@@ -13,8 +13,13 @@ import PaymentsPage from '@/pages/applicant/PaymentsPage';
 import CertificatesPage from '@/pages/applicant/CertificatesPage';
 import ApplicationsListPage from '@/pages/applicant/ApplicationsListPage';
 import ReviewerDashboard from '@/pages/reviewer/ReviewerDashboard';
+import ReviewQueue from '@/pages/reviewer/ReviewQueue';
+import ReviewDetail from '@/pages/reviewer/ReviewDetail';
 import AuditorDashboard from '@/pages/auditor/AuditorDashboard';
+import AssessmentManagement from '@/pages/auditor/AssessmentManagement';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
+import UserManagement from '@/pages/admin/UserManagement';
+import SystemSettings from '@/pages/admin/SystemSettings';
 
 function App() {
   return (
@@ -53,6 +58,8 @@ function App() {
                   <DashboardLayout>
                     <Routes>
                       <Route path="dashboard" element={<ReviewerDashboard />} />
+                      <Route path="queue" element={<ReviewQueue />} />
+                      <Route path="review/:id" element={<ReviewDetail />} />
                     </Routes>
                   </DashboardLayout>
                 </ProtectedRoute>
@@ -66,6 +73,7 @@ function App() {
                   <DashboardLayout>
                     <Routes>
                       <Route path="dashboard" element={<AuditorDashboard />} />
+                      <Route path="assessments" element={<AssessmentManagement />} />
                     </Routes>
                   </DashboardLayout>
                 </ProtectedRoute>
@@ -79,6 +87,8 @@ function App() {
                   <DashboardLayout>
                     <Routes>
                       <Route path="dashboard" element={<AdminDashboard />} />
+                      <Route path="users" element={<UserManagement />} />
+                      <Route path="settings" element={<SystemSettings />} />
                     </Routes>
                   </DashboardLayout>
                 </ProtectedRoute>

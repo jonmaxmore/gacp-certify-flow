@@ -156,7 +156,7 @@ const ReviewerDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card 
             className="hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => console.log('Search applications')}
+            onClick={() => navigate('/reviewer/queue')}
           >
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -173,7 +173,7 @@ const ReviewerDashboard = () => {
 
           <Card 
             className="hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => console.log('Filter by status')}
+            onClick={() => navigate('/reviewer/queue')}
           >
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -190,7 +190,7 @@ const ReviewerDashboard = () => {
 
           <Card 
             className="hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => console.log('Message templates')}
+            onClick={() => navigate('/reviewer/queue')}
           >
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -256,7 +256,7 @@ const ReviewerDashboard = () => {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => console.log('Review application', app.id)}
+                            onClick={() => navigate(`/reviewer/review/${app.id}`)}
                           >
                             <Eye className="h-4 w-4 mr-2" />
                             ตรวจสอบ
@@ -264,7 +264,7 @@ const ReviewerDashboard = () => {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => console.log('Application details', app.id)}
+                            onClick={() => navigate('/reviewer/queue')}
                           >
                             <ArrowRight className="h-4 w-4" />
                           </Button>
@@ -274,7 +274,7 @@ const ReviewerDashboard = () => {
                   ))}
                   {applications.length > 0 && (
                     <div className="text-center pt-4">
-                      <Button variant="outline">ดูรายการทั้งหมด</Button>
+                      <Button variant="outline" onClick={() => navigate('/reviewer/queue')}>ดูรายการทั้งหมด</Button>
                     </div>
                   )}
                 </div>
