@@ -2,6 +2,245 @@
 @tailwind components;
 @tailwind utilities;
 
+/* GACP Platform Design System */
+@layer base {
+  :root {
+    /* Apple-inspired Color System */
+    --background: 255 255 255; /* Pure white background */
+    --foreground: 15 23 42; /* Slate-900 for text */
+    
+    /* Primary Brand Colors - Deep Navy Blue */
+    --primary: 30 58 138; /* #1E3A8A - Deep navy blue */
+    --primary-foreground: 255 255 255; /* White text on primary */
+    --primary-glow: 59 130 246; /* Blue-500 for glows/accents */
+    
+    /* Card and Surface Colors */
+    --card: 255 255 255; /* White cards */
+    --card-foreground: 15 23 42; /* Dark text on cards */
+    
+    /* Muted backgrounds and text */
+    --muted: 248 250 252; /* Slate-50 for subtle backgrounds */
+    --muted-foreground: 100 116 139; /* Slate-500 for muted text */
+    
+    /* Accent colors */
+    --accent: 241 245 249; /* Slate-100 for accents */
+    --accent-foreground: 15 23 42; /* Dark text on accents */
+    
+    /* Secondary colors */
+    --secondary: 226 232 240; /* Slate-200 */
+    --secondary-foreground: 15 23 42;
+    
+    /* Border and input colors */
+    --border: 226 232 240; /* Slate-200 for borders */
+    --input: 226 232 240; /* Slate-200 for input borders */
+    --ring: 30 58 138; /* Primary color for focus rings */
+    
+    /* Destructive colors */
+    --destructive: 239 68 68; /* Red-500 */
+    --destructive-foreground: 255 255 255;
+    
+    /* Success colors */
+    --success: 34 197 94; /* Green-500 */
+    --success-foreground: 255 255 255;
+    
+    /* Warning colors */
+    --warning: 245 158 11; /* Amber-500 */
+    --warning-foreground: 255 255 255;
+    
+    /* Status-specific colors for GACP workflow */
+    --status-draft: 107 114 128; /* Gray-500 */
+    --status-submitted: 59 130 246; /* Blue-500 */
+    --status-review: 245 158 11; /* Amber-500 */
+    --status-approved: 34 197 94; /* Green-500 */
+    --status-rejected: 239 68 68; /* Red-500 */
+    
+    /* Apple-style shadows */
+    --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-elevated: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-primary: 0 10px 30px -10px hsl(var(--primary) / 0.3);
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-card: linear-gradient(to bottom, hsl(var(--background)), hsl(var(--muted)));
+    
+    /* Border radius system */
+    --radius-sm: 0.375rem; /* 6px */
+    --radius: 0.5rem; /* 8px */
+    --radius-md: 0.75rem; /* 12px */
+    --radius-lg: 1rem; /* 16px */
+    --radius-xl: 1.5rem; /* 24px */
+    
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  .dark {
+    --background: 15 23 42; /* Slate-900 */
+    --foreground: 248 250 252; /* Slate-50 */
+    
+    --primary: 59 130 246; /* Blue-500 - Brighter in dark mode */
+    --primary-foreground: 15 23 42; /* Dark text on primary */
+    
+    --card: 30 41 59; /* Slate-800 */
+    --card-foreground: 248 250 252;
+    
+    --muted: 51 65 85; /* Slate-700 */
+    --muted-foreground: 148 163 184; /* Slate-400 */
+    
+    --accent: 51 65 85; /* Slate-700 */
+    --accent-foreground: 248 250 252;
+    
+    --border: 51 65 85; /* Slate-700 */
+    --input: 51 65 85;
+    --ring: 59 130 246;
+  }
+}
+
+/* Base styles */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Apple-style scrollbars */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 hover:bg-gray-400 rounded-full;
+  }
+}
+
+/* Custom component styles */
+@layer components {
+  /* Apple-style cards */
+  .card-apple {
+    @apply bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300;
+  }
+  
+  .card-elevated {
+    @apply bg-white rounded-xl border border-gray-200;
+    box-shadow: var(--shadow-elevated);
+  }
+  
+  /* Status badges */
+  .status-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .status-draft { @apply bg-gray-100 text-gray-800; }
+  .status-submitted { @apply bg-blue-100 text-blue-800; }
+  .status-under-review { @apply bg-amber-100 text-amber-800; }
+  .status-returned { @apply bg-red-100 text-red-800; }
+  .status-docs-approved { @apply bg-green-100 text-green-800; }
+  .status-payment-pending { @apply bg-purple-100 text-purple-800; }
+  .status-online-scheduled { @apply bg-indigo-100 text-indigo-800; }
+  .status-certified { @apply bg-emerald-100 text-emerald-800; }
+  
+  /* Progress tracker */
+  .progress-step {
+    @apply flex items-center justify-center w-8 h-8 rounded-full border-2 text-sm font-medium transition-all duration-300;
+  }
+  
+  .progress-step.completed {
+    @apply bg-primary border-primary text-primary-foreground;
+  }
+  
+  .progress-step.current {
+    @apply border-primary text-primary bg-primary/10;
+  }
+  
+  .progress-step.pending {
+    @apply border-gray-300 text-gray-500 bg-white;
+  }
+  
+  /* Apple-style buttons */
+  .btn-apple {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+  
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-primary;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 focus:ring-secondary;
+  }
+  
+  /* Navigation styles */
+  .nav-link {
+    @apply flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200;
+    @apply hover:bg-accent hover:text-accent-foreground;
+  }
+  
+  .nav-link.active {
+    @apply bg-primary text-primary-foreground;
+  }
+  
+  /* Form styles */
+  .form-section {
+    @apply space-y-6 p-6 bg-white rounded-xl border border-gray-200;
+  }
+  
+  .form-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-6;
+  }
+  
+  /* Dashboard widgets */
+  .dashboard-widget {
+    @apply bg-white rounded-xl border border-gray-200 p-6;
+    box-shadow: var(--shadow-card);
+  }
+  
+  .dashboard-widget:hover {
+    box-shadow: var(--shadow-elevated);
+    @apply transition-all duration-300;
+  }
+  
+  .metric-card {
+    @apply flex items-center justify-between p-4 bg-gradient-to-r rounded-lg;
+  }
+  
+  /* Animations */
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+
 /* Apple Design System - Professional GACP Platform
 Clean, minimal, trustworthy design following Apple Human Interface Guidelines
 */
