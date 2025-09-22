@@ -230,6 +230,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "assessments_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "assessments_auditor_id_fkey"
             columns: ["auditor_id"]
             isOneToOne: false
@@ -388,6 +395,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "certificates_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "certificates_revoked_by_fkey"
             columns: ["revoked_by"]
             isOneToOne: false
@@ -448,6 +462,13 @@ export type Database = {
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications_safe"
             referencedColumns: ["id"]
           },
           {
@@ -568,6 +589,13 @@ export type Database = {
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -850,6 +878,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "reviews_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "reviews_reviewer_id_fkey"
             columns: ["reviewer_id"]
             isOneToOne: false
@@ -895,9 +930,86 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      applications_safe: {
+        Row: {
+          applicant_address: string | null
+          applicant_email: string | null
+          applicant_id: string | null
+          applicant_id_number: string | null
+          applicant_name: string | null
+          applicant_phone: string | null
+          application_number: string | null
+          created_at: string | null
+          crop_types: string[] | null
+          farm_address: string | null
+          farm_area_ngan: number | null
+          farm_area_rai: number | null
+          farm_area_wah: number | null
+          farm_name: string | null
+          id: string | null
+          organization_name: string | null
+          status: Database["public"]["Enums"]["application_status"] | null
+          submitted_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          applicant_address?: never
+          applicant_email?: never
+          applicant_id?: string | null
+          applicant_id_number?: never
+          applicant_name?: string | null
+          applicant_phone?: never
+          application_number?: string | null
+          created_at?: string | null
+          crop_types?: string[] | null
+          farm_address?: string | null
+          farm_area_ngan?: number | null
+          farm_area_rai?: number | null
+          farm_area_wah?: number | null
+          farm_name?: string | null
+          id?: string | null
+          organization_name?: string | null
+          status?: Database["public"]["Enums"]["application_status"] | null
+          submitted_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          applicant_address?: never
+          applicant_email?: never
+          applicant_id?: string | null
+          applicant_id_number?: never
+          applicant_name?: string | null
+          applicant_phone?: never
+          application_number?: string | null
+          created_at?: string | null
+          crop_types?: string[] | null
+          farm_address?: string | null
+          farm_area_ngan?: number | null
+          farm_area_rai?: number | null
+          farm_area_wah?: number | null
+          farm_name?: string | null
+          id?: string | null
+          organization_name?: string | null
+          status?: Database["public"]["Enums"]["application_status"] | null
+          submitted_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      can_access_application_sensitive_data: {
+        Args: { app_id: string }
+        Returns: boolean
+      }
       check_rate_limit: {
         Args: {
           action_type_val: string
@@ -918,6 +1030,10 @@ export type Database = {
       get_admin_stats: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       get_identity_verification_status: {
         Args: { target_user_id: string }
