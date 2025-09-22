@@ -163,8 +163,8 @@ const AdminDashboard = () => {
                 <div className="text-sm text-muted-foreground">
                   รอดำเนินการ: 0
                 </div>
-                <Button variant="outline" className="w-full" onClick={() => navigate('/reviewer/queue')}>
-                  ดูรายการทั้งหมด
+                <Button variant="outline" className="w-full" onClick={() => navigate('/admin/applications')}>
+                  ดูประวัติใบสมัคร
                 </Button>
               </div>
             </CardContent>
@@ -186,7 +186,7 @@ const AdminDashboard = () => {
                 <div className="text-sm text-muted-foreground">
                   รายได้เดือนนี้: 0 บาท
                 </div>
-                <Button variant="outline" className="w-full" onClick={() => navigate('/applicant/payments')}>
+                <Button variant="outline" className="w-full" onClick={() => navigate('/admin/analytics')}>
                   ดูรายงานการเงิน
                 </Button>
               </div>

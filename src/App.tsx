@@ -48,7 +48,7 @@ function App() {
             <Route
               path="/applicant/*"
               element={
-                <ProtectedRoute allowedRoles={['applicant']}>
+                <ProtectedRoute requiredRole="applicant">
                   <DashboardLayout>
                     <Routes>
                       <Route path="dashboard" element={<ApplicantDashboard />} />
@@ -67,7 +67,7 @@ function App() {
             <Route
               path="/reviewer/*"
               element={
-                <ProtectedRoute allowedRoles={['reviewer', 'admin']}>
+                <ProtectedRoute requiredRole="reviewer">
                   <DashboardLayout>
                     <Routes>
                       <Route path="dashboard" element={<ReviewerDashboard />} />
@@ -83,7 +83,7 @@ function App() {
             <Route
               path="/auditor/*"
               element={
-                <ProtectedRoute allowedRoles={['auditor', 'admin']}>
+                <ProtectedRoute requiredRole="auditor">
                   <DashboardLayout>
                     <Routes>
                       <Route path="dashboard" element={<AuditorDashboard />} />
@@ -100,7 +100,7 @@ function App() {
             <Route
               path="/admin/*"
               element={
-                <ProtectedRoute allowedRoles={['admin']}>
+                <ProtectedRoute requiredRole="admin">
                   <DashboardLayout>
                     <Routes>
                       <Route path="dashboard" element={<NewAdminDashboard />} />
