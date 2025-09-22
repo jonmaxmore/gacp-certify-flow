@@ -68,18 +68,67 @@ export const useAuth = () => {
 
       if (error) {
         console.error('Error fetching profile:', error);
+        // If profile fetch fails, try to create one from user metadata
+        await createMissingProfile(authUser);
+        return;
+      }
+
+      if (!profile) {
+        console.log('No profile found, creating one...');
+        await createMissingProfile(authUser);
+        return;
+      }
+
+      const userWithProfile: AuthUser = {
+        ...authUser,
+        profile: profile
+      };
+
+      setUser(userWithProfile);
+    } catch (error) {
+      console.error('Error in fetchUserProfile:', error);
+      setUser(authUser as AuthUser);
+    }
+  };
+
+  const createMissingProfile = async (authUser: User) => {
+    try {
+      const profileData = {
+        id: authUser.id,
+        email: authUser.email || '',
+        full_name: authUser.user_metadata?.full_name || '',
+        role: (authUser.user_metadata?.role as 'applicant' | 'reviewer' | 'auditor' | 'admin') || 'applicant',
+        phone: authUser.user_metadata?.phone || null,
+        thai_id_number: authUser.user_metadata?.thai_id_number || null,
+        organization_name: authUser.user_metadata?.organization_name || null,
+        position: authUser.user_metadata?.position || null,
+      };
+
+      const { data: newProfile, error } = await supabase
+        .from('profiles')
+        .insert(profileData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating profile:', error);
         setUser(authUser as AuthUser);
         return;
       }
 
       const userWithProfile: AuthUser = {
         ...authUser,
-        profile: profile || undefined
+        profile: newProfile
       };
 
       setUser(userWithProfile);
+      
+      toast({
+        title: "ยินดีต้อนรับ",
+        description: "บัญชีของคุณได้รับการตั้งค่าเรียบร้อยแล้ว",
+      });
     } catch (error) {
-      console.error('Error in fetchUserProfile:', error);
+      console.error('Error creating missing profile:', error);
       setUser(authUser as AuthUser);
     }
   };

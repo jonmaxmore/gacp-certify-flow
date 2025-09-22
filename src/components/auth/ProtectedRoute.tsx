@@ -25,10 +25,17 @@ export const ProtectedRoute = ({
       return;
     }
 
-    // If user has no profile, redirect to login
+    // If user has no profile, give it a moment to load
     if (!user.profile) {
-      navigate('/login');
-      return;
+      // Wait a bit for profile to be created/loaded
+      const timer = setTimeout(() => {
+        if (!user?.profile) {
+          console.warn('User has no profile after timeout, redirecting to login');
+          navigate('/login');
+        }
+      }, 3000); // 3 second timeout
+
+      return () => clearTimeout(timer);
     }
 
     // Check specific role requirement
