@@ -25,6 +25,7 @@ import SystemSettings from '@/pages/admin/SystemSettings';
 import AssessmentCalendar from '@/pages/auditor/AssessmentCalendar';
 import OnlineAssessment from '@/pages/auditor/OnlineAssessment';
 import AssessmentReport from '@/pages/auditor/AssessmentReport';
+import AssessmentScheduling from '@/pages/reviewer/AssessmentScheduling';
 
 function App() {
   return (
@@ -66,6 +67,7 @@ function App() {
                       <Route path="dashboard" element={<ReviewerDashboard />} />
                       <Route path="queue" element={<ReviewQueue />} />
                       <Route path="review/:id" element={<ReviewDetail />} />
+                      <Route path="assessments" element={<AssessmentScheduling />} />
                     </Routes>
                   </DashboardLayout>
                 </ProtectedRoute>

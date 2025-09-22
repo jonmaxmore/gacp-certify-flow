@@ -24,13 +24,13 @@ const navigation = {
     { name: 'แดชบอร์ด', href: '/applicant/dashboard', icon: LayoutDashboard },
     { name: 'ใบสมัคร', href: '/applicant/applications', icon: FileText },
     { name: 'การชำระเงิน', href: '/applicant/payments', icon: CreditCard },
-    { name: 'นัดหมาย', href: '/applicant/schedule', icon: Calendar },
+    { name: 'การประเมินของฉัน', href: '/applicant/schedule', icon: Calendar },
     { name: 'ใบรับรอง', href: '/applicant/certificates', icon: Award },
   ],
   reviewer: [
     { name: 'แดชบอร์ด', href: '/reviewer/dashboard', icon: LayoutDashboard },
     { name: 'คิวตรวจสอบ', href: '/reviewer/queue', icon: FileText },
-    { name: 'ใบสมัครทั้งหมด', href: '/reviewer/applications', icon: Eye },
+    { name: 'จัดการการประเมิน', href: '/reviewer/assessments', icon: Calendar },
   ],
   auditor: [
     { name: 'แดชบอร์ด', href: '/auditor/dashboard', icon: LayoutDashboard },

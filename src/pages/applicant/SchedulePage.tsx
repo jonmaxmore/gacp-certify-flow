@@ -70,16 +70,7 @@ const SchedulePage = () => {
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showRequestDialog, setShowRequestDialog] = useState(false);
-  const [showRescheduleDialog, setShowRescheduleDialog] = useState(false);
   const [selectedAssessment, setSelectedAssessment] = useState<Assessment | null>(null);
-  const [scheduleRequest, setScheduleRequest] = useState<ScheduleRequest>({
-    application_id: '',
-    assessment_type: 'ONLINE',
-    preferred_date: '',
-    preferred_time: '',
-    notes: ''
-  });
 
   useEffect(() => {
     if (user?.id) {
@@ -129,51 +120,7 @@ const SchedulePage = () => {
     }
   };
 
-  const handleRequestSchedule = async () => {
-    try {
-      if (!scheduleRequest.application_id || !scheduleRequest.preferred_date || !scheduleRequest.preferred_time) {
-        toast({
-          title: "ข้อมูลไม่ครบถ้วน",
-          description: "กรุณากรอกข้อมูลให้ครบถ้วน",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const { error } = await supabase.functions.invoke('schedule-assessment', {
-        body: {
-          ...scheduleRequest,
-          scheduled_at: `${scheduleRequest.preferred_date}T${scheduleRequest.preferred_time}:00`,
-          user_id: user?.id
-        }
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "ส่งคำขอนัดหมายสำเร็จ",
-        description: "เจ้าหน้าที่จะติดต่อกลับภายใน 2-3 วันทำการ",
-      });
-
-      setShowRequestDialog(false);
-      setScheduleRequest({
-        application_id: '',
-        assessment_type: 'ONLINE',
-        preferred_date: '',
-        preferred_time: '',
-        notes: ''
-      });
-      
-      loadData();
-    } catch (error) {
-      console.error('Error requesting schedule:', error);
-      toast({
-        title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถส่งคำขอนัดหมายได้ กรุณาลองใหม่อีกครั้ง",
-        variant: "destructive",
-      });
-    }
-  };
+  // Removed assessment request functionality - handled by staff now
 
   const handleJoinOnlineAssessment = async (assessment: Assessment) => {
     if (assessment.meeting_url) {
@@ -247,15 +194,17 @@ const SchedulePage = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">การนัดหมายประเมิน</h1>
+          <h1 className="text-3xl font-bold tracking-tight">การนัดหมายประเมินของฉัน</h1>
           <p className="text-muted-foreground">
-            จัดการการนัดหมายประเมินออนไลน์และออนไซต์
+            ติดตามการนัดหมายประเมินที่เจ้าหน้าที่กำหนดให้
           </p>
         </div>
-        <Button onClick={() => setShowRequestDialog(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          ขอนัดหมายใหม่
-        </Button>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="bg-info/10">
+            <AlertTriangle className="mr-1 h-3 w-3" />
+            เจ้าหน้าที่จะติดต่อเพื่อนัดหมายประเมิน
+          </Badge>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -437,89 +386,25 @@ const SchedulePage = () => {
         </CardContent>
       </Card>
 
-      {/* Request Schedule Dialog */}
-      <Dialog open={showRequestDialog} onOpenChange={setShowRequestDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>ขอนัดหมายประเมิน</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>เลือกใบสมัคร</Label>
-              <Select 
-                value={scheduleRequest.application_id} 
-                onValueChange={(value) => setScheduleRequest(prev => ({...prev, application_id: value}))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="เลือกใบสมัคร" />
-                </SelectTrigger>
-                <SelectContent>
-                  {applications
-                    .filter(app => canRequestSchedule(app))
-                    .map(app => (
-                      <SelectItem key={app.id} value={app.id}>
-                        {app.application_number} - {app.farm_name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
+      {/* Information Card */}
+      <Card className="border-info/20 bg-info/5">
+        <CardContent className="p-6">
+          <div className="flex items-start gap-4">
+            <div className="p-2 bg-info/10 rounded-full">
+              <Calendar className="h-6 w-6 text-info" />
             </div>
-
-            <div>
-              <Label>ประเภทการประเมิน</Label>
-              <Select 
-                value={scheduleRequest.assessment_type} 
-                onValueChange={(value) => setScheduleRequest(prev => ({...prev, assessment_type: value as 'ONLINE' | 'ONSITE'}))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ONLINE">ประเมินออนไลน์</SelectItem>
-                  <SelectItem value="ONSITE">ประเมินออนไซต์</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label>วันที่ต้องการ</Label>
-              <Input
-                type="date"
-                value={scheduleRequest.preferred_date}
-                onChange={(e) => setScheduleRequest(prev => ({...prev, preferred_date: e.target.value}))}
-                min={new Date().toISOString().split('T')[0]}
-              />
-            </div>
-
-            <div>
-              <Label>เวลาที่ต้องการ</Label>
-              <Input
-                type="time"
-                value={scheduleRequest.preferred_time}
-                onChange={(e) => setScheduleRequest(prev => ({...prev, preferred_time: e.target.value}))}
-              />
-            </div>
-
-            <div>
-              <Label>หมายเหตุ (ไม่บังคับ)</Label>
-              <Textarea
-                value={scheduleRequest.notes}
-                onChange={(e) => setScheduleRequest(prev => ({...prev, notes: e.target.value}))}
-                placeholder="เพิ่มข้อมูลเพิ่มเติมสำหรับการนัดหมาย"
-              />
-            </div>
-
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowRequestDialog(false)}>
-                ยกเลิก
-              </Button>
-              <Button onClick={handleRequestSchedule}>
-                ส่งคำขอ
-              </Button>
+            <div className="space-y-2">
+              <h3 className="font-semibold text-info">ข้อมูลการนัดหมายประเมิน</h3>
+              <div className="text-sm text-muted-foreground space-y-1">
+                <p>• หลังจากเอกสารได้รับการอนุมัติ เจ้าหน้าที่จะติดต่อเพื่อนัดหมายการประเมิน</p>
+                <p>• การประเมินจะดำเนินการในรูปแบบออนไลน์หรือออนไซต์ตามความเหมาะสม</p>
+                <p>• ท่านจะได้รับการแจ้งเตือนเมื่อมีการกำหนดนัดหมาย</p>
+                <p>• สามารถดูรายละเอียดและเข้าร่วมการประเมินได้จากหน้านี้</p>
+              </div>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </CardContent>
+      </Card>
     </div>
   );
 };
