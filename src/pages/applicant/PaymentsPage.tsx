@@ -133,7 +133,7 @@ const PaymentsPage = () => {
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">ยอดรวมที่ต้องชำระ</p>
                       <p className="text-2xl font-bold">
-                        {payments.reduce((sum, p) => sum + p.amount, 0).toLocaleString()} บาท
+                        {payments.reduce((sum, p) => sum + p.amount, 0).toLocaleString()} THB
                       </p>
                     </div>
                     <DollarSign className="h-8 w-8 text-blue-500" />
@@ -150,7 +150,7 @@ const PaymentsPage = () => {
                         {payments
                           .filter(p => p.status === 'COMPLETED')
                           .reduce((sum, p) => sum + p.amount, 0)
-                          .toLocaleString()} บาท
+                          .toLocaleString()} THB
                       </p>
                     </div>
                     <CheckCircle className="h-8 w-8 text-green-500" />
@@ -167,7 +167,7 @@ const PaymentsPage = () => {
                         {payments
                           .filter(p => p.status === 'PENDING')
                           .reduce((sum, p) => sum + p.amount, 0)
-                          .toLocaleString()} บาท
+                          .toLocaleString()} THB
                       </p>
                     </div>
                     <Clock className="h-8 w-8 text-orange-500" />
@@ -198,7 +198,7 @@ const PaymentsPage = () => {
                       
                       <div className="flex items-center justify-between">
                         <div className="text-lg font-semibold text-primary">
-                          {payment.amount.toLocaleString()} บาท
+                          {payment.amount.toLocaleString()} THB
                         </div>
                         <div className="flex gap-2">
                           {payment.status === 'PENDING' && (

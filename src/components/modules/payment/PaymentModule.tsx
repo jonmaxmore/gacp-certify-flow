@@ -112,6 +112,9 @@ export const PaymentModule: React.FC<PaymentModuleProps> = ({ applicationId }) =
   };
 
   const formatAmount = (amount: number, currency: string) => {
+    if (currency === 'THB') {
+      return `${amount.toLocaleString()} THB`;
+    }
     return new Intl.NumberFormat('th-TH', {
       style: 'currency',
       currency: currency,

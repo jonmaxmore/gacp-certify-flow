@@ -44,7 +44,7 @@ const navigation = {
     { name: 'วิเคราะห์แพลตฟอร์ม', href: '/admin/analytics', icon: BarChart3 },
     { name: 'จัดการผู้ใช้', href: '/admin/users', icon: Users },
     { name: 'ประวัติใบสมัครทั้งหมด', href: '/admin/applications', icon: FileText },
-    { name: 'ใบรับรอง', href: '/admin/certificates', icon: Award },
+    { name: 'จัดการใบรับรอง', href: '/admin/certificates', icon: Award },
     { name: 'ตั้งค่าระบบ', href: '/admin/settings', icon: Settings },
   ],
 };

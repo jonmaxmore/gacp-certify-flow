@@ -145,10 +145,10 @@ export default function NewAdminDashboard() {
 
   const quickActions = [
     {
-      title: 'จัดการสินค้าและบริการ',
-      description: 'เพิ่ม แก้ไข หรือลบสินค้า GACP',
-      icon: Package,
-      route: '/admin/products',
+      title: 'ดูรายงานการสมัครทั้งหมด',
+      description: 'ประวัติและสถิติการสมัครทั้งหมด',
+      icon: FileText,
+      route: '/admin/applications',
       color: 'bg-blue-500'
     },
     {
@@ -162,14 +162,14 @@ export default function NewAdminDashboard() {
       title: 'รายงานและสถิติ',
       description: 'ดูรายงานประสิทธิภาพระบบ',
       icon: BarChart3,
-      route: '/admin/reports',
+      route: '/admin/analytics',
       color: 'bg-purple-500'
     },
     {
       title: 'ตั้งค่าระบบ',
       description: 'กำหนดค่าและการตั้งค่าระบบ',
       icon: Settings,
-      route: '/admin/system-settings',
+      route: '/admin/settings',
       color: 'bg-orange-500'
     }
   ];
@@ -188,8 +188,8 @@ export default function NewAdminDashboard() {
     <div className="container mx-auto py-10">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">GACP Platform Dashboard</h1>
-        <p className="text-muted-foreground">ภาพรวมการดำเนินงานตาม Work Packages</p>
+        <h1 className="text-3xl font-bold">GACP แผงควบคุมผู้ดูแลระบบ</h1>
+        <p className="text-muted-foreground">ภาพรวมและการจัดการระบบรับรองมาตรฐาน GACP</p>
       </div>
 
       {/* Key Metrics */}
@@ -252,55 +252,86 @@ export default function NewAdminDashboard() {
         <CardHeader>
           <CardTitle className="flex items-center">
             <TrendingUp className="h-5 w-5 mr-2" />
-            ความคืบหน้า Work Packages
+            สถิติระบบ
           </CardTitle>
           <CardDescription>
-            สถานะการพัฒนาตามแผนงานโครงการ GACP Platform
+            ภาพรวมการใช้งานระบบ GACP Platform
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {workPackages.map((wp) => (
-              <Card key={wp.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                <CardHeader onClick={() => navigate(wp.route)}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <wp.icon className="h-5 w-5" />
-                      <CardTitle className="text-base">{wp.title}</CardTitle>
-                    </div>
-                    <Badge variant={
-                      wp.status === 'completed' ? 'default' :
-                      wp.status === 'in-progress' ? 'secondary' : 'outline'
-                    }>
-                      {wp.status === 'completed' ? 'เสร็จสิ้น' :
-                       wp.status === 'in-progress' ? 'กำลังดำเนินการ' : 'รอดำเนินการ'}
-                    </Badge>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/applications')}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <FileText className="h-5 w-5" />
+                    <CardTitle className="text-base">การจัดการใบสมัคร</CardTitle>
                   </div>
-                  <CardDescription>{wp.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>ความคืบหน้า</span>
-                      <span>{wp.progress}%</span>
-                    </div>
-                    <div className="w-full bg-secondary rounded-full h-2">
-                      <div 
-                        className="bg-primary h-2 rounded-full transition-all duration-300" 
-                        style={{ width: `${wp.progress}%` }}
-                      ></div>
-                    </div>
-                    {wp.metrics && (
-                      <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                        <span>ทั้งหมด: {wp.metrics.total}</span>
-                        <span>ใช้งาน: {wp.metrics.active}</span>
-                        <span>รอดำเนินการ: {wp.metrics.pending}</span>
-                      </div>
-                    )}
+                  <Badge variant="secondary">ใช้งานอยู่</Badge>
+                </div>
+                <CardDescription>ประวัติและสถิติใบสมัครทั้งหมด</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>ใบสมัครทั้งหมด</span>
+                    <span>{stats?.total_applications || 0}</span>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>รอตรวจสอบ: {stats?.pending_applications || 0}</span>
+                    <span>อนุมัติแล้ว: {stats?.approved_applications || 0}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/users')}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Users className="h-5 w-5" />
+                    <CardTitle className="text-base">การจัดการผู้ใช้งาน</CardTitle>
+                  </div>
+                  <Badge variant="secondary">ใช้งานอยู่</Badge>
+                </div>
+                <CardDescription>จัดการบทบาทและสิทธิ์ผู้ใช้</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>ผู้ใช้ทั้งหมด</span>
+                    <span>{stats?.total_users || 0}</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>ใช้งานอยู่: {stats?.active_users || 0}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/analytics')}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <BarChart3 className="h-5 w-5" />
+                    <CardTitle className="text-base">รายงานและสถิติ</CardTitle>
+                  </div>
+                  <Badge variant="secondary">ใช้งานอยู่</Badge>
+                </div>
+                <CardDescription>วิเคราะห์ประสิทธิภาพระบบ</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>อัตราการอนุมัติ</span>
+                    <span>{stats?.approval_rate || 0}%</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>เวลาเฉลี่ย: {stats?.avg_review_time || 0} วัน</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </CardContent>
       </Card>
