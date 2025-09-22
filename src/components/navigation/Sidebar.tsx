@@ -2,7 +2,6 @@ import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
 import { cn } from '@/lib/utils';
-import LanguageSwitcher from '@/components/ui/language-switcher';
 import { 
   LayoutDashboard, 
   FileText, 
@@ -13,7 +12,6 @@ import {
   Settings, 
   BarChart3,
   Shield,
-  Globe,
   Video,
   MapPin,
   Eye,
@@ -45,7 +43,6 @@ const navigation = {
     { name: 'แดชบอร์ด', href: '/admin/dashboard', icon: LayoutDashboard },
     { name: 'จัดการสินค้า', href: '/admin/products', icon: Award },
     { name: 'วิเคราะห์แพลตฟอร์ม', href: '/admin/analytics', icon: BarChart3 },
-    { name: 'ตั้งค่าภาษา', href: '/admin/languages', icon: Globe },
     { name: 'จัดการผู้ใช้', href: '/admin/users', icon: Users },
     { name: 'ใบสมัครทั้งหมด', href: '/admin/applications', icon: FileText },
     { name: 'การเงิน', href: '/admin/payments', icon: CreditCard },
@@ -75,17 +72,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
     <div className="flex flex-col h-full bg-white border-r">
       {/* Header */}
       <div className="p-6 border-b">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Award className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <div>
-              <h2 className="font-semibold">GACP System</h2>
-              <p className="text-sm text-muted-foreground">ระบบรับรองมาตรฐาน</p>
-            </div>
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+            <Award className="w-5 h-5 text-primary-foreground" />
           </div>
-          <LanguageSwitcher showLabel={false} />
+          <div>
+            <h2 className="font-semibold">GACP System</h2>
+            <p className="text-sm text-muted-foreground">ระบบรับรองมาตรฐาน</p>
+          </div>
         </div>
       </div>
 
