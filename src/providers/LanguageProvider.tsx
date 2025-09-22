@@ -37,13 +37,13 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
       // First, try to get from user profile if authenticated
       if (user?.id) {
         try {
-          const { data } = await supabase
+          const { data, error } = await supabase
             .from('profiles')
             .select('preferred_language')
             .eq('id', user.id)
-            .single();
+            .maybeSingle();
           
-          if (data?.preferred_language) {
+          if (data?.preferred_language && !error) {
             const savedLang = data.preferred_language as Language;
             setLanguage(savedLang);
             i18n.changeLanguage(savedLang);
