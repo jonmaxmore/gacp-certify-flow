@@ -9,6 +9,9 @@ import RegisterPage from '@/pages/auth/RegisterPage';
 import CertificateVerificationPage from '@/pages/public/CertificateVerificationPage';
 import ApplicantDashboard from '@/pages/applicant/ApplicantDashboard';
 import ApplicationWizard from '@/pages/applicant/ApplicationWizard';
+import PaymentsPage from '@/pages/applicant/PaymentsPage';
+import CertificatesPage from '@/pages/applicant/CertificatesPage';
+import ApplicationsListPage from '@/pages/applicant/ApplicationsListPage';
 import ReviewerDashboard from '@/pages/reviewer/ReviewerDashboard';
 import AuditorDashboard from '@/pages/auditor/AuditorDashboard';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
@@ -34,6 +37,9 @@ function App() {
                       <Route path="dashboard" element={<ApplicantDashboard />} />
                       <Route path="application/new" element={<ApplicationWizard />} />
                       <Route path="application/:id/edit" element={<ApplicationWizard />} />
+                      <Route path="applications" element={<ApplicationsListPage />} />
+                      <Route path="payments" element={<PaymentsPage />} />
+                      <Route path="certificates" element={<CertificatesPage />} />
                     </Routes>
                   </DashboardLayout>
                 </ProtectedRoute>

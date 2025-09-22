@@ -154,7 +154,10 @@ const ReviewerDashboard = () => {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Card 
+            className="hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => console.log('Search applications')}
+          >
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-primary/10 rounded-lg">
@@ -168,7 +171,10 @@ const ReviewerDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Card 
+            className="hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => console.log('Filter by status')}
+          >
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-secondary/10 rounded-lg">
@@ -182,7 +188,10 @@ const ReviewerDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Card 
+            className="hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => console.log('Message templates')}
+          >
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-accent/10 rounded-lg">
@@ -244,11 +253,19 @@ const ReviewerDashboard = () => {
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => console.log('Review application', app.id)}
+                          >
                             <Eye className="h-4 w-4 mr-2" />
                             ตรวจสอบ
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => console.log('Application details', app.id)}
+                          >
                             <ArrowRight className="h-4 w-4" />
                           </Button>
                         </div>
