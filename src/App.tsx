@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import LoginPortal from "./pages/LoginPortal";
+import EnhancedLoginPortal from "./pages/enhanced/LoginPortal";
 import Register from "./pages/Register";
 import ApplicantDashboard from "./pages/applicant/ApplicantDashboard";
 import ReviewerDashboard from "./pages/reviewer/ReviewerDashboard";
@@ -23,7 +24,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/login" element={<LoginPortal />} />
+        <Route path="/login" element={<LoginPortal />} />
+        <Route path="/login-enhanced" element={<EnhancedLoginPortal />} />
           <Route path="/register" element={<Register />} />
           <Route path="/applicant/dashboard" element={
             <ProtectedRoute requiredRole="applicant">

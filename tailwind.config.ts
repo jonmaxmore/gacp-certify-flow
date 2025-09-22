@@ -22,7 +22,6 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
-          light: "hsl(var(--primary-light))",
           glow: "hsl(var(--primary-glow))",
         },
         secondary: {
@@ -40,6 +39,7 @@ export default {
         },
         pending: "hsl(var(--pending))",
         approved: "hsl(var(--approved))",
+        certified: "hsl(var(--certified))",
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
@@ -75,22 +75,32 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        xl: "20px",
+        "2xl": "24px",
+        "3xl": "32px",
       },
       backgroundImage: {
         'gradient-primary': 'var(--gradient-primary)',
         'gradient-secondary': 'var(--gradient-secondary)',
         'gradient-hero': 'var(--gradient-hero)',
         'gradient-card': 'var(--gradient-card)',
+        'gradient-glass': 'var(--gradient-glass)',
       },
       boxShadow: {
-        'soft': 'var(--shadow-soft)',
-        'medium': 'var(--shadow-medium)',
-        'strong': 'var(--shadow-strong)',
-        'glow': 'var(--shadow-glow)',
+        'apple-minimal': 'var(--shadow-minimal)',
+        'apple-soft': 'var(--shadow-soft)',
+        'apple-medium': 'var(--shadow-medium)',
+        'apple-large': 'var(--shadow-large)',
+        'apple-focus': 'var(--shadow-focus)',
       },
       transitionTimingFunction: {
-        'smooth': 'var(--transition-smooth)',
-        'bounce': 'var(--transition-bounce)',
+        'apple-quick': 'var(--transition-quick)',
+        'apple-smooth': 'var(--transition-smooth)',
+        'apple-elegant': 'var(--transition-elegant)',
+        'apple-spring': 'var(--transition-spring)',
+      },
+      fontFamily: {
+        'apple': ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
       },
       keyframes: {
         "accordion-down": {
