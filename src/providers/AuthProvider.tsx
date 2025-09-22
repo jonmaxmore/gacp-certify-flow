@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { validateInput, emailSchema, passwordSchema } from '@/utils/inputValidation';
 
 interface UserProfile {
   id: string;
@@ -175,20 +176,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setLoading(true);
       
+      // Validate and sanitize inputs
+      const emailValidation = validateInput(email, 'email');
+      if (!emailValidation.isValid) {
+        throw new Error('Invalid email format: ' + emailValidation.errors.join(', '));
+      }
+      
+      // Validate email with schema
+      try {
+        emailSchema.parse(emailValidation.sanitized);
+      } catch (error: any) {
+        throw new Error('Email validation failed: ' + error.errors?.[0]?.message || 'Invalid email');
+      }
+      
+      // Validate password
+      try {
+        passwordSchema.parse(password);
+      } catch (error: any) {
+        throw new Error('Password validation failed: ' + error.errors?.[0]?.message || 'Invalid password');
+      }
+      
+      // Sanitize other inputs
+      const sanitizedData = {
+        full_name: validateInput(userData.full_name).sanitized,
+        role: userData.role,
+        phone: userData.phone ? validateInput(userData.phone).sanitized : undefined,
+        organization_name: userData.organization_name ? validateInput(userData.organization_name).sanitized : undefined,
+        thai_id_number: userData.thai_id_number ? validateInput(userData.thai_id_number).sanitized : undefined,
+      };
+      
       const redirectUrl = `${window.location.origin}/`;
       
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: emailValidation.sanitized,
         password,
         options: {
           emailRedirectTo: redirectUrl,
-          data: {
-            full_name: userData.full_name,
-            role: userData.role,
-            phone: userData.phone,
-            organization_name: userData.organization_name,
-            thai_id_number: userData.thai_id_number,
-          }
+          data: sanitizedData
         }
       });
 
@@ -217,9 +241,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setLoading(true);
       
+      // Validate and sanitize email input
+      const emailValidation = validateInput(email, 'email');
+      if (!emailValidation.isValid) {
+        throw new Error('Invalid email format: ' + emailValidation.errors.join(', '));
+      }
+      
+      try {
+        emailSchema.parse(emailValidation.sanitized);
+      } catch (error: any) {
+        throw new Error('Email validation failed: ' + error.errors?.[0]?.message || 'Invalid email');
+      }
+      
       // Check rate limiting before attempting sign in
       const { data: rateLimitCheck } = await supabase.rpc('check_rate_limit', {
-        identifier_val: email,
+        identifier_val: emailValidation.sanitized,
         action_type_val: 'login_attempt',
         max_attempts: 5,
         window_minutes: 15
@@ -235,14 +271,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: emailValidation.sanitized,
         password,
       });
 
       if (error) {
         // Log authentication failure
         await supabase.rpc('log_auth_failure', {
-          email_attempt: email,
+          email_attempt: emailValidation.sanitized,
           failure_reason: error.message
         });
         throw error;
