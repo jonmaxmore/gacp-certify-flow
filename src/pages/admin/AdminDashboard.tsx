@@ -1,13 +1,52 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, FileText, DollarSign, Award, Settings, Shield, LogOut } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Users, FileText, DollarSign, Award, Settings, Shield, LogOut, TrendingUp, Activity, AlertTriangle, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 const AdminDashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalApplications: 0,
+    totalRevenue: 0,
+    totalCertificates: 0,
+    recentActivity: []
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchSystemStats();
+  }, []);
+
+  const fetchSystemStats = async () => {
+    try {
+      const [usersData, appsData, paymentsData, certsData] = await Promise.all([
+        supabase.from('profiles').select('id', { count: 'exact' }),
+        supabase.from('applications').select('id', { count: 'exact' }),
+        supabase.from('payments').select('amount').eq('status', 'COMPLETED'),
+        supabase.from('certificates').select('id', { count: 'exact' })
+      ]);
+
+      const totalRevenue = paymentsData.data?.reduce((sum, payment) => sum + Number(payment.amount), 0) || 0;
+
+      setStats({
+        totalUsers: usersData.count || 0,
+        totalApplications: appsData.count || 0,
+        totalRevenue,
+        totalCertificates: certsData.count || 0,
+        recentActivity: []
+      });
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -39,7 +78,7 @@ const AdminDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">ผู้ใช้ทั้งหมด</p>
-                  <p className="text-3xl font-bold">0</p>
+                  <p className="text-3xl font-bold">{stats.totalUsers}</p>
                 </div>
                 <Users className="h-8 w-8 text-blue-500" />
               </div>
@@ -51,7 +90,7 @@ const AdminDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">ใบสมัครรวม</p>
-                  <p className="text-3xl font-bold">0</p>
+                  <p className="text-3xl font-bold">{stats.totalApplications}</p>
                 </div>
                 <FileText className="h-8 w-8 text-green-500" />
               </div>
@@ -63,7 +102,7 @@ const AdminDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">รายได้ (บาท)</p>
-                  <p className="text-3xl font-bold">0</p>
+                  <p className="text-3xl font-bold">{stats.totalRevenue.toLocaleString()}</p>
                 </div>
                 <DollarSign className="h-8 w-8 text-yellow-500" />
               </div>
@@ -75,7 +114,7 @@ const AdminDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">ใบรับรอง</p>
-                  <p className="text-3xl font-bold">0</p>
+                  <p className="text-3xl font-bold">{stats.totalCertificates}</p>
                 </div>
                 <Award className="h-8 w-8 text-purple-500" />
               </div>
