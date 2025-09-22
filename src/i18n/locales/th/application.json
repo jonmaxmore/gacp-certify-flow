@@ -1,0 +1,33 @@
+{
+  "status": {
+    "DRAFT": "แบบร่าง",
+    "SUBMITTED": "ส่งแล้ว",
+    "UNDER_REVIEW": "กำลังตรวจสอบ",
+    "RETURNED": "ส่งกลับแก้ไข",
+    "DOCS_APPROVED": "เอกสารผ่าน",
+    "PAYMENT_PENDING": "รอชำระเงิน",
+    "ONLINE_SCHEDULED": "นัดประเมินออนไลน์",
+    "ONSITE_SCHEDULED": "นัดประเมินออนไซต์",
+    "CERTIFIED": "ผ่านการรับรอง",
+    "REVOKED": "เพิกถอน"
+  },
+  "form": {
+    "personalInfo": "ข้อมูลส่วนบุคคล",
+    "farmInfo": "ข้อมูลฟาร์ม",
+    "cropInfo": "ข้อมูลพืช",
+    "documents": "เอกสารแนบ",
+    "applicantName": "ชื่อผู้สมัคร",
+    "farmName": "ชื่อฟาร์ม",
+    "farmAddress": "ที่อยู่ฟาร์ม",
+    "cropTypes": "ชนิดพืช",
+    "farmArea": "พื้นที่เพาะปลูก",
+    "expectedYield": "ผลผลิตที่คาดหวัง",
+    "cultivationMethods": "วิธีการเพาะปลูก"
+  },
+  "wizard": {
+    "step1": "ข้อมูลพื้นฐาน",
+    "step2": "ข้อมูลฟาร์ม",
+    "step3": "เอกสาร",
+    "step4": "ตรวจสอบ"
+  }
+}

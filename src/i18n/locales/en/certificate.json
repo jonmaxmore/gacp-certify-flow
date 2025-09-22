@@ -1,0 +1,18 @@
+{
+  "title": "GACP Certificate",
+  "certificateNumber": "Certificate Number",
+  "issuedDate": "Issued Date",
+  "expiryDate": "Expiry Date",
+  "status": "Status",
+  "download": "Download Certificate",
+  "verify": "Verify Certificate",
+  "verification": {
+    "title": "Certificate Verification",
+    "enterNumber": "Enter Certificate Number",
+    "checkButton": "Check",
+    "valid": "Certificate is valid",
+    "invalid": "Certificate is invalid",
+    "expired": "Certificate has expired",
+    "revoked": "Certificate has been revoked"
+  }
+}

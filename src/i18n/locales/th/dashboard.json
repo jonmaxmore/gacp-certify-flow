@@ -1,0 +1,57 @@
+{
+  "header": {
+    "title": "GACP Certification",
+    "welcome": "ยินดีต้อนรับ"
+  },
+  "stats": {
+    "totalApplications": "ใบสมัครทั้งหมด",
+    "pendingApplications": "กำลังดำเนินการ",
+    "approvedApplications": "ผ่านการรับรอง",
+    "completedPayments": "การชำระเงิน"
+  },
+  "quickActions": {
+    "newApplication": {
+      "title": "สร้างใบสมัครใหม่",
+      "description": "เริ่มต้นกระบวนการสมัครรับรองมาตรฐาน GACP",
+      "button": "เริ่มต้นสมัคร"
+    },
+    "knowledgeTest": {
+      "title": "แบบทดสอบความรู้",
+      "description": "ทำแบบทดสอบความรู้เกี่ยวกับมาตรฐาน GACP",
+      "button": "เริ่มทำแบบทดสอบ"
+    },
+    "payment": {
+      "title": "ชำระค่าธรรมเนียม",
+      "description": "ชำระค่าตรวจสอบเอกสารและค่าประเมิน",
+      "button": "ดูรายการชำระเงิน"
+    }
+  },
+  "recentApplications": {
+    "title": "ใบสมัครล่าสุด",
+    "description": "รายการใบสมัครและสถานะการดำเนินการ",
+    "noApplications": "ยังไม่มีใบสมัคร",
+    "createFirst": "สร้างใบสมัครแรก",
+    "noFarmName": "ไม่ระบุชื่อฟาร์ม",
+    "progress": "ความคืบหน้า"
+  },
+  "nextActions": {
+    "title": "การดำเนินการต่อไป",
+    "description": "ขั้นตอนที่ต้องดำเนินการในระบบ",
+    "startApplication": {
+      "title": "เริ่มต้นการสมัคร",
+      "description": "สร้างใบสมัครรับรองมาตรฐาน GACP ใบแรกของคุณ"
+    },
+    "draftApplication": {
+      "title": "ใบสมัครแบบร่าง",
+      "description": "มีใบสมัครที่ยังไม่ได้ส่ง กรุณาเสร็จสิ้นและส่งใบสมัคร"
+    },
+    "underReview": {
+      "title": "กำลังตรวจสอบเอกสาร",
+      "description": "เอกสารของคุณอยู่ระหว่างการตรวจสอบโดยเจ้าหน้าที่"
+    },
+    "paymentPending": {
+      "title": "รอการชำระเงิน",
+      "description": "กรุณาชำระค่าธรรมเนียมเพื่อดำเนินการต่อ"
+    }
+  }
+}

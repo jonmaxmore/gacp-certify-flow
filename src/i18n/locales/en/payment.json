@@ -1,0 +1,20 @@
+{
+  "status": {
+    "PENDING": "Pending",
+    "COMPLETED": "Completed",
+    "FAILED": "Failed",
+    "REFUNDED": "Refunded"
+  },
+  "milestones": {
+    "1": "Document Review Fee",
+    "2": "Assessment Fee",
+    "3": "Certificate Issuance Fee"
+  },
+  "details": {
+    "amount": "Amount",
+    "paymentMethod": "Payment Method",
+    "transactionId": "Transaction ID",
+    "paidAt": "Paid At",
+    "dueDate": "Due Date"
+  }
+}
