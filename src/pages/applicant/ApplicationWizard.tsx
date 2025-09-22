@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, ArrowRight, Save, Upload, CheckCircle, FileText, MapPin, Users, Award } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface ApplicationFormData {
   // Applicant Information
@@ -44,6 +45,7 @@ const ApplicationWizard = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -185,10 +187,13 @@ const ApplicationWizard = () => {
     
     setIsSaving(true);
     try {
+      // Prepare application data with proper date handling
       const applicationData = {
         applicant_id: user.id,
         status: isDraft ? 'DRAFT' as const : 'SUBMITTED' as const,
         ...formData,
+        // Handle date fields properly - convert empty strings to null
+        training_date: formData.training_date || null,
       };
 
       if (applicationId) {
@@ -199,6 +204,11 @@ const ApplicationWizard = () => {
           .eq('id', applicationId);
         
         if (error) throw error;
+        
+        toast({
+          title: "บันทึกสำเร็จ",
+          description: isDraft ? "บันทึกข้อมูลเป็นแบบร่างแล้ว" : "ส่งใบสมัครเรียบร้อยแล้ว",
+        });
       } else {
         // Create new application
         const { data, error } = await supabase
@@ -214,11 +224,21 @@ const ApplicationWizard = () => {
           // Update URL to include the new application ID
           navigate(`/applicant/application/${data.id}/edit`, { replace: true });
         }
+        
+        toast({
+          title: "สร้างใบสมัครสำเร็จ",
+          description: isDraft ? "สร้างใบสมัครเป็นแบบร่างแล้ว" : "ส่งใบสมัครเรียบร้อยแล้ว",
+        });
       }
 
       console.log('Application saved successfully');
     } catch (error) {
       console.error('Error saving application:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง",
+        variant: "destructive",
+      });
     } finally {
       setIsSaving(false);
     }
@@ -241,9 +261,18 @@ const ApplicationWizard = () => {
     setIsSubmitting(true);
     try {
       await handleSave(false); // Save as submitted
+      toast({
+        title: "ส่งใบสมัครสำเร็จ!",
+        description: "ใบสมัครของคุณได้รับการส่งเรียบร้อยแล้ว เจ้าหน้าที่จะตรวจสอบและติดต่อกลับ",
+      });
       navigate('/applicant/dashboard');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting application:', error);
+      toast({
+        title: "เกิดข้อผิดพลาดในการส่งใบสมัคร",
+        description: error?.message || "ไม่สามารถส่งใบสมัครได้ กรุณาลองใหม่อีกครั้ง",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -971,4 +1000,5 @@ const ApplicationWizard = () => {
   );
 };
 
+export { ApplicationWizard };
 export default ApplicationWizard;
