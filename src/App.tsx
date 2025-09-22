@@ -11,6 +11,7 @@ import ApplicantDashboard from '@/pages/applicant/ApplicantDashboard';
 import ApplicationWizard from '@/pages/applicant/ApplicationWizard';
 import PaymentsPage from '@/pages/applicant/PaymentsPage';
 import CertificatesPage from '@/pages/applicant/CertificatesPage';
+import CertificateManagement from '@/pages/admin/CertificateManagement';
 import ApplicationsListPage from '@/pages/applicant/ApplicationsListPage';
 import SchedulePage from '@/pages/applicant/SchedulePage';
 import ReviewerDashboard from '@/pages/reviewer/ReviewerDashboard';
@@ -96,6 +97,7 @@ function App() {
                     <Routes>
                       <Route path="dashboard" element={<AdminDashboard />} />
                       <Route path="users" element={<UserManagement />} />
+                      <Route path="certificates" element={<CertificateManagement />} />
                       <Route path="settings" element={<SystemSettings />} />
                     </Routes>
                   </DashboardLayout>

@@ -209,7 +209,7 @@ const AdminDashboard = () => {
                 <div className="text-sm text-muted-foreground">
                   ออกใบรับรองแล้ว: 0
                 </div>
-                <Button variant="outline" className="w-full" onClick={() => navigate('/applicant/certificates')}>
+                <Button variant="outline" className="w-full" onClick={() => navigate('/admin/certificates')}>
                   จัดการใบรับรอง
                 </Button>
               </div>
