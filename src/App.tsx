@@ -6,10 +6,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import LoginPortal from "./pages/LoginPortal";
+import Register from "./pages/Register";
 import ApplicantDashboard from "./pages/applicant/ApplicantDashboard";
 import ReviewerDashboard from "./pages/reviewer/ReviewerDashboard";
 import AuditorDashboard from "./pages/auditor/AuditorDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -22,10 +24,27 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<LoginPortal />} />
-          <Route path="/applicant/dashboard" element={<ApplicantDashboard />} />
-          <Route path="/reviewer/dashboard" element={<ReviewerDashboard />} />
-          <Route path="/auditor/dashboard" element={<AuditorDashboard />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/applicant/dashboard" element={
+            <ProtectedRoute requiredRole="applicant">
+              <ApplicantDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/reviewer/dashboard" element={
+            <ProtectedRoute requiredRole="reviewer">
+              <ReviewerDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/auditor/dashboard" element={
+            <ProtectedRoute requiredRole="auditor">
+              <AuditorDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/dashboard" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

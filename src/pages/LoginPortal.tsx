@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,21 +7,43 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Header } from "@/components/layout/Header";
 import { ArrowLeft, User, Shield, Eye, Settings } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
 type UserRole = "applicant" | "reviewer" | "auditor" | "admin";
 
 interface LoginForm {
-  username: string;
+  email: string;
   password: string;
 }
 
 export default function LoginPortal() {
   const [activeTab, setActiveTab] = useState<UserRole>("applicant");
-  const [loginForm, setLoginForm] = useState<LoginForm>({ username: "", password: "" });
+  const [loginForm, setLoginForm] = useState<LoginForm>({ email: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { signIn, user, loading } = useAuth();
   const { toast } = useToast();
+
+  // Show success message for registration
+  useEffect(() => {
+    const message = searchParams.get('message');
+    if (message === 'registration-success') {
+      toast({
+        title: "สมัครสมาชิกสำเร็จ",
+        description: "กรุณาตรวจสอบอีเมลเพื่อยืนยันบัญชี จากนั้นเข้าสู่ระบบได้ทันที",
+      });
+    }
+  }, [searchParams, toast]);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!loading && user?.profile) {
+      const role = user.profile.role;
+      navigate(`/${role}/dashboard`);
+    }
+  }, [user, loading, navigate]);
 
   const roleConfig = {
     applicant: {
@@ -61,10 +83,10 @@ export default function LoginPortal() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!loginForm.username || !loginForm.password) {
+    if (!loginForm.email || !loginForm.password) {
       toast({
         title: "ข้อมูลไม่ครบถ้วน",
-        description: "กรุณากรอกชื่อผู้ใช้และรหัสผ่าน",
+        description: "กรุณากรอกอีเมลและรหัสผ่าน",
         variant: "destructive",
       });
       return;
@@ -72,32 +94,29 @@ export default function LoginPortal() {
 
     setIsLoading(true);
     
-    // Simulate login process
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Mock successful login
-      toast({
-        title: "เข้าสู่ระบบสำเร็จ",
-        description: `ยินดีต้อนรับ ${loginForm.username}`,
-      });
-      
-      // Redirect to appropriate dashboard
-      navigate(roleConfig[activeTab].redirectPath);
-    } catch (error) {
-      toast({
-        title: "เข้าสู่ระบบไม่สำเร็จ",
-        description: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+    const result = await signIn(loginForm.email, loginForm.password);
+    
+    if (!result.error) {
+      // Will redirect via useEffect when user state updates
     }
+    
+    setIsLoading(false);
   };
 
   const handleInputChange = (field: keyof LoginForm, value: string) => {
     setLoginForm(prev => ({ ...prev, [field]: value }));
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-card flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">กำลังโหลด...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-card">
@@ -170,13 +189,13 @@ export default function LoginPortal() {
 
                       <form onSubmit={handleLogin} className="space-y-6">
                         <div className="space-y-2">
-                          <Label htmlFor="username">ชื่อผู้ใช้งาน</Label>
+                          <Label htmlFor="email">อีเมล</Label>
                           <Input
-                            id="username"
-                            type="text"
-                            placeholder="กรอกชื่อผู้ใช้งาน"
-                            value={loginForm.username}
-                            onChange={(e) => handleInputChange("username", e.target.value)}
+                            id="email"
+                            type="email"
+                            placeholder="your@email.com"
+                            value={loginForm.email}
+                            onChange={(e) => handleInputChange("email", e.target.value)}
                             className="shadow-soft"
                             required
                           />

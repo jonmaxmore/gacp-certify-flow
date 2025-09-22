@@ -1,10 +1,11 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Header } from "@/components/layout/Header";
 import { ProgressTracker } from "@/components/ui/progress-tracker";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   FileText, 
   CreditCard, 
@@ -20,12 +21,30 @@ import {
 } from "lucide-react";
 
 export default function ApplicantDashboard() {
-  const [user] = useState({
-    name: "สมชาย ใจดี",
-    email: "somchai@email.com",
-    farmName: "ฟาร์มผักปลอดภัย สมชาย",
-    memberSince: "มกราคม 2567"
-  });
+  const { user, signOut, loading } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect if not logged in or not applicant
+  useEffect(() => {
+    if (!loading && (!user || user.profile?.role !== 'applicant')) {
+      navigate('/login');
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-card flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">กำลังโหลด...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || !user.profile) {
+    return null;
+  }
 
   const progressSteps = [
     { id: "draft", title: "ร่าง", status: "completed" as const },
@@ -92,18 +111,21 @@ export default function ApplicantDashboard() {
       <Header 
         isLoggedIn={true}
         userRole="applicant"
-        userName={user.name}
-        onLogout={() => {/* Handle logout */}}
+        userName={user.profile.full_name || user.email}
+        onLogout={async () => {
+          await signOut();
+          navigate('/');
+        }}
       />
       
       <div className="container mx-auto px-4 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            ยินดีต้อนรับ, {user.name}
+            ยินดีต้อนรับ, {user.profile.full_name || user.email}
           </h1>
           <p className="text-muted-foreground">
-            {user.farmName} • สมาชิกตั้งแต่ {user.memberSince}
+            {user.profile.organization_name || 'เกษตรกร/ผู้ประกอบการ'} • สมาชิกตั้งแต่ {new Date(user.profile.created_at).toLocaleDateString('th-TH')}
           </p>
         </div>
 
