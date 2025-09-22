@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,6 +15,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { signIn, user, loading } = useAuth();
+  const { t } = useTranslation('auth');
   const navigate = useNavigate();
 
   // Redirect authenticated users to their dashboard
@@ -63,19 +65,19 @@ const LoginPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-semibold">เข้าสู่ระบบ</CardTitle>
+          <CardTitle className="text-2xl font-semibold">{t('login.title')}</CardTitle>
           <CardDescription>
-            ระบบรับรองมาตรฐาน GACP
+            {t('login.subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">อีเมล</Label>
+              <Label htmlFor="email">{t('login.email')}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="your@email.com"
+                placeholder={t('login.emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -84,12 +86,12 @@ const LoginPage = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">รหัสผ่าน</Label>
+              <Label htmlFor="password">{t('login.password')}</Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="รหัสผ่าน"
+                  placeholder={t('login.passwordPlaceholder')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -120,12 +122,12 @@ const LoginPage = () => {
               {isLoading ? (
                 <div className="flex items-center gap-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  กำลังเข้าสู่ระบบ...
+                  {t('login.loggingIn')}
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
                   <LogIn className="h-4 w-4" />
-                  เข้าสู่ระบบ
+                  {t('login.loginButton')}
                 </div>
               )}
             </Button>
@@ -134,12 +136,12 @@ const LoginPage = () => {
           <Separator className="my-6" />
 
           <div className="text-center text-sm">
-            <span className="text-muted-foreground">ยังไม่มีบัญชี? </span>
+            <span className="text-muted-foreground">{t('login.noAccount')} </span>
             <Link
               to="/register"
               className="text-primary hover:underline font-medium"
             >
-              สมัครสมาชิก
+              {t('login.register')}
             </Link>
           </div>
         </CardContent>

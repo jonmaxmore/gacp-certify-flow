@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '@/providers/LanguageProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Plus, FileText, CreditCard, Calendar, Download, LogOut, Clock, CheckCircle, AlertCircle, Users } from 'lucide-react';
+import { formatDate } from '@/utils/dateFormatter';
 import { Link, useNavigate } from 'react-router-dom';
 
 interface ApplicationData {
@@ -33,6 +36,8 @@ interface AssessmentData {
 
 const ApplicantDashboard = () => {
   const { user, signOut } = useAuth();
+  const { t } = useTranslation('dashboard');
+  const { language } = useLanguage();
   const navigate = useNavigate();
   const [applications, setApplications] = useState<ApplicationData[]>([]);
   const [payments, setPayments] = useState<PaymentData[]>([]);
@@ -85,15 +90,15 @@ const ApplicantDashboard = () => {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      'DRAFT': { label: 'แบบร่าง', class: 'status-draft' },
-      'SUBMITTED': { label: 'ส่งแล้ว', class: 'status-submitted' },
-      'UNDER_REVIEW': { label: 'กำลังตรวจสอบ', class: 'status-under-review' },
-      'RETURNED': { label: 'ส่งกลับแก้ไข', class: 'status-returned' },
-      'DOCS_APPROVED': { label: 'เอกสารผ่าน', class: 'status-docs-approved' },
-      'PAYMENT_PENDING': { label: 'รอชำระเงิน', class: 'status-payment-pending' },
-      'ONLINE_SCHEDULED': { label: 'นัดประเมินออนไลน์', class: 'status-online-scheduled' },
-      'ONSITE_SCHEDULED': { label: 'นัดประเมินออนไซต์', class: 'status-online-scheduled' },
-      'CERTIFIED': { label: 'ผ่านการรับรอง', class: 'status-certified' },
+      'DRAFT': { label: t('status.DRAFT', { ns: 'application' }), class: 'status-draft' },
+      'SUBMITTED': { label: t('status.SUBMITTED', { ns: 'application' }), class: 'status-submitted' },
+      'UNDER_REVIEW': { label: t('status.UNDER_REVIEW', { ns: 'application' }), class: 'status-under-review' },
+      'RETURNED': { label: t('status.RETURNED', { ns: 'application' }), class: 'status-returned' },
+      'DOCS_APPROVED': { label: t('status.DOCS_APPROVED', { ns: 'application' }), class: 'status-docs-approved' },
+      'PAYMENT_PENDING': { label: t('status.PAYMENT_PENDING', { ns: 'application' }), class: 'status-payment-pending' },
+      'ONLINE_SCHEDULED': { label: t('status.ONLINE_SCHEDULED', { ns: 'application' }), class: 'status-online-scheduled' },
+      'ONSITE_SCHEDULED': { label: t('status.ONSITE_SCHEDULED', { ns: 'application' }), class: 'status-online-scheduled' },
+      'CERTIFIED': { label: t('status.CERTIFIED', { ns: 'application' }), class: 'status-certified' },
     };
 
     const config = statusConfig[status as keyof typeof statusConfig] || { label: status, class: 'status-draft' };
@@ -129,7 +134,7 @@ const ApplicantDashboard = () => {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">กำลังโหลดข้อมูล...</p>
+          <p className="text-muted-foreground">{t('messages.loading', { ns: 'common' })}</p>
         </div>
       </div>
     );
@@ -146,18 +151,18 @@ const ApplicantDashboard = () => {
                 <span className="text-white font-bold text-lg">G</span>
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-gray-900">GACP Certification</h1>
-                <p className="text-sm text-gray-500">ยินดีต้อนรับ, {user?.profile?.full_name}</p>
+                <h1 className="text-xl font-semibold text-gray-900">{t('header.title')}</h1>
+                <p className="text-sm text-gray-500">{t('header.welcome')}, {user?.profile?.full_name}</p>
               </div>
             </div>
             <div className="flex items-center space-x-3">
               <div className="hidden md:flex items-center space-x-2 text-sm text-gray-600">
                 <Users className="h-4 w-4" />
-                <span>ผู้สมัคร</span>
+                <span>{t('roles.applicant', { ns: 'navigation' })}</span>
               </div>
               <Button variant="outline" onClick={handleSignOut} className="flex items-center space-x-2">
                 <LogOut className="h-4 w-4" />
-                <span>ออกจากระบบ</span>
+                <span>{t('logout.button', { ns: 'auth' })}</span>
               </Button>
             </div>
           </div>
@@ -172,7 +177,7 @@ const ApplicantDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">ใบสมัครทั้งหมด</p>
+                  <p className="text-sm font-medium text-gray-600">{t('stats.totalApplications')}</p>
                   <p className="text-3xl font-bold text-gray-900">{stats.totalApplications}</p>
                 </div>
                 <div className="p-3 bg-blue-100 rounded-xl">
@@ -186,7 +191,7 @@ const ApplicantDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">กำลังดำเนินการ</p>
+                  <p className="text-sm font-medium text-gray-600">{t('stats.pendingApplications')}</p>
                   <p className="text-3xl font-bold text-amber-600">{stats.pendingApplications}</p>
                 </div>
                 <div className="p-3 bg-amber-100 rounded-xl">
@@ -200,7 +205,7 @@ const ApplicantDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">ผ่านการรับรอง</p>
+                  <p className="text-sm font-medium text-gray-600">{t('stats.approvedApplications')}</p>
                   <p className="text-3xl font-bold text-green-600">{stats.approvedApplications}</p>
                 </div>
                 <div className="p-3 bg-green-100 rounded-xl">
@@ -214,7 +219,7 @@ const ApplicantDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">การชำระเงิน</p>
+                  <p className="text-sm font-medium text-gray-600">{t('stats.completedPayments')}</p>
                   <p className="text-3xl font-bold text-purple-600">{stats.completedPayments}</p>
                 </div>
                 <div className="p-3 bg-purple-100 rounded-xl">
@@ -235,15 +240,15 @@ const ApplicantDashboard = () => {
                   <Plus className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">สร้างใบสมัครใหม่</CardTitle>
-                  <CardDescription>เริ่มต้นกระบวนการสมัครรับรองมาตรฐาน GACP</CardDescription>
+                  <CardTitle className="text-lg">{t('quickActions.newApplication.title')}</CardTitle>
+                  <CardDescription>{t('quickActions.newApplication.description')}</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
               <Link to="/applicant/application/new">
                 <Button className="w-full btn-primary">
-                  เริ่มต้นสมัคร
+                  {t('quickActions.newApplication.button')}
                 </Button>
               </Link>
             </CardContent>
@@ -257,14 +262,14 @@ const ApplicantDashboard = () => {
                   <FileText className="h-5 w-5 text-indigo-600" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">แบบทดสอบความรู้</CardTitle>
-                  <CardDescription>ทำแบบทดสอบความรู้เกี่ยวกับมาตรฐาน GACP</CardDescription>
+                  <CardTitle className="text-lg">{t('quickActions.knowledgeTest.title')}</CardTitle>
+                  <CardDescription>{t('quickActions.knowledgeTest.description')}</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
               <Button variant="outline" className="w-full" disabled>
-                เริ่มทำแบบทดสอบ
+                {t('quickActions.knowledgeTest.button')}
               </Button>
             </CardContent>
           </Card>
@@ -277,14 +282,14 @@ const ApplicantDashboard = () => {
                   <CreditCard className="h-5 w-5 text-green-600" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">ชำระค่าธรรมเนียม</CardTitle>
-                  <CardDescription>ชำระค่าตรวจสอบเอกสารและค่าประเมิน</CardDescription>
+                  <CardTitle className="text-lg">{t('quickActions.payment.title')}</CardTitle>
+                  <CardDescription>{t('quickActions.payment.description')}</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
               <Button variant="outline" className="w-full" disabled>
-                ดูรายการชำระเงิน
+                {t('quickActions.payment.button')}
               </Button>
             </CardContent>
           </Card>
@@ -297,10 +302,10 @@ const ApplicantDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <FileText className="h-5 w-5" />
-                <span>ใบสมัครล่าสุด</span>
+                <span>{t('recentApplications.title')}</span>
               </CardTitle>
               <CardDescription>
-                รายการใบสมัครและสถานะการดำเนินการ
+                {t('recentApplications.description')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -311,13 +316,13 @@ const ApplicantDashboard = () => {
                       <div className="flex justify-between items-start mb-2">
                         <div>
                           <p className="font-medium text-gray-900">{app.application_number}</p>
-                          <p className="text-sm text-gray-600">{app.farm_name || 'ไม่ระบุชื่อฟาร์ม'}</p>
+                          <p className="text-sm text-gray-600">{app.farm_name || t('recentApplications.noFarmName')}</p>
                         </div>
                         {getStatusBadge(app.status)}
                       </div>
                       <div className="mt-3">
                         <div className="flex justify-between text-xs text-gray-500 mb-1">
-                          <span>ความคืบหน้า</span>
+                          <span>{t('recentApplications.progress')}</span>
                           <span>{getProgressPercentage(app.status)}%</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
@@ -329,17 +334,17 @@ const ApplicantDashboard = () => {
                       </div>
                       <div className="mt-3 flex justify-between items-center">
                         <span className="text-xs text-gray-500">
-                          สร้างเมื่อ {new Date(app.created_at).toLocaleDateString('th-TH')}
+                          {t('time.createdAt', { ns: 'common' })} {formatDate(app.created_at, language)}
                         </span>
                         <Button size="sm" variant="outline">
-                          ดูรายละเอียด
+                          {t('buttons.viewDetails', { ns: 'common' })}
                         </Button>
                       </div>
                     </div>
                   ))}
                   {applications.length > 3 && (
                     <Button variant="outline" className="w-full">
-                      ดูใบสมัครทั้งหมด ({applications.length})
+                      {t('buttons.viewAll', { ns: 'common' })} ({applications.length})
                     </Button>
                   )}
                 </div>
@@ -348,9 +353,9 @@ const ApplicantDashboard = () => {
                   <div className="p-4 bg-gray-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                     <FileText className="h-8 w-8 text-gray-400" />
                   </div>
-                  <p className="text-gray-600 mb-4">ยังไม่มีใบสมัคร</p>
+                  <p className="text-gray-600 mb-4">{t('recentApplications.noApplications')}</p>
                   <Link to="/applicant/application/new">
-                    <Button>สร้างใบสมัครแรก</Button>
+                    <Button>{t('recentApplications.createFirst')}</Button>
                   </Link>
                 </div>
               )}
@@ -362,10 +367,10 @@ const ApplicantDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Calendar className="h-5 w-5" />
-                <span>การดำเนินการต่อไป</span>
+                <span>{t('nextActions.title')}</span>
               </CardTitle>
               <CardDescription>
-                ขั้นตอนที่ต้องดำเนินการในระบบ
+                {t('nextActions.description')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -376,8 +381,8 @@ const ApplicantDashboard = () => {
                     <div className="flex items-center space-x-3">
                       <AlertCircle className="h-5 w-5 text-blue-600" />
                       <div>
-                        <p className="font-medium text-blue-900">เริ่มต้นการสมัคร</p>
-                        <p className="text-sm text-blue-700">สร้างใบสมัครรับรองมาตรฐาน GACP ใบแรกของคุณ</p>
+                        <p className="font-medium text-blue-900">{t('nextActions.startApplication.title')}</p>
+                        <p className="text-sm text-blue-700">{t('nextActions.startApplication.description')}</p>
                       </div>
                     </div>
                   </div>
@@ -388,8 +393,8 @@ const ApplicantDashboard = () => {
                         <div className="flex items-center space-x-3">
                           <Clock className="h-5 w-5 text-amber-600" />
                           <div>
-                            <p className="font-medium text-amber-900">ใบสมัครแบบร่าง</p>
-                            <p className="text-sm text-amber-700">มีใบสมัครที่ยังไม่ได้ส่ง กรุณาเสร็จสิ้นและส่งใบสมัคร</p>
+                            <p className="font-medium text-amber-900">{t('nextActions.draftApplication.title')}</p>
+                            <p className="text-sm text-amber-700">{t('nextActions.draftApplication.description')}</p>
                           </div>
                         </div>
                       </div>
@@ -400,8 +405,8 @@ const ApplicantDashboard = () => {
                         <div className="flex items-center space-x-3">
                           <CreditCard className="h-5 w-5 text-purple-600" />
                           <div>
-                            <p className="font-medium text-purple-900">รอชำระเงิน</p>
-                            <p className="text-sm text-purple-700">กรุณาชำระค่าธรรมเนียมเพื่อดำเนินการต่อ</p>
+                            <p className="font-medium text-purple-900">{t('nextActions.paymentPending.title')}</p>
+                            <p className="text-sm text-purple-700">{t('nextActions.paymentPending.description')}</p>
                           </div>
                         </div>
                       </div>
@@ -412,8 +417,8 @@ const ApplicantDashboard = () => {
                         <div className="flex items-center space-x-3">
                           <Calendar className="h-5 w-5 text-green-600" />
                           <div>
-                            <p className="font-medium text-green-900">นัดหมายประเมิน</p>
-                            <p className="text-sm text-green-700">มีนัดหมายประเมินที่กำลังจะถึง</p>
+                            <p className="font-medium text-green-900">{t('nextActions.underReview.title')}</p>
+                            <p className="text-sm text-green-700">{t('nextActions.underReview.description')}</p>
                           </div>
                         </div>
                       </div>

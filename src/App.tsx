@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/providers/AuthProvider';
+import { LanguageProvider } from '@/providers/LanguageProvider';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import LoginPage from '@/pages/auth/LoginPage';
@@ -34,8 +35,9 @@ import AssessmentScheduling from '@/pages/reviewer/AssessmentScheduling';
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <div className="min-h-screen bg-background">
+      <LanguageProvider>
+        <Router>
+          <div className="min-h-screen bg-background">
           <Routes>
             {/* Public routes */}
             <Route path="/login" element={<LoginPage />} />
@@ -121,6 +123,7 @@ function App() {
           <Toaster />
         </div>
       </Router>
+      </LanguageProvider>
     </AuthProvider>
   );
 }

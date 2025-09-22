@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from '@/components/navigation/Sidebar';
 import { Button } from '@/components/ui/button';
+import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -42,7 +43,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
             <Menu className="h-5 w-5" />
           </Button>
           <h1 className="font-semibold">GACP System</h1>
-          <div className="w-8" /> {/* Spacer */}
+          <LanguageSwitcher />
+        </div>
+
+        {/* Desktop header */}
+        <div className="hidden lg:flex items-center justify-end p-4 border-b bg-white">
+          <LanguageSwitcher />
         </div>
 
         {/* Page content */}

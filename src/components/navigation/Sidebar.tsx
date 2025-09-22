@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { 
   LayoutDashboard, 
@@ -20,34 +21,34 @@ import {
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 
-const navigation = {
+const getNavigation = (t: any) => ({
   applicant: [
-    { name: 'แดชบอร์ด', href: '/applicant/dashboard', icon: LayoutDashboard },
-    { name: 'ใบสมัคร', href: '/applicant/applications', icon: FileText },
-    { name: 'การชำระเงิน', href: '/applicant/payments', icon: CreditCard },
-    { name: 'การประเมินของฉัน', href: '/applicant/schedule', icon: Calendar },
-    { name: 'ใบรับรอง', href: '/applicant/certificates', icon: Award },
+    { name: t('menu.dashboard'), href: '/applicant/dashboard', icon: LayoutDashboard },
+    { name: t('menu.applications'), href: '/applicant/applications', icon: FileText },
+    { name: t('menu.payments'), href: '/applicant/payments', icon: CreditCard },
+    { name: t('menu.schedule'), href: '/applicant/schedule', icon: Calendar },
+    { name: t('menu.certificates'), href: '/applicant/certificates', icon: Award },
   ],
   reviewer: [
-    { name: 'แดชบอร์ด', href: '/reviewer/dashboard', icon: LayoutDashboard },
-    { name: 'คิวตรวจสอบ', href: '/reviewer/queue', icon: FileText },
-    { name: 'จัดการการประเมิน', href: '/reviewer/assessments', icon: Calendar },
+    { name: t('menu.dashboard'), href: '/reviewer/dashboard', icon: LayoutDashboard },
+    { name: t('menu.queue'), href: '/reviewer/queue', icon: FileText },
+    { name: t('menu.assessments'), href: '/reviewer/assessments', icon: Calendar },
   ],
   auditor: [
-    { name: 'แดชบอร์ด', href: '/auditor/dashboard', icon: LayoutDashboard },
-    { name: 'จัดการการประเมิน', href: '/auditor/assessments', icon: FileText },
-    { name: 'ปฏิทินการประเมิน', href: '/auditor/calendar', icon: Calendar },
+    { name: t('menu.dashboard'), href: '/auditor/dashboard', icon: LayoutDashboard },
+    { name: t('menu.assessments'), href: '/auditor/assessments', icon: FileText },
+    { name: t('menu.calendar'), href: '/auditor/calendar', icon: Calendar },
   ],
   admin: [
-    { name: 'แดชบอร์ด', href: '/admin/dashboard', icon: LayoutDashboard },
-    { name: 'จัดการสินค้า', href: '/admin/products', icon: Award },
-    { name: 'วิเคราะห์แพลตฟอร์ม', href: '/admin/analytics', icon: BarChart3 },
-    { name: 'จัดการผู้ใช้', href: '/admin/users', icon: Users },
-    { name: 'ประวัติใบสมัครทั้งหมด', href: '/admin/applications', icon: FileText },
-    { name: 'จัดการใบรับรอง', href: '/admin/certificates', icon: Award },
-    { name: 'ตั้งค่าระบบ', href: '/admin/settings', icon: Settings },
+    { name: t('menu.dashboard'), href: '/admin/dashboard', icon: LayoutDashboard },
+    { name: t('menu.products'), href: '/admin/products', icon: Award },
+    { name: t('menu.analytics'), href: '/admin/analytics', icon: BarChart3 },
+    { name: t('menu.users'), href: '/admin/users', icon: Users },
+    { name: t('menu.allApplications'), href: '/admin/applications', icon: FileText },
+    { name: t('menu.certificateManagement'), href: '/admin/certificates', icon: Award },
+    { name: t('menu.settings'), href: '/admin/settings', icon: Settings },
   ],
-};
+});
 
 interface SidebarProps {
   onClose?: () => void;
@@ -55,9 +56,11 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
   const { user, signOut } = useAuth();
+  const { t } = useTranslation('navigation');
   const location = useLocation();
 
   const userRole = user?.profile?.role || 'applicant';
+  const navigation = getNavigation(t);
   const userNavigation = navigation[userRole] || navigation.applicant;
 
   const handleSignOut = async () => {
@@ -74,8 +77,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
             <Award className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
-            <h2 className="font-semibold">GACP System</h2>
-            <p className="text-sm text-muted-foreground">ระบบรับรองมาตรฐาน</p>
+            <h2 className="font-semibold">{t('systemTitle')}</h2>
+            <p className="text-sm text-muted-foreground">{t('systemSubtitle')}</p>
           </div>
         </div>
       </div>
@@ -87,10 +90,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
           <p className="text-xs text-muted-foreground">{user?.profile?.email}</p>
           <div className="inline-block">
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary/10 text-primary">
-              {userRole === 'applicant' && 'เกษตรกร'}
-              {userRole === 'reviewer' && 'เจ้าหน้าที่ตรวจเอกสาร'}
-              {userRole === 'auditor' && 'เจ้าหน้าที่ประเมิน'}
-              {userRole === 'admin' && 'ผู้ดูแลระบบ'}
+              {t(`roles.${userRole}`)}
             </span>
           </div>
         </div>
@@ -130,7 +130,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
           onClick={handleSignOut}
         >
           <LogOut className="w-4 h-4" />
-          ออกจากระบบ
+          {t('logout', { ns: 'auth' })}
         </Button>
       </div>
     </div>

@@ -769,6 +769,7 @@ export type Database = {
           last_login_at: string | null
           organization_name: string | null
           phone: string | null
+          preferred_language: string | null
           role: Database["public"]["Enums"]["user_role"]
           thai_id_number: string | null
           updated_at: string | null
@@ -783,6 +784,7 @@ export type Database = {
           last_login_at?: string | null
           organization_name?: string | null
           phone?: string | null
+          preferred_language?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           thai_id_number?: string | null
           updated_at?: string | null
@@ -797,6 +799,7 @@ export type Database = {
           last_login_at?: string | null
           organization_name?: string | null
           phone?: string | null
+          preferred_language?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           thai_id_number?: string | null
           updated_at?: string | null
