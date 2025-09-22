@@ -939,6 +939,15 @@ export type Database = {
         Args: { email_attempt: string; failure_reason: string }
         Returns: undefined
       }
+      log_security_event: {
+        Args: {
+          p_details?: Json
+          p_event_type: string
+          p_severity?: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       update_application_status: {
         Args: {
           p_application_id: string
