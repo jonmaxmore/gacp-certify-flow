@@ -27,6 +27,7 @@ export type Database = {
           created_at: string | null
           crop_types: string[] | null
           cultivation_methods: string[] | null
+          estimated_completion_date: string | null
           expected_yield: string | null
           farm_address: string | null
           farm_area_ngan: number | null
@@ -35,9 +36,13 @@ export type Database = {
           farm_coordinates: string | null
           farm_name: string | null
           id: string
+          max_revisions: number | null
           metadata: Json | null
+          next_action_required: string | null
           organization_name: string | null
           organization_registration: string | null
+          payment_assessment_id: string | null
+          payment_review_id: string | null
           representative_name: string | null
           representative_position: string | null
           responsible_person: string | null
@@ -50,6 +55,10 @@ export type Database = {
           training_completed: boolean | null
           training_date: string | null
           updated_at: string | null
+          workflow_history: Json | null
+          workflow_status:
+            | Database["public"]["Enums"]["application_workflow_status"]
+            | null
         }
         Insert: {
           applicant_address?: string | null
@@ -63,6 +72,7 @@ export type Database = {
           created_at?: string | null
           crop_types?: string[] | null
           cultivation_methods?: string[] | null
+          estimated_completion_date?: string | null
           expected_yield?: string | null
           farm_address?: string | null
           farm_area_ngan?: number | null
@@ -71,9 +81,13 @@ export type Database = {
           farm_coordinates?: string | null
           farm_name?: string | null
           id?: string
+          max_revisions?: number | null
           metadata?: Json | null
+          next_action_required?: string | null
           organization_name?: string | null
           organization_registration?: string | null
+          payment_assessment_id?: string | null
+          payment_review_id?: string | null
           representative_name?: string | null
           representative_position?: string | null
           responsible_person?: string | null
@@ -86,6 +100,10 @@ export type Database = {
           training_completed?: boolean | null
           training_date?: string | null
           updated_at?: string | null
+          workflow_history?: Json | null
+          workflow_status?:
+            | Database["public"]["Enums"]["application_workflow_status"]
+            | null
         }
         Update: {
           applicant_address?: string | null
@@ -99,6 +117,7 @@ export type Database = {
           created_at?: string | null
           crop_types?: string[] | null
           cultivation_methods?: string[] | null
+          estimated_completion_date?: string | null
           expected_yield?: string | null
           farm_address?: string | null
           farm_area_ngan?: number | null
@@ -107,9 +126,13 @@ export type Database = {
           farm_coordinates?: string | null
           farm_name?: string | null
           id?: string
+          max_revisions?: number | null
           metadata?: Json | null
+          next_action_required?: string | null
           organization_name?: string | null
           organization_registration?: string | null
+          payment_assessment_id?: string | null
+          payment_review_id?: string | null
           representative_name?: string | null
           representative_position?: string | null
           responsible_person?: string | null
@@ -122,6 +145,10 @@ export type Database = {
           training_completed?: boolean | null
           training_date?: string | null
           updated_at?: string | null
+          workflow_history?: Json | null
+          workflow_status?:
+            | Database["public"]["Enums"]["application_workflow_status"]
+            | null
         }
         Relationships: [
           {
@@ -129,6 +156,20 @@ export type Database = {
             columns: ["applicant_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_payment_assessment_id_fkey"
+            columns: ["payment_assessment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_payment_review_id_fkey"
+            columns: ["payment_review_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
             referencedColumns: ["id"]
           },
         ]
@@ -508,6 +549,7 @@ export type Database = {
         Row: {
           amount: number
           application_id: string
+          bank_reference: string | null
           checkout_url: string | null
           created_at: string | null
           currency: string | null
@@ -517,16 +559,24 @@ export type Database = {
           id: string
           milestone: number
           paid_at: string | null
+          payment_due_date: string | null
           payment_method: string | null
+          payment_method_details: Json | null
+          payment_reminder_sent: boolean | null
+          qr_code_data: string | null
           receipt_url: string | null
           status: Database["public"]["Enums"]["payment_status"] | null
           updated_at: string | null
           webhook_data: Json | null
           webhook_received_at: string | null
+          workflow_status:
+            | Database["public"]["Enums"]["application_workflow_status"]
+            | null
         }
         Insert: {
           amount: number
           application_id: string
+          bank_reference?: string | null
           checkout_url?: string | null
           created_at?: string | null
           currency?: string | null
@@ -536,16 +586,24 @@ export type Database = {
           id?: string
           milestone: number
           paid_at?: string | null
+          payment_due_date?: string | null
           payment_method?: string | null
+          payment_method_details?: Json | null
+          payment_reminder_sent?: boolean | null
+          qr_code_data?: string | null
           receipt_url?: string | null
           status?: Database["public"]["Enums"]["payment_status"] | null
           updated_at?: string | null
           webhook_data?: Json | null
           webhook_received_at?: string | null
+          workflow_status?:
+            | Database["public"]["Enums"]["application_workflow_status"]
+            | null
         }
         Update: {
           amount?: number
           application_id?: string
+          bank_reference?: string | null
           checkout_url?: string | null
           created_at?: string | null
           currency?: string | null
@@ -555,12 +613,19 @@ export type Database = {
           id?: string
           milestone?: number
           paid_at?: string | null
+          payment_due_date?: string | null
           payment_method?: string | null
+          payment_method_details?: Json | null
+          payment_reminder_sent?: boolean | null
+          qr_code_data?: string | null
           receipt_url?: string | null
           status?: Database["public"]["Enums"]["payment_status"] | null
           updated_at?: string | null
           webhook_data?: Json | null
           webhook_received_at?: string | null
+          workflow_status?:
+            | Database["public"]["Enums"]["application_workflow_status"]
+            | null
         }
         Relationships: [
           {
@@ -893,6 +958,81 @@ export type Database = {
           },
         ]
       }
+      workflow_notifications: {
+        Row: {
+          action_label: string | null
+          action_url: string | null
+          application_id: string | null
+          channels: Json | null
+          created_at: string | null
+          id: string
+          message: string
+          metadata: Json | null
+          notification_type: string
+          priority: string
+          read_at: string | null
+          scheduled_for: string | null
+          sent_at: string | null
+          status: string
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          action_label?: string | null
+          action_url?: string | null
+          application_id?: string | null
+          channels?: Json | null
+          created_at?: string | null
+          id?: string
+          message: string
+          metadata?: Json | null
+          notification_type: string
+          priority?: string
+          read_at?: string | null
+          scheduled_for?: string | null
+          sent_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          action_label?: string | null
+          action_url?: string | null
+          application_id?: string | null
+          channels?: Json | null
+          created_at?: string | null
+          id?: string
+          message?: string
+          metadata?: Json | null
+          notification_type?: string
+          priority?: string
+          read_at?: string | null
+          scheduled_for?: string | null
+          sent_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_notifications_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -910,6 +1050,15 @@ export type Database = {
           window_minutes?: number
         }
         Returns: boolean
+      }
+      create_payment_record: {
+        Args: {
+          p_amount: number
+          p_application_id: string
+          p_due_date?: string
+          p_milestone: Database["public"]["Enums"]["payment_milestone"]
+        }
+        Returns: string
       }
       generate_application_number: {
         Args: Record<PropertyKey, never>
@@ -932,6 +1081,10 @@ export type Database = {
         Returns: Json
       }
       get_safe_profile: {
+        Args: { target_user_id?: string }
+        Returns: Json
+      }
+      get_user_workflow_tasks: {
         Args: { target_user_id?: string }
         Returns: Json
       }
@@ -980,6 +1133,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      update_workflow_status: {
+        Args: {
+          p_application_id: string
+          p_new_status: Database["public"]["Enums"]["application_workflow_status"]
+          p_notes?: string
+          p_updated_by: string
+        }
+        Returns: boolean
+      }
       verify_certificate: {
         Args: { cert_number: string }
         Returns: Json
@@ -1003,6 +1165,26 @@ export type Database = {
         | "ONSITE_COMPLETED"
         | "CERTIFIED"
         | "REVOKED"
+      application_workflow_status:
+        | "DRAFT"
+        | "SUBMITTED"
+        | "PAYMENT_PENDING_REVIEW"
+        | "PAYMENT_CONFIRMED_REVIEW"
+        | "UNDER_REVIEW"
+        | "REVISION_REQUESTED"
+        | "REVIEW_APPROVED"
+        | "PAYMENT_PENDING_ASSESSMENT"
+        | "PAYMENT_CONFIRMED_ASSESSMENT"
+        | "ONLINE_ASSESSMENT_SCHEDULED"
+        | "ONLINE_ASSESSMENT_IN_PROGRESS"
+        | "ONLINE_ASSESSMENT_COMPLETED"
+        | "ONSITE_ASSESSMENT_SCHEDULED"
+        | "ONSITE_ASSESSMENT_IN_PROGRESS"
+        | "ONSITE_ASSESSMENT_COMPLETED"
+        | "CERTIFIED"
+        | "REJECTED"
+        | "EXPIRED"
+        | "REVOKED"
       assessment_status: "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"
       assessment_type: "ONLINE" | "ONSITE"
       document_type:
@@ -1016,6 +1198,11 @@ export type Database = {
         | "STAFF_LIST"
         | "SOP_DOCUMENTS"
         | "OTHER"
+      payment_milestone:
+        | "DOCUMENT_REVIEW"
+        | "ASSESSMENT"
+        | "CERTIFICATION"
+        | "REINSPECTION"
       payment_status: "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED"
       user_role: "applicant" | "reviewer" | "auditor" | "admin"
     }
@@ -1159,6 +1346,27 @@ export const Constants = {
         "CERTIFIED",
         "REVOKED",
       ],
+      application_workflow_status: [
+        "DRAFT",
+        "SUBMITTED",
+        "PAYMENT_PENDING_REVIEW",
+        "PAYMENT_CONFIRMED_REVIEW",
+        "UNDER_REVIEW",
+        "REVISION_REQUESTED",
+        "REVIEW_APPROVED",
+        "PAYMENT_PENDING_ASSESSMENT",
+        "PAYMENT_CONFIRMED_ASSESSMENT",
+        "ONLINE_ASSESSMENT_SCHEDULED",
+        "ONLINE_ASSESSMENT_IN_PROGRESS",
+        "ONLINE_ASSESSMENT_COMPLETED",
+        "ONSITE_ASSESSMENT_SCHEDULED",
+        "ONSITE_ASSESSMENT_IN_PROGRESS",
+        "ONSITE_ASSESSMENT_COMPLETED",
+        "CERTIFIED",
+        "REJECTED",
+        "EXPIRED",
+        "REVOKED",
+      ],
       assessment_status: ["SCHEDULED", "IN_PROGRESS", "COMPLETED", "CANCELLED"],
       assessment_type: ["ONLINE", "ONSITE"],
       document_type: [
@@ -1172,6 +1380,12 @@ export const Constants = {
         "STAFF_LIST",
         "SOP_DOCUMENTS",
         "OTHER",
+      ],
+      payment_milestone: [
+        "DOCUMENT_REVIEW",
+        "ASSESSMENT",
+        "CERTIFICATION",
+        "REINSPECTION",
       ],
       payment_status: ["PENDING", "COMPLETED", "FAILED", "REFUNDED"],
       user_role: ["applicant", "reviewer", "auditor", "admin"],
