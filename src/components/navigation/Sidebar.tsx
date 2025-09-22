@@ -35,20 +35,17 @@ const navigation = {
   ],
   auditor: [
     { name: 'แดชบอร์ด', href: '/auditor/dashboard', icon: LayoutDashboard },
-    { name: 'ประเมินออนไลน์', href: '/auditor/online', icon: Video },
-    { name: 'ประเมินออนไซต์', href: '/auditor/onsite', icon: MapPin },
-    { name: 'รายงาน', href: '/auditor/reports', icon: FileText },
+    { name: 'จัดการการประเมิน', href: '/auditor/assessments', icon: FileText },
+    { name: 'ปฏิทินการประเมิน', href: '/auditor/calendar', icon: Calendar },
   ],
   admin: [
     { name: 'แดชบอร์ด', href: '/admin/dashboard', icon: LayoutDashboard },
     { name: 'จัดการสินค้า', href: '/admin/products', icon: Award },
     { name: 'วิเคราะห์แพลตฟอร์ม', href: '/admin/analytics', icon: BarChart3 },
     { name: 'จัดการผู้ใช้', href: '/admin/users', icon: Users },
-    { name: 'ใบสมัครทั้งหมด', href: '/admin/applications', icon: FileText },
-    { name: 'การเงิน', href: '/admin/payments', icon: CreditCard },
+    { name: 'ประวัติใบสมัครทั้งหมด', href: '/admin/applications', icon: FileText },
     { name: 'ใบรับรอง', href: '/admin/certificates', icon: Award },
     { name: 'ตั้งค่าระบบ', href: '/admin/settings', icon: Settings },
-    { name: 'บันทึกการใช้งาน', href: '/admin/audit-logs', icon: Shield },
   ],
 };
 

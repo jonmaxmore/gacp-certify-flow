@@ -13,6 +13,7 @@ import PaymentsPage from '@/pages/applicant/PaymentsPage';
 import CertificatesPage from '@/pages/applicant/CertificatesPage';
 import CertificateManagement from '@/pages/admin/CertificateManagement';
 import ApplicationsListPage from '@/pages/applicant/ApplicationsListPage';
+import AdminApplicationsHistoryPage from '@/pages/admin/AdminApplicationsHistoryPage';
 import SchedulePage from '@/pages/applicant/SchedulePage';
 import ReviewerDashboard from '@/pages/reviewer/ReviewerDashboard';
 import ReviewQueue from '@/pages/reviewer/ReviewQueue';
@@ -103,7 +104,7 @@ function App() {
                       <Route path="dashboard" element={<NewAdminDashboard />} />
                       <Route path="products" element={<ProductManagement />} />
                       <Route path="users" element={<UserManagement />} />
-                      <Route path="applications" element={<ApplicationsListPage />} />
+                      <Route path="applications" element={<AdminApplicationsHistoryPage />} />
                       <Route path="analytics" element={<PlatformAnalytics />} />
                       <Route path="certificates" element={<CertificateManagement />} />
                       <Route path="settings" element={<SystemSettings />} />
