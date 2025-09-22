@@ -953,12 +953,12 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          applicant_address?: never
-          applicant_email?: never
+          applicant_address?: string | null
+          applicant_email?: string | null
           applicant_id?: string | null
-          applicant_id_number?: never
+          applicant_id_number?: string | null
           applicant_name?: string | null
-          applicant_phone?: never
+          applicant_phone?: string | null
           application_number?: string | null
           created_at?: string | null
           crop_types?: string[] | null
@@ -974,12 +974,12 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          applicant_address?: never
-          applicant_email?: never
+          applicant_address?: string | null
+          applicant_email?: string | null
           applicant_id?: string | null
-          applicant_id_number?: never
+          applicant_id_number?: string | null
           applicant_name?: string | null
-          applicant_phone?: never
+          applicant_phone?: string | null
           application_number?: string | null
           created_at?: string | null
           crop_types?: string[] | null
