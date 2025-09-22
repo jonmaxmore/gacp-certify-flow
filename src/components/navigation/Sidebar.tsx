@@ -123,14 +123,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t">
+      <div className="p-4 border-t bg-muted/20">
         <Button
-          variant="ghost"
-          className="w-full justify-start gap-3"
+          variant="outline"
+          size="sm"
+          className="w-full justify-start gap-3 bg-background hover:bg-destructive hover:text-destructive-foreground transition-colors"
           onClick={handleSignOut}
         >
           <LogOut className="w-4 h-4" />
-          {t('logout', { ns: 'auth' })}
+          {t('logout.button', { ns: 'auth' }) || 'ออกจากระบบ'}
         </Button>
       </div>
     </div>
