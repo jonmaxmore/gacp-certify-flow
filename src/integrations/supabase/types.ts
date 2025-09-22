@@ -131,6 +131,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "applications_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "secure_profile_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       assessments: {
@@ -236,6 +243,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "assessments_auditor_id_fkey"
+            columns: ["auditor_id"]
+            isOneToOne: false
+            referencedRelation: "secure_profile_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       audit_logs: {
@@ -302,6 +316,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "secure_profile_view"
             referencedColumns: ["id"]
           },
         ]
@@ -394,6 +415,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "certificates_revoked_by_fkey"
+            columns: ["revoked_by"]
+            isOneToOne: false
+            referencedRelation: "secure_profile_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       documents: {
@@ -455,6 +483,13 @@ export type Database = {
             columns: ["uploaded_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "secure_profile_view"
             referencedColumns: ["id"]
           },
         ]
@@ -853,6 +888,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "reviews_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "secure_profile_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       system_config: {
@@ -888,11 +930,62 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "system_config_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "secure_profile_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      secure_profile_view: {
+        Row: {
+          address_display: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          has_thai_id_verification: boolean | null
+          id: string | null
+          is_active: boolean | null
+          last_login_at: string | null
+          organization_name: string | null
+          phone_display: string | null
+          role: Database["public"]["Enums"]["user_role"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          address_display?: never
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          has_thai_id_verification?: never
+          id?: string | null
+          is_active?: boolean | null
+          last_login_at?: string | null
+          organization_name?: string | null
+          phone_display?: never
+          role?: Database["public"]["Enums"]["user_role"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          address_display?: never
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          has_thai_id_verification?: never
+          id?: string | null
+          is_active?: boolean | null
+          last_login_at?: string | null
+          organization_name?: string | null
+          phone_display?: never
+          role?: Database["public"]["Enums"]["user_role"] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       check_rate_limit: {
@@ -914,6 +1007,10 @@ export type Database = {
       }
       get_admin_stats: {
         Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      get_identity_verification_status: {
+        Args: { target_user_id: string }
         Returns: Json
       }
       get_safe_profile: {
