@@ -51,17 +51,23 @@ export const useAuth = () => {
     );
 
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session check:', session?.user?.id);
-      setSession(session);
-      if (session?.user) {
-        console.log('Initial session has user, fetching profile...');
-        fetchUserProfile(session.user);
-      } else {
-        console.log('No initial session found');
+    supabase.auth.getSession()
+      .then(async ({ data: { session } }) => {
+        console.log('Initial session check:', session?.user?.id);
+        setSession(session);
+        if (session?.user) {
+          console.log('Initial session has user, fetching profile...');
+          await fetchUserProfile(session.user);
+          setLoading(false);
+        } else {
+          console.log('No initial session found');
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error('Error getting initial session:', err);
         setLoading(false);
-      }
-    });
+      });
 
     return () => subscription.unsubscribe();
   }, []);
