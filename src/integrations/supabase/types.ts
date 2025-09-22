@@ -224,7 +224,13 @@ export type Database = {
           email: string
           full_name: string | null
           id: string
+          is_active: boolean | null
+          last_login_at: string | null
+          organization_name: string | null
           phone: string | null
+          position: string | null
+          role: Database["public"]["Enums"]["user_role"] | null
+          thai_id_number: string | null
           updated_at: string | null
         }
         Insert: {
@@ -232,7 +238,13 @@ export type Database = {
           email: string
           full_name?: string | null
           id: string
+          is_active?: boolean | null
+          last_login_at?: string | null
+          organization_name?: string | null
           phone?: string | null
+          position?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+          thai_id_number?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -240,7 +252,13 @@ export type Database = {
           email?: string
           full_name?: string | null
           id?: string
+          is_active?: boolean | null
+          last_login_at?: string | null
+          organization_name?: string | null
           phone?: string | null
+          position?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+          thai_id_number?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -298,7 +316,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      user_role: "applicant" | "reviewer" | "auditor" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -425,6 +443,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["applicant", "reviewer", "auditor", "admin"],
+    },
   },
 } as const
