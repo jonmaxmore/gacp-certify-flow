@@ -40,6 +40,7 @@ const navigation = {
   ],
   admin: [
     { name: 'แดชบอร์ด', href: '/admin/dashboard', icon: LayoutDashboard },
+    { name: 'จัดการสินค้า', href: '/admin/products', icon: Award },
     { name: 'จัดการผู้ใช้', href: '/admin/users', icon: Users },
     { name: 'ใบสมัครทั้งหมด', href: '/admin/applications', icon: FileText },
     { name: 'การเงิน', href: '/admin/payments', icon: CreditCard },

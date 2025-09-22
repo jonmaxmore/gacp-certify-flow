@@ -20,6 +20,8 @@ import ReviewDetail from '@/pages/reviewer/ReviewDetail';
 import AuditorDashboard from '@/pages/auditor/AuditorDashboard';
 import AssessmentManagement from '@/pages/auditor/AssessmentManagement';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
+import NewAdminDashboard from '@/pages/admin/NewAdminDashboard';
+import ProductManagement from '@/pages/admin/ProductManagement';
 import UserManagement from '@/pages/admin/UserManagement';
 import SystemSettings from '@/pages/admin/SystemSettings';
 import AssessmentCalendar from '@/pages/auditor/AssessmentCalendar';
@@ -97,8 +99,10 @@ function App() {
                 <ProtectedRoute allowedRoles={['admin']}>
                   <DashboardLayout>
                     <Routes>
-                      <Route path="dashboard" element={<AdminDashboard />} />
+                      <Route path="dashboard" element={<NewAdminDashboard />} />
+                      <Route path="products" element={<ProductManagement />} />
                       <Route path="users" element={<UserManagement />} />
+                      <Route path="applications" element={<ApplicationsListPage />} />
                       <Route path="certificates" element={<CertificateManagement />} />
                       <Route path="settings" element={<SystemSettings />} />
                     </Routes>

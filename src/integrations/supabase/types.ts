@@ -572,6 +572,157 @@ export type Database = {
           },
         ]
       }
+      pricing_tiers: {
+        Row: {
+          assessment_fee: number | null
+          certificate_fee: number | null
+          created_at: string | null
+          description: string | null
+          features: Json | null
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          max_farm_area: number | null
+          name: string
+          price: number
+          product_id: string | null
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          assessment_fee?: number | null
+          certificate_fee?: number | null
+          created_at?: string | null
+          description?: string | null
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          max_farm_area?: number | null
+          name: string
+          price: number
+          product_id?: string | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          assessment_fee?: number | null
+          certificate_fee?: number | null
+          created_at?: string | null
+          description?: string | null
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          max_farm_area?: number | null
+          name?: string
+          price?: number
+          product_id?: string | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pricing_tiers_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          assessment_type: string | null
+          category_id: string | null
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          duration_days: number | null
+          features: Json | null
+          id: string
+          is_active: boolean | null
+          metadata: Json | null
+          name: string
+          price: number
+          requirements: Json | null
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          assessment_type?: string | null
+          category_id?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          duration_days?: number | null
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          name: string
+          price?: number
+          requirements?: Json | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          assessment_type?: string | null
+          category_id?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          duration_days?: number | null
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          name?: string
+          price?: number
+          requirements?: Json | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "product_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address: string | null
