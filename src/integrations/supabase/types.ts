@@ -459,6 +459,51 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          action_label: string | null
+          action_url: string | null
+          created_at: string
+          id: string
+          message: string
+          priority: string
+          read: boolean
+          related_id: string | null
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action_label?: string | null
+          action_url?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          priority?: string
+          read?: boolean
+          related_id?: string | null
+          title: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action_label?: string | null
+          action_url?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          priority?: string
+          read?: boolean
+          related_id?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
