@@ -131,6 +131,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "applications_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "safe_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       assessments: {
@@ -236,6 +243,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "assessments_auditor_id_fkey"
+            columns: ["auditor_id"]
+            isOneToOne: false
+            referencedRelation: "safe_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       audit_logs: {
@@ -302,6 +316,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "safe_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -394,6 +415,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "certificates_revoked_by_fkey"
+            columns: ["revoked_by"]
+            isOneToOne: false
+            referencedRelation: "safe_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       documents: {
@@ -455,6 +483,13 @@ export type Database = {
             columns: ["uploaded_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "safe_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -733,7 +768,6 @@ export type Database = {
           is_active: boolean | null
           last_login_at: string | null
           organization_name: string | null
-          password_hash: string | null
           phone: string | null
           role: Database["public"]["Enums"]["user_role"]
           thai_id_number: string | null
@@ -748,7 +782,6 @@ export type Database = {
           is_active?: boolean | null
           last_login_at?: string | null
           organization_name?: string | null
-          password_hash?: string | null
           phone?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           thai_id_number?: string | null
@@ -763,7 +796,6 @@ export type Database = {
           is_active?: boolean | null
           last_login_at?: string | null
           organization_name?: string | null
-          password_hash?: string | null
           phone?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           thai_id_number?: string | null
@@ -856,6 +888,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "reviews_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "safe_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       system_config: {
@@ -891,11 +930,59 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "system_config_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "safe_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      safe_profiles: {
+        Row: {
+          address: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          has_identification: boolean | null
+          id: string | null
+          is_active: boolean | null
+          organization_name: string | null
+          phone: string | null
+          role: Database["public"]["Enums"]["user_role"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: never
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          has_identification?: never
+          id?: string | null
+          is_active?: boolean | null
+          organization_name?: string | null
+          phone?: never
+          role?: Database["public"]["Enums"]["user_role"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: never
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          has_identification?: never
+          id?: string | null
+          is_active?: boolean | null
+          organization_name?: string | null
+          phone?: never
+          role?: Database["public"]["Enums"]["user_role"] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       check_rate_limit: {
@@ -966,6 +1053,10 @@ export type Database = {
       }
       verify_certificate: {
         Args: { cert_number: string }
+        Returns: Json
+      }
+      verify_identity_access: {
+        Args: { target_user_id: string }
         Returns: Json
       }
     }
