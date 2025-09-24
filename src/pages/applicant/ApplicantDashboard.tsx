@@ -6,32 +6,33 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, FileText, CreditCard, Calendar, Download, LogOut, Clock, CheckCircle, AlertCircle, Users } from 'lucide-react';
+import { Plus, FileText, CreditCard, Calendar, Download, LogOut, Clock, CheckCircle, AlertCircle, Users, Brain, Award, BookOpen } from 'lucide-react';
 import { formatDate } from '@/utils/dateFormatter';
 import { Link, useNavigate } from 'react-router-dom';
+import { KnowledgeTestModule } from '@/components/modules/knowledge-test/KnowledgeTestModule';
+import { WorkflowStatusTracker } from '@/components/workflow/WorkflowStatusTracker';
+import { PaymentManager } from '@/components/payments/PaymentManager';
+import { NotificationCenter } from '@/components/notifications/NotificationCenter';
+import { useWorkflowStatus } from '@/hooks/useWorkflowStatus';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface ApplicationData {
   id: string;
   application_number: string;
   status: string;
+  workflow_status: string;
   created_at: string;
   farm_name?: string;
   applicant_name?: string;
 }
 
-interface PaymentData {
+interface TestResult {
   id: string;
-  milestone: number;
-  amount: number;
-  status: string;
-  created_at: string;
-}
-
-interface AssessmentData {
-  id: string;
-  type: string;
-  status: string;
-  scheduled_at?: string;
+  userId: string;
+  score: number;
+  totalQuestions: number;
+  percentage: number;
+  passed: boolean;
 }
 
 const ApplicantDashboard = () => {
@@ -39,48 +40,50 @@ const ApplicantDashboard = () => {
   const { t } = useTranslation('dashboard');
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const [applications, setApplications] = useState<ApplicationData[]>([]);
-  const [payments, setPayments] = useState<PaymentData[]>([]);
-  const [assessments, setAssessments] = useState<AssessmentData[]>([]);
+  const [knowledgeTestPassed, setKnowledgeTestPassed] = useState(false);
+  const [showKnowledgeTest, setShowKnowledgeTest] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [testResult, setTestResult] = useState<TestResult | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const { 
+    applications, 
+    userTasks, 
+    loading: workflowLoading, 
+    getWorkflowProgress, 
+    getNextAction 
+  } = useWorkflowStatus();
+
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    checkKnowledgeTestStatus();
+  }, [user]);
 
-  const fetchDashboardData = async () => {
+  const checkKnowledgeTestStatus = async () => {
+    if (!user?.id) return;
+    
     try {
-      // Fetch applications
-      const { data: appsData } = await supabase
-        .from('applications')
-        .select('id, application_number, status, created_at, farm_name, applicant_name')
-        .eq('applicant_id', user?.id)
-        .order('created_at', { ascending: false });
-
-      if (appsData) setApplications(appsData);
-
-      // Fetch payments
-      const { data: paymentsData } = await supabase
-        .from('payments')
-        .select('id, milestone, amount, status, created_at')
-        .in('application_id', appsData?.map(app => app.id) || [])
-        .order('created_at', { ascending: false });
-
-      if (paymentsData) setPayments(paymentsData);
-
-      // Fetch assessments
-      const { data: assessmentsData } = await supabase
-        .from('assessments')
-        .select('id, type, status, scheduled_at')
-        .in('application_id', appsData?.map(app => app.id) || [])
-        .order('scheduled_at', { ascending: false });
-
-      if (assessmentsData) setAssessments(assessmentsData);
+      // Check if user has passed knowledge test
+      // For demo, we'll check if user has any applications or use localStorage
+      const testStatus = localStorage.getItem(`knowledge_test_${user.id}`);
+      if (testStatus) {
+        const result = JSON.parse(testStatus);
+        setKnowledgeTestPassed(result.passed);
+        setTestResult(result);
+      }
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      console.error('Error checking test status:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleTestCompleted = (result: TestResult) => {
+    setTestResult(result);
+    setKnowledgeTestPassed(result.passed);
+    setShowKnowledgeTest(false);
+    
+    // Store result locally for demo
+    localStorage.setItem(`knowledge_test_${user?.id}`, JSON.stringify(result));
   };
 
   const handleSignOut = async () => {
@@ -90,79 +93,92 @@ const ApplicantDashboard = () => {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      'DRAFT': { label: t('status.DRAFT', { ns: 'application' }), class: 'status-draft' },
-      'SUBMITTED': { label: t('status.SUBMITTED', { ns: 'application' }), class: 'status-submitted' },
-      'UNDER_REVIEW': { label: t('status.UNDER_REVIEW', { ns: 'application' }), class: 'status-under-review' },
-      'RETURNED': { label: t('status.RETURNED', { ns: 'application' }), class: 'status-returned' },
-      'DOCS_APPROVED': { label: t('status.DOCS_APPROVED', { ns: 'application' }), class: 'status-docs-approved' },
-      'PAYMENT_PENDING': { label: t('status.PAYMENT_PENDING', { ns: 'application' }), class: 'status-payment-pending' },
-      'ONLINE_SCHEDULED': { label: t('status.ONLINE_SCHEDULED', { ns: 'application' }), class: 'status-online-scheduled' },
-      'ONSITE_SCHEDULED': { label: t('status.ONSITE_SCHEDULED', { ns: 'application' }), class: 'status-online-scheduled' },
-      'CERTIFIED': { label: t('status.CERTIFIED', { ns: 'application' }), class: 'status-certified' },
+      'DRAFT': { label: 'แบบร่าง', variant: 'secondary' as const, icon: FileText },
+      'SUBMITTED': { label: 'ส่งแล้ว', variant: 'default' as const, icon: CheckCircle },
+      'PAYMENT_PENDING_REVIEW': { label: 'รอชำระค่าตรวจเอกสาร', variant: 'destructive' as const, icon: CreditCard },
+      'UNDER_REVIEW': { label: 'กำลังตรวจสอบ', variant: 'default' as const, icon: Clock },
+      'PAYMENT_PENDING_ASSESSMENT': { label: 'รอชำระค่าประเมิน', variant: 'destructive' as const, icon: CreditCard },
+      'ONLINE_ASSESSMENT_SCHEDULED': { label: 'นัดประเมินออนไลน์', variant: 'default' as const, icon: Calendar },
+      'CERTIFIED': { label: 'ได้รับใบรับรอง', variant: 'default' as const, icon: Award },
     };
 
-    const config = statusConfig[status as keyof typeof statusConfig] || { label: status, class: 'status-draft' };
-    return <Badge className={`status-badge ${config.class}`}>{config.label}</Badge>;
-  };
-
-  const getProgressPercentage = (status: string) => {
-    const statusProgress = {
-      'DRAFT': 10,
-      'SUBMITTED': 20,
-      'UNDER_REVIEW': 30,
-      'RETURNED': 25,
-      'DOCS_APPROVED': 50,
-      'PAYMENT_PENDING': 60,
-      'ONLINE_SCHEDULED': 70,
-      'ONLINE_COMPLETED': 80,
-      'ONSITE_SCHEDULED': 85,
-      'ONSITE_COMPLETED': 90,
-      'CERTIFIED': 100,
+    const config = statusConfig[status as keyof typeof statusConfig] || { 
+      label: status, 
+      variant: 'secondary' as const, 
+      icon: AlertCircle 
     };
-    return statusProgress[status as keyof typeof statusProgress] || 0;
+    
+    const IconComponent = config.icon;
+    
+    return (
+      <Badge variant={config.variant} className="gap-1">
+        <IconComponent className="h-3 w-3" />
+        {config.label}
+      </Badge>
+    );
   };
 
   const stats = {
-    totalApplications: applications.length,
-    pendingApplications: applications.filter(app => !['CERTIFIED', 'REVOKED'].includes(app.status)).length,
-    approvedApplications: applications.filter(app => app.status === 'CERTIFIED').length,
-    completedPayments: payments.filter(payment => payment.status === 'COMPLETED').length,
+    totalApplications: applications?.length || 0,
+    pendingApplications: applications?.filter(app => !['CERTIFIED', 'REJECTED'].includes(app.workflow_status)).length || 0,
+    approvedApplications: applications?.filter(app => app.workflow_status === 'CERTIFIED').length || 0,
+    knowledgeTestScore: testResult?.percentage || 0,
   };
 
-  if (loading) {
+  if (loading || workflowLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">{t('messages.loading', { ns: 'common' })}</p>
+          <p className="text-muted-foreground">กำลังโหลดข้อมูล...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Enhanced Header with Apple styling */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="bg-card border-b border-border sticky top-0 z-50 backdrop-blur-sm bg-card/95">
         <div className="container mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-glow rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">G</span>
+              <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-lg">G</span>
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-gray-900">{t('header.title')}</h1>
-                <p className="text-sm text-gray-500">{t('header.welcome')}, {user?.profile?.full_name}</p>
+                <h1 className="text-xl font-semibold text-foreground">แพลตฟอร์ม GACP</h1>
+                <p className="text-sm text-muted-foreground">ยินดีต้อนรับ, {user?.profile?.full_name}</p>
               </div>
             </div>
+            
             <div className="flex items-center space-x-3">
-              <div className="hidden md:flex items-center space-x-2 text-sm text-gray-600">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowNotifications(true)}
+                className="relative"
+              >
+                <AlertCircle className="h-4 w-4 mr-2" />
+                การแจ้งเตือน
+                {userTasks?.unread_notifications > 0 && (
+                  <Badge 
+                    variant="destructive" 
+                    className="absolute -top-2 -right-2 h-5 w-5 text-xs p-0 flex items-center justify-center"
+                  >
+                    {userTasks.unread_notifications}
+                  </Badge>
+                )}
+              </Button>
+              
+              <div className="hidden md:flex items-center space-x-2 text-sm text-muted-foreground">
                 <Users className="h-4 w-4" />
-                <span>{t('roles.applicant', { ns: 'navigation' })}</span>
+                <span>ผู้สมัคร</span>
               </div>
-              <Button variant="outline" onClick={handleSignOut} className="flex items-center space-x-2">
-                <LogOut className="h-4 w-4" />
-                <span>{t('logout.button', { ns: 'auth' })}</span>
+              
+              <Button variant="outline" onClick={handleSignOut} size="sm">
+                <LogOut className="h-4 w-4 mr-2" />
+                ออกจากระบบ
               </Button>
             </div>
           </div>
@@ -171,59 +187,82 @@ const ApplicantDashboard = () => {
 
       {/* Main Content */}
       <main className="container mx-auto px-6 py-8">
+        {/* Knowledge Test Section */}
+        {!knowledgeTestPassed && (
+          <Card className="mb-8 border-warning bg-warning/5">
+            <CardHeader>
+              <div className="flex items-center space-x-3">
+                <Brain className="h-8 w-8 text-warning" />
+                <div>
+                  <CardTitle className="text-warning">จำเป็นต้องทำแบบทดสอบความรู้ก่อน</CardTitle>
+                  <CardDescription>
+                    คุณต้องผ่านแบบทดสอบความรู้ GACP ก่อนที่จะสามารถสมัครขอใบรับรองได้
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={() => setShowKnowledgeTest(true)} className="w-full">
+                <BookOpen className="h-4 w-4 mr-2" />
+                เริ่มทำแบบทดสอบความรู้
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="dashboard-widget">
+          <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">{t('stats.totalApplications')}</p>
-                  <p className="text-3xl font-bold text-gray-900">{stats.totalApplications}</p>
+                  <p className="text-sm font-medium text-muted-foreground">ใบสมัครทั้งหมด</p>
+                  <p className="text-3xl font-bold text-foreground">{stats.totalApplications}</p>
                 </div>
-                <div className="p-3 bg-blue-100 rounded-xl">
-                  <FileText className="h-6 w-6 text-blue-600" />
+                <div className="p-3 bg-primary/10 rounded-xl">
+                  <FileText className="h-6 w-6 text-primary" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="dashboard-widget">
+          <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">{t('stats.pendingApplications')}</p>
-                  <p className="text-3xl font-bold text-amber-600">{stats.pendingApplications}</p>
+                  <p className="text-sm font-medium text-muted-foreground">กำลังดำเนินการ</p>
+                  <p className="text-3xl font-bold text-orange-600">{stats.pendingApplications}</p>
                 </div>
-                <div className="p-3 bg-amber-100 rounded-xl">
-                  <Clock className="h-6 w-6 text-amber-600" />
+                <div className="p-3 bg-orange-100 rounded-xl">
+                  <Clock className="h-6 w-6 text-orange-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="dashboard-widget">
+          <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">{t('stats.approvedApplications')}</p>
+                  <p className="text-sm font-medium text-muted-foreground">ได้รับใบรับรอง</p>
                   <p className="text-3xl font-bold text-green-600">{stats.approvedApplications}</p>
                 </div>
                 <div className="p-3 bg-green-100 rounded-xl">
-                  <CheckCircle className="h-6 w-6 text-green-600" />
+                  <Award className="h-6 w-6 text-green-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="dashboard-widget">
+          <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">{t('stats.completedPayments')}</p>
-                  <p className="text-3xl font-bold text-purple-600">{stats.completedPayments}</p>
+                  <p className="text-sm font-medium text-muted-foreground">คะแนนทดสอบ</p>
+                  <p className="text-3xl font-bold text-blue-600">{stats.knowledgeTestScore}%</p>
                 </div>
-                <div className="p-3 bg-purple-100 rounded-xl">
-                  <CreditCard className="h-6 w-6 text-purple-600" />
+                <div className="p-3 bg-blue-100 rounded-xl">
+                  <Brain className="h-6 w-6 text-blue-600" />
                 </div>
               </div>
             </CardContent>
@@ -231,218 +270,211 @@ const ApplicantDashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {/* New Application Card */}
-          <Card className="card-apple hover:shadow-lg transition-all duration-300 group">
-            <CardHeader className="pb-4">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                  <Plus className="h-5 w-5 text-primary" />
+        {knowledgeTestPassed && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <Card className="hover:shadow-lg transition-all duration-300 group cursor-pointer">
+              <CardHeader className="pb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                    <Plus className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">สมัครใหม่</CardTitle>
+                    <CardDescription>สร้างใบสมัครขอใบรับรอง GACP</CardDescription>
+                  </div>
                 </div>
-                <div>
-                  <CardTitle className="text-lg">{t('quickActions.newApplication.title')}</CardTitle>
-                  <CardDescription>{t('quickActions.newApplication.description')}</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Link to="/applicant/application/new">
-                <Button className="w-full btn-primary">
-                  {t('quickActions.newApplication.button')}
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
+              </CardHeader>
+              <CardContent>
+                <Link to="/applicant/application/new">
+                  <Button className="w-full">
+                    เริ่มสมัคร
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
 
-          {/* Knowledge Test Card */}
-          <Card className="card-apple hover:shadow-lg transition-all duration-300 group">
-            <CardHeader className="pb-4">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors">
-                  <FileText className="h-5 w-5 text-indigo-600" />
+            <Card className="hover:shadow-lg transition-all duration-300 group cursor-pointer">
+              <CardHeader className="pb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors">
+                    <CreditCard className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">ชำระเงิน</CardTitle>
+                    <CardDescription>ชำระค่าธรรมเนียมการตรวจสอบ</CardDescription>
+                  </div>
                 </div>
-                <div>
-                  <CardTitle className="text-lg">{t('quickActions.knowledgeTest.title')}</CardTitle>
-                  <CardDescription>{t('quickActions.knowledgeTest.description')}</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full" disabled>
-                {t('quickActions.knowledgeTest.button')}
-              </Button>
-            </CardContent>
-          </Card>
+              </CardHeader>
+              <CardContent>
+                <Link to="/applicant/payments">
+                  <Button variant="outline" className="w-full">
+                    ดูรายการชำระเงิน
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
 
-          {/* Quick Payment */}
-          <Card className="card-apple hover:shadow-lg transition-all duration-300 group">
-            <CardHeader className="pb-4">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors">
-                  <CreditCard className="h-5 w-5 text-green-600" />
+            <Card className="hover:shadow-lg transition-all duration-300 group cursor-pointer">
+              <CardHeader className="pb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+                    <Calendar className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">การประเมิน</CardTitle>
+                    <CardDescription>ตารางการประเมินออนไลน์และในพื้นที่</CardDescription>
+                  </div>
                 </div>
-                <div>
-                  <CardTitle className="text-lg">{t('quickActions.payment.title')}</CardTitle>
-                  <CardDescription>{t('quickActions.payment.description')}</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full" disabled>
-                {t('quickActions.payment.button')}
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+              </CardHeader>
+              <CardContent>
+                <Link to="/applicant/schedule">
+                  <Button variant="outline" className="w-full">
+                    ดูตารางเวลา
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
-        {/* Applications List */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Applications */}
-          <Card className="card-elevated">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <FileText className="h-5 w-5" />
-                <span>{t('recentApplications.title')}</span>
-              </CardTitle>
-              <CardDescription>
-                {t('recentApplications.description')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {applications.length > 0 ? (
+        {/* Applications and Workflow */}
+        {knowledgeTestPassed && applications && applications.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Applications List */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <FileText className="h-5 w-5" />
+                  <span>ใบสมัครล่าสุด</span>
+                </CardTitle>
+                <CardDescription>
+                  ติดตามสถานะใบสมัครของคุณ
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
                 <div className="space-y-4">
                   {applications.slice(0, 3).map((app) => (
-                    <div key={app.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div key={app.id} className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+                      {/* Workflow Status Tracker for each application */}
+                      <div className="mb-4">
+                        <WorkflowStatusTracker 
+                          currentStatus={app.workflow_status}
+                          applicationData={app}
+                          userRole="applicant"
+                        />
+                      </div>
+                      
                       <div className="flex justify-between items-start mb-2">
                         <div>
-                          <p className="font-medium text-gray-900">{app.application_number}</p>
-                          <p className="text-sm text-gray-600">{app.farm_name || t('recentApplications.noFarmName')}</p>
+                          <p className="font-medium text-foreground">{app.application_number}</p>
+                          <p className="text-sm text-muted-foreground">{app.farm_name || 'ไม่ระบุชื่อฟาร์ม'}</p>
                         </div>
-                        {getStatusBadge(app.status)}
+                        {getStatusBadge(app.workflow_status)}
                       </div>
-                      <div className="mt-3">
-                        <div className="flex justify-between text-xs text-gray-500 mb-1">
-                          <span>{t('recentApplications.progress')}</span>
-                          <span>{getProgressPercentage(app.status)}%</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-primary rounded-full h-2 transition-all duration-300"
-                            style={{ width: `${getProgressPercentage(app.status)}%` }}
-                          ></div>
-                        </div>
-                      </div>
+                      
                       <div className="mt-3 flex justify-between items-center">
-                        <span className="text-xs text-gray-500">
-                          {t('time.createdAt', { ns: 'common' })} {formatDate(app.created_at, language)}
+                        <span className="text-xs text-muted-foreground">
+                          สร้างเมื่อ {formatDate(app.created_at, language)}
                         </span>
-                        <Button size="sm" variant="outline">
-                          {t('buttons.viewDetails', { ns: 'common' })}
-                        </Button>
+                        <div className="flex space-x-2">
+                          <Button size="sm" variant="outline" asChild>
+                            <Link to={`/applicant/application/${app.id}`}>
+                              ดูรายละเอียด
+                            </Link>
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ))}
-                  {applications.length > 3 && (
-                    <Button variant="outline" className="w-full">
-                      {t('buttons.viewAll', { ns: 'common' })} ({applications.length})
-                    </Button>
-                  )}
                 </div>
-              ) : (
-                <div className="text-center py-8">
-                  <div className="p-4 bg-gray-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                    <FileText className="h-8 w-8 text-gray-400" />
-                  </div>
-                  <p className="text-gray-600 mb-4">{t('recentApplications.noApplications')}</p>
-                  <Link to="/applicant/application/new">
-                    <Button>{t('recentApplications.createFirst')}</Button>
-                  </Link>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* Quick Links & Status */}
-          <Card className="card-elevated">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Calendar className="h-5 w-5" />
-                <span>{t('nextActions.title')}</span>
-              </CardTitle>
-              <CardDescription>
-                {t('nextActions.description')}
-              </CardDescription>
-            </CardHeader>
+            {/* Payments for each application */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <CreditCard className="h-5 w-5" />
+                  <span>การชำระเงิน</span>
+                </CardTitle>
+                <CardDescription>
+                  ค่าธรรมเนียมและสถานะการชำระเงิน
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {applications.map((app) => (
+                  <div key={app.id} className="mb-4">
+                    <PaymentManager applicationId={app.id} />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Empty State for Knowledge Test Not Passed */}
+        {!knowledgeTestPassed && (
+          <Card className="text-center py-12">
             <CardContent>
-              <div className="space-y-4">
-                {/* Next Actions based on application status */}
-                {applications.length === 0 ? (
-                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <div className="flex items-center space-x-3">
-                      <AlertCircle className="h-5 w-5 text-blue-600" />
-                      <div>
-                        <p className="font-medium text-blue-900">{t('nextActions.startApplication.title')}</p>
-                        <p className="text-sm text-blue-700">{t('nextActions.startApplication.description')}</p>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    {applications.some(app => app.status === 'DRAFT') && (
-                      <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
-                        <div className="flex items-center space-x-3">
-                          <Clock className="h-5 w-5 text-amber-600" />
-                          <div>
-                            <p className="font-medium text-amber-900">{t('nextActions.draftApplication.title')}</p>
-                            <p className="text-sm text-amber-700">{t('nextActions.draftApplication.description')}</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {applications.some(app => app.status === 'PAYMENT_PENDING') && (
-                      <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                        <div className="flex items-center space-x-3">
-                          <CreditCard className="h-5 w-5 text-purple-600" />
-                          <div>
-                            <p className="font-medium text-purple-900">{t('nextActions.paymentPending.title')}</p>
-                            <p className="text-sm text-purple-700">{t('nextActions.paymentPending.description')}</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {applications.some(app => ['ONLINE_SCHEDULED', 'ONSITE_SCHEDULED'].includes(app.status)) && (
-                      <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                        <div className="flex items-center space-x-3">
-                          <Calendar className="h-5 w-5 text-green-600" />
-                          <div>
-                            <p className="font-medium text-green-900">{t('nextActions.underReview.title')}</p>
-                            <p className="text-sm text-green-700">{t('nextActions.underReview.description')}</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-
-                {/* Contact Support */}
-                <div className="pt-4 border-t border-gray-200">
-                  <p className="text-sm text-gray-600 mb-3">ต้องการความช่วยเหลือ?</p>
-                  <div className="flex space-x-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      คู่มือการใช้งาน
-                    </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
-                      ติดต่อเจ้าหน้าที่
-                    </Button>
-                  </div>
-                </div>
-              </div>
+              <Brain className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-foreground mb-2">
+                เริ่มต้นการเรียนรู้ GACP
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                ทำแบบทดสอบความรู้เพื่อปลดล็อคการสมัครขอใบรับรอง
+              </p>
+              <Button onClick={() => setShowKnowledgeTest(true)} size="lg">
+                <BookOpen className="h-4 w-4 mr-2" />
+                เริ่มแบบทดสอบ
+              </Button>
             </CardContent>
           </Card>
-        </div>
+        )}
+
+        {/* Empty State for No Applications */}
+        {knowledgeTestPassed && (!applications || applications.length === 0) && (
+          <Card className="text-center py-12">
+            <CardContent>
+              <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-foreground mb-2">
+                ยังไม่มีใบสมัคร
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                เริ่มสมัครขอใบรับรอง GACP เพื่อรับการรับรองมาตรฐานการเกษตร
+              </p>
+              <Button asChild size="lg">
+                <Link to="/applicant/application/new">
+                  <Plus className="h-4 w-4 mr-2" />
+                  สร้างใบสมัครใหม่
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </main>
+
+      {/* Knowledge Test Dialog */}
+      <Dialog open={showKnowledgeTest} onOpenChange={setShowKnowledgeTest}>
+        <DialogContent className="max-w-4xl h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>แบบทดสอบความรู้ GACP</DialogTitle>
+          </DialogHeader>
+          <KnowledgeTestModule
+            userId={user?.id || ''}
+            onTestCompleted={handleTestCompleted}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Notifications Dialog */}
+      <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>การแจ้งเตือน</DialogTitle>
+          </DialogHeader>
+          <NotificationCenter />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
