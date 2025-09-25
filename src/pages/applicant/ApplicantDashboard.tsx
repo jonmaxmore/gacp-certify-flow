@@ -15,6 +15,7 @@ import { PaymentManager } from '@/components/payments/PaymentManager';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import { useWorkflowStatus } from '@/hooks/useWorkflowStatus';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AppleStyleDashboard } from '@/components/dashboard/AppleStyleDashboard';
 
 interface ApplicationData {
   id: string;
@@ -125,6 +126,47 @@ const ApplicantDashboard = () => {
     knowledgeTestScore: testResult?.percentage || 0,
   };
 
+  const quickActions = [
+    {
+      title: 'สมัครใหม่',
+      description: 'สร้างใบสมัครขอใบรับรอง GACP',
+      icon: Plus,
+      action: () => navigate('/applicant/application/new'),
+      variant: 'primary' as const,
+      disabled: !knowledgeTestPassed
+    },
+    {
+      title: 'ชำระเงิน', 
+      description: 'ชำระค่าธรรมเนียมการตรวจสอบ',
+      icon: CreditCard,
+      action: () => navigate('/applicant/payments'),
+      variant: 'success' as const
+    },
+    {
+      title: 'การประเมิน',
+      description: 'ตารางการประเมินออนไลน์และในพื้นที่', 
+      icon: Calendar,
+      action: () => navigate('/applicant/schedule'),
+      variant: 'default' as const
+    }
+  ];
+
+  const nextSteps = [
+    {
+      title: 'เริ่มสมัคร',
+      description: 'สร้างใบสมัครขอใบรับรอง GACP ครั้งแรก',
+      action: 'สร้างใบสมัคร',
+      priority: 'high' as const,
+      dueDate: 'ภายใน 7 วัน'
+    },
+    {
+      title: 'ทำแบบทดสอบ',
+      description: 'ทำแบบทดสอบความรู้ GACP เพื่อปลดล็อคการสมัคร',
+      action: 'เริ่มทดสอบ',
+      priority: 'urgent' as const
+    }
+  ];
+
   if (loading || workflowLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -143,8 +185,8 @@ const ApplicantDashboard = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">G</span>
+              <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-soft">
+                <span className="text-white font-bold text-lg">G</span>
               </div>
               <div>
                 <h1 className="text-xl font-semibold text-foreground">แพลตฟอร์ม GACP</h1>
@@ -185,163 +227,22 @@ const ApplicantDashboard = () => {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-6 py-8">
-        {/* Knowledge Test Section */}
-        {!knowledgeTestPassed && (
-          <Card className="mb-8 border-warning bg-warning/5">
-            <CardHeader>
-              <div className="flex items-center space-x-3">
-                <Brain className="h-8 w-8 text-warning" />
-                <div>
-                  <CardTitle className="text-warning">จำเป็นต้องทำแบบทดสอบความรู้ก่อน</CardTitle>
-                  <CardDescription>
-                    คุณต้องผ่านแบบทดสอบความรู้ GACP ก่อนที่จะสามารถสมัครขอใบรับรองได้
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Button onClick={() => setShowKnowledgeTest(true)} className="w-full">
-                <BookOpen className="h-4 w-4 mr-2" />
-                เริ่มทำแบบทดสอบความรู้
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+      {/* Apple Style Dashboard */}
+      <AppleStyleDashboard
+        userName={user?.profile?.full_name || 'ผู้ใช้'}
+        stats={stats}
+        quickActions={quickActions}
+        nextSteps={nextSteps}
+        knowledgeTestPassed={knowledgeTestPassed}
+        onKnowledgeTestClick={() => setShowKnowledgeTest(true)}
+      />
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">ใบสมัครทั้งหมด</p>
-                  <p className="text-3xl font-bold text-foreground">{stats.totalApplications}</p>
-                </div>
-                <div className="p-3 bg-primary/10 rounded-xl">
-                  <FileText className="h-6 w-6 text-primary" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">กำลังดำเนินการ</p>
-                  <p className="text-3xl font-bold text-orange-600">{stats.pendingApplications}</p>
-                </div>
-                <div className="p-3 bg-orange-100 rounded-xl">
-                  <Clock className="h-6 w-6 text-orange-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">ได้รับใบรับรอง</p>
-                  <p className="text-3xl font-bold text-green-600">{stats.approvedApplications}</p>
-                </div>
-                <div className="p-3 bg-green-100 rounded-xl">
-                  <Award className="h-6 w-6 text-green-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">คะแนนทดสอบ</p>
-                  <p className="text-3xl font-bold text-blue-600">{stats.knowledgeTestScore}%</p>
-                </div>
-                <div className="p-3 bg-blue-100 rounded-xl">
-                  <Brain className="h-6 w-6 text-blue-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Quick Actions */}
-        {knowledgeTestPassed && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <Card className="hover:shadow-lg transition-all duration-300 group cursor-pointer">
-              <CardHeader className="pb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                    <Plus className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">สมัครใหม่</CardTitle>
-                    <CardDescription>สร้างใบสมัครขอใบรับรอง GACP</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Link to="/applicant/application/new">
-                  <Button className="w-full">
-                    เริ่มสมัคร
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-all duration-300 group cursor-pointer">
-              <CardHeader className="pb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors">
-                    <CreditCard className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">ชำระเงิน</CardTitle>
-                    <CardDescription>ชำระค่าธรรมเนียมการตรวจสอบ</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Link to="/applicant/payments">
-                  <Button variant="outline" className="w-full">
-                    ดูรายการชำระเงิน
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-all duration-300 group cursor-pointer">
-              <CardHeader className="pb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
-                    <Calendar className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">การประเมิน</CardTitle>
-                    <CardDescription>ตารางการประเมินออนไลน์และในพื้นที่</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Link to="/applicant/schedule">
-                  <Button variant="outline" className="w-full">
-                    ดูตารางเวลา
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Applications and Workflow */}
-        {knowledgeTestPassed && applications && applications.length > 0 && (
+      {/* Applications and Workflow - Additional Section */}
+      {knowledgeTestPassed && applications && applications.length > 0 && (
+        <div className="container mx-auto px-6 pb-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Applications List */}
-            <Card>
+            <Card className="shadow-soft">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <FileText className="h-5 w-5" />
@@ -354,7 +255,7 @@ const ApplicantDashboard = () => {
               <CardContent>
                 <div className="space-y-4">
                   {applications.slice(0, 3).map((app) => (
-                    <div key={app.id} className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+                    <div key={app.id} className="p-4 border border-border rounded-xl hover:bg-muted/50 transition-all duration-300 hover:shadow-soft">
                       {/* Workflow Status Tracker for each application */}
                       <div className="mb-4">
                         <WorkflowStatusTracker 
@@ -391,7 +292,7 @@ const ApplicantDashboard = () => {
             </Card>
 
             {/* Payments for each application */}
-            <Card>
+            <Card className="shadow-soft">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <CreditCard className="h-5 w-5" />
@@ -410,48 +311,8 @@ const ApplicantDashboard = () => {
               </CardContent>
             </Card>
           </div>
-        )}
-
-        {/* Empty State for Knowledge Test Not Passed */}
-        {!knowledgeTestPassed && (
-          <Card className="text-center py-12">
-            <CardContent>
-              <Brain className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-foreground mb-2">
-                เริ่มต้นการเรียนรู้ GACP
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                ทำแบบทดสอบความรู้เพื่อปลดล็อคการสมัครขอใบรับรอง
-              </p>
-              <Button onClick={() => setShowKnowledgeTest(true)} size="lg">
-                <BookOpen className="h-4 w-4 mr-2" />
-                เริ่มแบบทดสอบ
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Empty State for No Applications */}
-        {knowledgeTestPassed && (!applications || applications.length === 0) && (
-          <Card className="text-center py-12">
-            <CardContent>
-              <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-foreground mb-2">
-                ยังไม่มีใบสมัคร
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                เริ่มสมัครขอใบรับรอง GACP เพื่อรับการรับรองมาตรฐานการเกษตร
-              </p>
-              <Button asChild size="lg">
-                <Link to="/applicant/application/new">
-                  <Plus className="h-4 w-4 mr-2" />
-                  สร้างใบสมัครใหม่
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-      </main>
+        </div>
+      )}
 
       {/* Knowledge Test Dialog */}
       <Dialog open={showKnowledgeTest} onOpenChange={setShowKnowledgeTest}>

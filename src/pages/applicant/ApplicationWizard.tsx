@@ -10,6 +10,9 @@ import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, ArrowRight, Save, Upload, CheckCircle, FileText, MapPin, Users, Award } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { SkuInput } from '@/components/ui/sku-input';
+import { FileUpload } from '@/components/ui/file-upload';
+import { AppleCard } from '@/components/ui/apple-card';
 
 interface ApplicationFormData {
   // Applicant Information
@@ -505,25 +508,33 @@ const ApplicationWizard = () => {
               <CardContent className="space-y-6">
                 <div>
                   <Label className="text-base font-medium">ชนิดพืชที่เพาะปลูก *</Label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
-                    {cropOptions.map((crop) => (
-                      <label key={crop} className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          checked={formData.crop_types.includes(crop)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              updateFormData('crop_types', [...formData.crop_types, crop]);
-                            } else {
-                              updateFormData('crop_types', formData.crop_types.filter(c => c !== crop));
-                            }
-                          }}
-                          className="rounded border-gray-300"
-                        />
-                        <span className="text-sm">{crop}</span>
-                      </label>
-                    ))}
+                  <div className="mt-2">
+                    <AppleCard variant="default" size="sm" className="bg-primary/5 border-primary/20">
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-primary/20 rounded-lg">
+                          <span className="text-sm font-medium text-primary">🌿</span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-primary">กัญชา</p>
+                          <p className="text-xs text-muted-foreground">พืชเดียวที่อนุญาตให้เพาะปลูกในระบบ GACP</p>
+                        </div>
+                      </div>
+                    </AppleCard>
                   </div>
+                </div>
+
+                {/* SKU Input Section */}
+                <div>
+                  <Label className="text-base font-medium">รายการผลิตภัณฑ์ (SKU)</Label>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    เพิ่มรายการผลิตภัณฑ์ที่คุณต้องการผลิต (ไม่จำเป็นต้องกรอกตอนนี้)
+                  </p>
+                  <SkuInput
+                    value={[]}
+                    onChange={() => {}}
+                    placeholder="เช่น กัญชาแห้ง, น้ำมันกัญชา"
+                    maxItems={20}
+                  />
                 </div>
 
                 <div>
@@ -699,39 +710,47 @@ const ApplicationWizard = () => {
                     { name: 'รูปภาพฟาร์ม', type: 'PHOTOS', desc: 'รูปภาพพื้นที่เพาะปลูก' },
                     { name: 'SOP ของฟาร์ม', type: 'SOP_DOCUMENTS', desc: 'ขั้นตอนการทำงานมาตรฐาน' },
                   ].map((doc) => (
-                    <div key={doc.type} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex justify-between items-start mb-2">
+                    <AppleCard key={doc.type} variant="default" size="sm" className="hover:shadow-medium transition-all duration-300">
+                      <div className="space-y-3">
                         <div>
-                          <h4 className="font-medium text-gray-900">{doc.name}</h4>
-                          <p className="text-sm text-gray-600">{doc.desc}</p>
+                          <h4 className="font-medium text-foreground">{doc.name}</h4>
+                          <p className="text-sm text-muted-foreground">{doc.desc}</p>
                         </div>
-                        <Button size="sm" variant="outline">
-                          <Upload className="h-4 w-4 mr-2" />
-                          เลือกไฟล์
-                        </Button>
+                        <FileUpload
+                          onFileSelect={(files) => {
+                            console.log(`Selected optional files for ${doc.type}:`, files);
+                            // Handle optional file upload logic here
+                          }}
+                          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                          maxSize={10}
+                        />
                       </div>
-                    </div>
+                    </AppleCard>
                   ))}
                 </CardContent>
               </Card>
             </div>
 
-            {/* Upload Area */}
-            <Card className="form-section">
-              <CardContent className="p-8">
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary transition-colors">
-                  <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-lg font-medium text-gray-700 mb-2">ลากและวางไฟล์ที่นี่</p>
-                  <p className="text-gray-500 mb-4">หรือคลิกเพื่อเลือกไฟล์</p>
-                  <Button variant="outline">
-                    เลือกไฟล์จากคอมพิวเตอร์
-                  </Button>
-                  <div className="mt-4 text-xs text-gray-500">
-                    รองรับไฟล์: PDF, DOC, DOCX, JPG, PNG, GIF | ขนาดสูงสุด: 10MB ต่อไฟล์
-                  </div>
+            {/* Additional Upload Area */}
+            <AppleCard variant="default" size="lg">
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-medium text-foreground">อัพโหลดเอกสารเพิ่มเติม</h3>
+                  <p className="text-sm text-muted-foreground">
+                    หากมีเอกสารอื่นๆ ที่ต้องการแนบเพิ่มเติม
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
+                <FileUpload
+                  onFileSelect={(files) => {
+                    console.log('Additional files selected:', files);
+                    // Handle additional file upload logic here
+                  }}
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
+                  maxSize={10}
+                  multiple={true}
+                />
+              </div>
+            </AppleCard>
           </div>
         );
 
