@@ -155,7 +155,7 @@ export const useWorkflowStatus = () => {
           p_application_id: applicationId,
           p_milestone: milestone,
           p_amount: amount,
-          p_due_date: dueDate?.toISOString()
+          p_due_date: dueDate?.toISOString() || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
         });
 
       if (error) throw error;

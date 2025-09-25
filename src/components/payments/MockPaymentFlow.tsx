@@ -119,9 +119,13 @@ export const MockPaymentFlow = ({
       if (step.progress === 100) {
         // Create mock payment record
         try {
+          const milestoneEnum = milestone === 1 ? 'DOCUMENT_REVIEW' : 
+                               milestone === 2 ? 'ASSESSMENT' :
+                               milestone === 3 ? 'CERTIFICATION' : 'DOCUMENT_REVIEW';
+          
           const { error } = await supabase.rpc('create_payment_record', {
             p_application_id: applicationId,
-            p_milestone: milestone,
+            p_milestone: milestoneEnum,
             p_amount: amount,
             p_due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
           });

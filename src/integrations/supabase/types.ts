@@ -1516,19 +1516,12 @@ export type Database = {
         Returns: string
       }
       create_payment_record: {
-        Args:
-          | {
-              p_amount: number
-              p_application_id: string
-              p_due_date?: string
-              p_milestone: Database["public"]["Enums"]["payment_milestone"]
-            }
-          | {
-              p_amount: number
-              p_application_id: string
-              p_due_date?: string
-              p_milestone: number
-            }
+        Args: {
+          p_amount: number
+          p_application_id: string
+          p_due_date?: string
+          p_milestone: Database["public"]["Enums"]["payment_milestone"]
+        }
         Returns: string
       }
       encrypt_sensitive_data: {
