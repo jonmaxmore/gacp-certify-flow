@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/providers/AuthProvider';
 import { LanguageProvider } from '@/providers/LanguageProvider';
+import { SecurityMonitor } from '@/components/security/SecurityMonitor';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import LoginPage from '@/pages/auth/LoginPage';
@@ -122,6 +123,7 @@ function App() {
           </Routes>
           
           <Toaster />
+          <SecurityMonitor />
         </div>
       </Router>
       </LanguageProvider>
