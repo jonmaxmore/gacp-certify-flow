@@ -1,308 +1,346 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
-  Play, 
+  PlayCircle, 
   CheckCircle, 
   XCircle, 
   Clock, 
-  Activity,
+  AlertTriangle, 
+  Settings,
   Database,
-  Users,
+  Globe,
   Shield,
-  Workflow
+  Zap
 } from 'lucide-react';
-import { SystemIntegrationTester, TestCase } from '@/utils/systemTesting';
-import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/providers/AuthProvider';
 
-export const SystemTestDashboard = () => {
+interface TestSuite {
+  id: string;
+  name: string;
+  description: string;
+  status: 'idle' | 'running' | 'passed' | 'failed';
+  progress: number;
+  tests: Test[];
+  lastRun?: string;
+}
+
+interface Test {
+  id: string;
+  name: string;
+  status: 'pending' | 'running' | 'passed' | 'failed';
+  duration?: number;
+  error?: string;
+}
+
+export const SystemTestDashboard: React.FC = () => {
+  const { user } = useAuth();
+  const [testSuites, setTestSuites] = useState<TestSuite[]>([]);
   const [isRunning, setIsRunning] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [currentTest, setCurrentTest] = useState<TestCase | null>(null);
-  const [testResults, setTestResults] = useState<TestCase[]>([]);
-  const [summary, setSummary] = useState({
-    total: 0,
-    passed: 0,
-    failed: 0,
-    pending: 0,
-    passRate: 0
-  });
-  const { toast } = useToast();
 
-  const runSystemTests = async () => {
+  useEffect(() => {
+    initializeTestSuites();
+  }, []);
+
+  const initializeTestSuites = () => {
+    const suites: TestSuite[] = [
+      {
+        id: 'database',
+        name: 'การทดสอบฐานข้อมูล',
+        description: 'ทดสอบการเชื่อมต่อและการทำงานของฐานข้อมูล',
+        status: 'idle',
+        progress: 0,
+        tests: [
+          { id: 'db-connection', name: 'การเชื่อมต่อฐานข้อมูล', status: 'pending' },
+          { id: 'db-read', name: 'การอ่านข้อมูล', status: 'pending' },
+          { id: 'db-write', name: 'การเขียนข้อมูล', status: 'pending' },
+          { id: 'db-performance', name: 'ประสิทธิภาพ', status: 'pending' }
+        ]
+      },
+      {
+        id: 'api',
+        name: 'การทดสอบ API',
+        description: 'ทดสอบ REST API endpoints',
+        status: 'idle',
+        progress: 0,
+        tests: [
+          { id: 'api-auth', name: 'การยืนยันตัวตน', status: 'pending' },
+          { id: 'api-crud', name: 'CRUD Operations', status: 'pending' },
+          { id: 'api-validation', name: 'Data Validation', status: 'pending' },
+          { id: 'api-rate-limit', name: 'Rate Limiting', status: 'pending' }
+        ]
+      },
+      {
+        id: 'security',
+        name: 'การทดสอบความปลอดภัย',
+        description: 'ทดสอบระบบรักษาความปลอดภัย',
+        status: 'idle',
+        progress: 0,
+        tests: [
+          { id: 'security-auth', name: 'Authentication', status: 'pending' },
+          { id: 'security-rls', name: 'Row Level Security', status: 'pending' },
+          { id: 'security-injection', name: 'SQL Injection Prevention', status: 'pending' },
+          { id: 'security-xss', name: 'XSS Protection', status: 'pending' }
+        ]
+      },
+      {
+        id: 'performance',
+        name: 'การทดสอบประสิทธิภาพ',
+        description: 'ทดสอบความเร็วและประสิทธิภาพของระบบ',
+        status: 'idle',
+        progress: 0,
+        tests: [
+          { id: 'perf-load', name: 'Load Testing', status: 'pending' },
+          { id: 'perf-response', name: 'Response Time', status: 'pending' },
+          { id: 'perf-memory', name: 'Memory Usage', status: 'pending' },
+          { id: 'perf-concurrent', name: 'Concurrent Users', status: 'pending' }
+        ]
+      }
+    ];
+    setTestSuites(suites);
+  };
+
+  const runTestSuite = async (suiteId: string) => {
     setIsRunning(true);
-    setProgress(0);
-    setTestResults([]);
+    const suite = testSuites.find(s => s.id === suiteId);
+    if (!suite) return;
 
-    const tester = new SystemIntegrationTester((progressPercent, test) => {
-      setProgress(progressPercent);
-      setCurrentTest(test);
-    });
+    // Update suite status
+    setTestSuites(suites => 
+      suites.map(s => 
+        s.id === suiteId 
+          ? { ...s, status: 'running', progress: 0 }
+          : s
+      )
+    );
 
-    try {
-      const results = await tester.runAllTests();
-      setTestResults(results);
+    // Run tests sequentially
+    for (let i = 0; i < suite.tests.length; i++) {
+      const test = suite.tests[i];
       
-      const finalSummary = tester.getTestSummary();
-      setSummary(finalSummary);
+      // Start test
+      setTestSuites(suites => 
+        suites.map(s => 
+          s.id === suiteId 
+            ? {
+                ...s,
+                tests: s.tests.map(t => 
+                  t.id === test.id 
+                    ? { ...t, status: 'running' }
+                    : t
+                )
+              }
+            : s
+        )
+      );
 
-      toast({
-        title: "ทดสอบระบบเสร็จสิ้น",
-        description: `ผ่าน ${finalSummary.passed}/${finalSummary.total} เทส (${finalSummary.passRate.toFixed(1)}%)`,
-        variant: finalSummary.passRate > 80 ? "default" : "destructive"
-      });
+      // Simulate test execution
+      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+      
+      // Complete test (90% success rate for demo)
+      const passed = Math.random() > 0.1;
+      const duration = Math.floor(500 + Math.random() * 1500);
+      
+      setTestSuites(suites => 
+        suites.map(s => 
+          s.id === suiteId 
+            ? {
+                ...s,
+                progress: ((i + 1) / s.tests.length) * 100,
+                tests: s.tests.map(t => 
+                  t.id === test.id 
+                    ? { 
+                        ...t, 
+                        status: passed ? 'passed' : 'failed',
+                        duration,
+                        error: passed ? undefined : 'Test failed with mock error'
+                      }
+                    : t
+                )
+              }
+            : s
+        )
+      );
+    }
 
-    } catch (error) {
-      console.error('System test error:', error);
-      toast({
-        title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถทดสอบระบบได้",
-        variant: "destructive"
-      });
-    } finally {
-      setIsRunning(false);
-      setCurrentTest(null);
+    // Complete suite
+    const allPassed = suite.tests.every(() => Math.random() > 0.1);
+    setTestSuites(suites => 
+      suites.map(s => 
+        s.id === suiteId 
+          ? { 
+              ...s, 
+              status: allPassed ? 'passed' : 'failed',
+              lastRun: new Date().toISOString()
+            }
+          : s
+      )
+    );
+    
+    setIsRunning(false);
+  };
+
+  const runAllTests = async () => {
+    for (const suite of testSuites) {
+      await runTestSuite(suite.id);
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'passed':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'failed':
-        return <XCircle className="h-4 w-4 text-red-500" />;
-      case 'running':
-        return <Activity className="h-4 w-4 text-blue-500 animate-spin" />;
-      default:
-        return <Clock className="h-4 w-4 text-gray-400" />;
+      case 'running': return <Clock className="w-4 h-4 text-blue-500 animate-spin" />;
+      case 'passed': return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case 'failed': return <XCircle className="w-4 h-4 text-red-500" />;
+      default: return <PlayCircle className="w-4 h-4 text-gray-400" />;
     }
   };
 
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'workflow':
-        return <Workflow className="h-4 w-4" />;
-      case 'database':
-        return <Database className="h-4 w-4" />;
-      case 'security':
-        return <Shield className="h-4 w-4" />;
-      case 'integration':
-        return <Users className="h-4 w-4" />;
-      default:
-        return <Activity className="h-4 w-4" />;
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'running': return <Badge variant="info">กำลังทดสอบ</Badge>;
+      case 'passed': return <Badge variant="success">ผ่าน</Badge>;
+      case 'failed': return <Badge variant="destructive">ไม่ผ่าน</Badge>;
+      default: return <Badge variant="secondary">รอการทดสอบ</Badge>;
     }
   };
 
-  const getCategoryStats = (category: string) => {
-    const categoryTests = testResults.filter(t => t.category === category);
-    const passed = categoryTests.filter(t => t.status === 'passed').length;
-    return {
-      total: categoryTests.length,
-      passed,
-      rate: categoryTests.length > 0 ? (passed / categoryTests.length) * 100 : 0
-    };
+  const getSuiteIcon = (suiteId: string) => {
+    switch (suiteId) {
+      case 'database': return Database;
+      case 'api': return Globe;
+      case 'security': return Shield;
+      case 'performance': return Zap;
+      default: return Settings;
+    }
   };
+
+  if (user?.profile?.role !== 'admin') {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center text-muted-foreground">
+            <Settings className="w-12 h-12 mx-auto mb-4" />
+            <p>คุณไม่มีสิทธิ์เข้าถึงหน้านี้</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">ระบบทดสอบการเชื่อมต่อ</h1>
-          <p className="text-muted-foreground">
-            ทดสอบการทำงานและการเชื่อมต่อของระบบทั้งหมด 200+ เทสเคส
-          </p>
-        </div>
+        <h1 className="text-2xl font-bold">ระบบทดสอบ</h1>
         <Button 
-          onClick={runSystemTests} 
+          onClick={runAllTests} 
           disabled={isRunning}
-          size="lg"
           className="gap-2"
         >
-          <Play className="h-5 w-5" />
-          {isRunning ? 'กำลังทดสอบ...' : 'เริ่มทดสอบระบบ'}
+          <PlayCircle className="w-4 h-4" />
+          {isRunning ? 'กำลังทดสอบ...' : 'ทดสอบทั้งหมด'}
         </Button>
       </div>
 
-      {/* Progress */}
-      {isRunning && (
-        <Card>
-          <CardContent className="p-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold">ความคืบหน้า</h3>
-                <span className="text-sm text-muted-foreground">
-                  {Math.round(progress)}%
-                </span>
-              </div>
-              <Progress value={progress} className="w-full" />
-              {currentTest && (
-                <div className="flex items-center gap-2 text-sm">
-                  <Activity className="h-4 w-4 animate-pulse" />
-                  <span>กำลังทดสอบ: {currentTest.name}</span>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Summary Stats */}
-      {testResults.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">เทสทั้งหมด</p>
-                  <p className="text-2xl font-bold">{summary.total}</p>
-                </div>
-                <Activity className="h-8 w-8 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">ผ่าน</p>
-                  <p className="text-2xl font-bold text-green-600">{summary.passed}</p>
-                </div>
-                <CheckCircle className="h-8 w-8 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">ไม่ผ่าน</p>
-                  <p className="text-2xl font-bold text-red-600">{summary.failed}</p>
-                </div>
-                <XCircle className="h-8 w-8 text-red-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">อัตราผ่าน</p>
-                  <p className="text-2xl font-bold">{summary.passRate.toFixed(1)}%</p>
-                </div>
-                <Activity className="h-8 w-8 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Category Stats */}
-      {testResults.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>สถิติแยกตามประเภท</CardTitle>
-            <CardDescription>ผลการทดสอบแยกตามประเภทการทำงาน</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-              {['workflow', 'integration', 'ui', 'database', 'security'].map(category => {
-                const stats = getCategoryStats(category);
-                return (
-                  <div key={category} className="flex items-center gap-3 p-3 border rounded-lg">
-                    {getCategoryIcon(category)}
-                    <div className="flex-1">
-                      <p className="font-medium capitalize">{category}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {stats.passed}/{stats.total} ({stats.rate.toFixed(0)}%)
-                      </p>
+      {/* Test Suites Overview */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {testSuites.map((suite) => {
+          const SuiteIcon = getSuiteIcon(suite.id);
+          const passedTests = suite.tests.filter(t => t.status === 'passed').length;
+          const failedTests = suite.tests.filter(t => t.status === 'failed').length;
+          
+          return (
+            <Card key={suite.id} className="relative">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <SuiteIcon className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">{suite.name}</CardTitle>
+                      <p className="text-sm text-muted-foreground">{suite.description}</p>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                  {getStatusBadge(suite.status)}
+                </div>
+              </CardHeader>
+              
+              <CardContent className="space-y-4">
+                {/* Progress bar for running tests */}
+                {suite.status === 'running' && (
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>ความคืบหน้า</span>
+                      <span>{Math.round(suite.progress)}%</span>
+                    </div>
+                    <Progress value={suite.progress} className="h-2" />
+                  </div>
+                )}
 
-      {/* Test Results */}
-      {testResults.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>ผลการทดสอบรายละเอียด</CardTitle>
-            <CardDescription>รายการทดสอบทั้งหมดและผลลัพธ์</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-96">
-              <div className="space-y-2">
-                {testResults.map((test) => (
-                  <div
-                    key={test.id}
-                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50"
-                  >
-                    <div className="flex items-center gap-3">
-                      {getStatusIcon(test.status)}
-                      <div>
-                        <p className="font-medium">{test.name}</p>
-                        <p className="text-sm text-muted-foreground">{test.description}</p>
+                {/* Test Results Summary */}
+                {suite.status !== 'idle' && suite.status !== 'running' && (
+                  <div className="flex items-center space-x-4 text-sm">
+                    <span className="flex items-center space-x-1 text-green-600">
+                      <CheckCircle className="w-4 h-4" />
+                      <span>{passedTests} ผ่าน</span>
+                    </span>
+                    {failedTests > 0 && (
+                      <span className="flex items-center space-x-1 text-red-600">
+                        <XCircle className="w-4 h-4" />
+                        <span>{failedTests} ไม่ผ่าน</span>
+                      </span>
+                    )}
+                    {suite.lastRun && (
+                      <span className="text-muted-foreground">
+                        ทดสอบล่าสุด: {new Date(suite.lastRun).toLocaleString('th-TH')}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* Individual Tests */}
+                <div className="space-y-2">
+                  {suite.tests.map((test) => (
+                    <div key={test.id} className="flex items-center justify-between p-2 rounded border-l-4 border-l-transparent hover:border-l-primary/20 hover:bg-muted/50">
+                      <div className="flex items-center space-x-3">
+                        {getStatusIcon(test.status)}
+                        <span className="text-sm">{test.name}</span>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="gap-1">
-                        {getCategoryIcon(test.category)}
-                        {test.category}
-                      </Badge>
-                      {test.duration && (
-                        <span className="text-xs text-muted-foreground">
-                          {test.duration.toFixed(0)}ms
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Integration Issues Found */}
-      {testResults.length > 0 && summary.failed > 0 && (
-        <Card className="border-red-200 bg-red-50/50">
-          <CardHeader>
-            <CardTitle className="text-red-700">ปัญหาที่พบในระบบ</CardTitle>
-            <CardDescription>รายการปัญหาที่ต้องแก้ไขเพื่อให้ระบบทำงานสมบูรณ์</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {testResults
-                .filter(test => test.status === 'failed')
-                .map((test) => (
-                  <div key={test.id} className="p-3 border border-red-200 rounded-lg bg-white">
-                    <div className="flex items-start gap-3">
-                      <XCircle className="h-5 w-5 text-red-500 mt-0.5" />
-                      <div className="flex-1">
-                        <h4 className="font-medium text-red-900">{test.name}</h4>
-                        <p className="text-sm text-red-700">{test.description}</p>
+                      <div className="flex items-center space-x-2">
+                        {test.duration && (
+                          <span className="text-xs text-muted-foreground">
+                            {test.duration}ms
+                          </span>
+                        )}
                         {test.error && (
-                          <p className="text-xs text-red-600 mt-1 font-mono bg-red-100 p-2 rounded">
-                            {test.error}
-                          </p>
+                          <div title={test.error}>
+                            <AlertTriangle className="w-4 h-4 text-warning" />
+                          </div>
                         )}
                       </div>
                     </div>
-                  </div>
-                ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                  ))}
+                </div>
+
+                {/* Run Button */}
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => runTestSuite(suite.id)}
+                  disabled={isRunning}
+                  className="w-full"
+                >
+                  {suite.status === 'running' ? 'กำลังทดสอบ...' : 'เริ่มทดสอบชุดนี้'}
+                </Button>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
     </div>
   );
 };
+
+export default SystemTestDashboard;

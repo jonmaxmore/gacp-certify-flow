@@ -120,6 +120,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
             );
           })}
         </ul>
+        
+        {/* Module Access */}
+        <div className="mt-6 pt-4 border-t">
+          <NavLink
+            to={`/${userRole}/modules`}
+            onClick={onClose}
+            className={cn(
+              'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors mb-2',
+              location.pathname.includes('/modules')
+                ? 'bg-secondary text-secondary-foreground'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+            )}
+          >
+            <Settings className="w-4 h-4" />
+            โมดูลทั้งหมด
+          </NavLink>
+        </div>
       </nav>
 
       {/* Footer */}

@@ -87,12 +87,35 @@
     --shadow-soft: 0 1px 3px hsl(var(--primary) / 0.1);
     --shadow-medium: 0 4px 12px hsl(var(--primary) / 0.15);
     
+    /* Industrial Design Tokens */
+    --steel-gray: 220 13% 91%;
+    --steel-gray-light: 220 13% 95%;
+    --steel-gray-dark: 220 13% 85%;
+    --precision-blue: 210 100% 56%;
+    --precision-blue-light: 210 100% 85%;
+    --safety-orange: 25 95% 53%;
+    --safety-orange-light: 25 95% 85%;
+    --machine-yellow: 45 93% 47%;
+    --machine-yellow-light: 45 93% 85%;
+    --industrial-red: 0 84% 60%;
+    --industrial-red-light: 0 84% 85%;
+    
+    /* Status Colors */
+    --pending: 45 93% 47%;
+    --approved: 142 71% 45%;
+    --certified: 158 64% 52%;
+
     /* Additional gradients */
     --gradient-card: linear-gradient(145deg, hsl(var(--card)), hsl(var(--muted)));
-    --gradient-steel: linear-gradient(135deg, hsl(220 13% 95%), hsl(220 13% 90%));
+    --gradient-steel: linear-gradient(135deg, hsl(var(--steel-gray-light)), hsl(var(--steel-gray)));
     --gradient-machine: linear-gradient(145deg, hsl(var(--muted)), hsl(var(--accent)));
-    --gradient-precision: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--muted)));
-    
+    --gradient-precision: linear-gradient(135deg, hsl(var(--precision-blue-light)), hsl(var(--precision-blue)));
+    --gradient-glass: linear-gradient(145deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.05));
+
+    /* Shadow Definitions */
+    --shadow-minimal: 0 1px 3px hsl(var(--primary) / 0.1), 0 1px 2px hsl(var(--primary) / 0.06);
+    --shadow-focus: 0 0 0 3px hsl(var(--primary) / 0.1);
+
     /* Grid pattern for backgrounds */
     --grid-size: 60px;
   }
