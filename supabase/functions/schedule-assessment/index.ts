@@ -145,10 +145,13 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Update application status
-    const newStatus = assessment_type === 'ONLINE' ? 'ONLINE_SCHEDULED' : 'ONSITE_SCHEDULED';
+    const newStatus = assessment_type === 'ONLINE' ? 'ONLINE_ASSESSMENT_SCHEDULED' : 'ONSITE_ASSESSMENT_SCHEDULED';
     const { error: statusError } = await supabaseClient
       .from('applications')
-      .update({ status: newStatus })
+      .update({ 
+        workflow_status: newStatus,
+        updated_at: new Date().toISOString()
+      })
       .eq('id', application_id);
 
     if (statusError) {
@@ -190,10 +193,18 @@ const handler = async (req: Request): Promise<Response> => {
 
   } catch (error) {
     console.error('Error in schedule-assessment function:', error);
+    
+    // Return more specific error message
+    const errorMessage = (error as Error)?.message || 'เกิดข้อผิดพลาดไม่สามารถประเมินได้';
+    
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ 
+        success: false,
+        error: errorMessage,
+        details: (error as Error)?.message || 'Unknown error'
+      }),
       { 
-        status: 500, 
+        status: 400, 
         headers: { 'Content-Type': 'application/json', ...corsHeaders }
       }
     );

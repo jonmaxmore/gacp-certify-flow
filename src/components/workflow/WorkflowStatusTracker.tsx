@@ -24,6 +24,20 @@ interface WorkflowStatusTrackerProps {
 const getWorkflowSteps = (currentStatus: string, userRole: string): WorkflowStep[] => {
   const baseSteps: WorkflowStep[] = [
     {
+      id: 'KNOWLEDGE_TEST',
+      title: 'แบบทดสอบความรู้',
+      description: 'ทำแบบทดสอบความรู้ GACP ก่อนยื่นใบสมัคร',
+      icon: FileText,
+      status: 'completed'
+    },
+    {
+      id: 'REGISTRATION',
+      title: 'ลงทะเบียนและยืนยันตัวตน',
+      description: 'สร้างบัญชีและยืนยันข้อมูลส่วนตัว',
+      icon: CheckCircle,
+      status: 'completed'
+    },
+    {
       id: 'DRAFT',
       title: 'เริ่มต้นใบสมัคร',
       description: 'กรอกข้อมูลใบสมัครและเอกสารประกอบ',
@@ -71,7 +85,7 @@ const getWorkflowSteps = (currentStatus: string, userRole: string): WorkflowStep
     },
     {
       id: 'ONLINE_ASSESSMENT_SCHEDULED',
-      title: 'ประเมินออนไลน์',
+      title: 'นัดหมายและประเมินออนไลน์ และ/หรือ นัดหมายและประเมินที่ฟาร์ม',
       description: 'เข้าร่วมการประเมินออนไลน์',
       icon: VideoIcon,
       status: 'pending'
