@@ -4,17 +4,17 @@ import { LoadingFallback } from '@/components/optimized/LazyComponents';
 import { useAuth } from '@/providers/AuthProvider';
 
 // Lazy load all modules
-const CMSModule = lazy(() => import('@/components/modules/cms/CMSModule'));
-const ELearningModule = lazy(() => import('@/components/modules/elearning/ELearningModule'));
-const KnowledgeTestModule = lazy(() => import('@/components/modules/knowledge-test/KnowledgeTestModule'));
-const EnhancedDocumentManager = lazy(() => import('@/components/modules/documents/EnhancedDocumentManager'));
-const NotificationCenter = lazy(() => import('@/components/modules/notifications/NotificationCenter'));
-const PaymentModule = lazy(() => import('@/components/modules/payment/PaymentModule'));
+const CMSModule = lazy(() => import('@/components/modules/cms/CMSModule').then(module => ({ default: module.CMSModule })));
+const ELearningModule = lazy(() => import('@/components/modules/elearning/ELearningModule').then(module => ({ default: module.ELearningModule })));
+const KnowledgeTestModule = lazy(() => import('@/components/modules/knowledge-test/KnowledgeTestModule').then(module => ({ default: module.KnowledgeTestModule })));
+const EnhancedDocumentManager = lazy(() => import('@/components/modules/documents/EnhancedDocumentManager').then(module => ({ default: module.EnhancedDocumentManager })));
+const NotificationCenter = lazy(() => import('@/components/modules/notifications/NotificationCenter').then(module => ({ default: module.NotificationCenter })));
+const PaymentModule = lazy(() => import('@/components/modules/payment/PaymentModule').then(module => ({ default: module.PaymentModule })));
 const AIChatbot = lazy(() => import('@/components/ai/AIChatbot'));
 
 // System modules
-const SecurityMonitor = lazy(() => import('@/components/security/SecurityMonitor'));
-const SystemTestDashboard = lazy(() => import('@/components/testing/SystemTestDashboard'));
+const SecurityMonitor = lazy(() => import('@/components/security/SecurityMonitor').then(module => ({ default: module.SecurityMonitor })));
+const SystemTestDashboard = lazy(() => import('@/components/testing/SystemTestDashboard').then(module => ({ default: module.SystemTestDashboard })));
 
 interface ModuleRouterProps {
   basePath?: string;
@@ -35,7 +35,7 @@ const ModuleRouter: React.FC<ModuleRouterProps> = ({ basePath = '' }) => {
         {hasRole(['applicant']) && (
           <Route 
             path={`${basePath}/knowledge-test`} 
-            element={<KnowledgeTestModule />} 
+            element={<KnowledgeTestModule userId={user?.id || ''} onTestCompleted={() => {}} />} 
           />
         )}
         
@@ -50,7 +50,7 @@ const ModuleRouter: React.FC<ModuleRouterProps> = ({ basePath = '' }) => {
         {hasRole(['admin']) && (
           <Route 
             path={`${basePath}/cms/*`} 
-            element={<CMSModule />} 
+            element={<CMSModule userRole={userRole as 'admin'} />} 
           />
         )}
 
@@ -58,7 +58,7 @@ const ModuleRouter: React.FC<ModuleRouterProps> = ({ basePath = '' }) => {
         {hasRole(['applicant', 'reviewer', 'auditor', 'admin']) && (
           <Route 
             path={`${basePath}/documents/*`} 
-            element={<EnhancedDocumentManager />} 
+            element={<EnhancedDocumentManager applicationId="default" />} 
           />
         )}
 
@@ -66,7 +66,7 @@ const ModuleRouter: React.FC<ModuleRouterProps> = ({ basePath = '' }) => {
         {hasRole(['applicant', 'reviewer', 'auditor', 'admin']) && (
           <Route 
             path={`${basePath}/notifications/*`} 
-            element={<NotificationCenter />} 
+            element={<NotificationCenter userId={user?.id || ''} />} 
           />
         )}
 
@@ -82,7 +82,7 @@ const ModuleRouter: React.FC<ModuleRouterProps> = ({ basePath = '' }) => {
         {hasRole(['applicant', 'reviewer', 'auditor', 'admin']) && (
           <Route 
             path={`${basePath}/chatbot`} 
-            element={<AIChatbot />} 
+            element={<AIChatbot userRole={userRole} />} 
           />
         )}
 
