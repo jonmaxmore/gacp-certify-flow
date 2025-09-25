@@ -9,6 +9,8 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
 import CertificateVerificationPage from '@/pages/public/CertificateVerificationPage';
+import { SystemTestDashboard } from '@/components/testing/SystemTestDashboard';
+import { SystemAnalysisReport } from '@/components/analysis/SystemAnalysisReport';
 import ApplicantDashboard from '@/pages/applicant/ApplicantDashboard';
 import ApplicationWizard from '@/pages/applicant/ApplicationWizard';
 import PaymentsPage from '@/pages/applicant/PaymentsPage';
@@ -44,6 +46,8 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/verify-certificate" element={<CertificateVerificationPage />} />
+            <Route path="/system-test" element={<SystemTestDashboard />} />
+            <Route path="/system-analysis" element={<SystemAnalysisReport />} />
             
             {/* Protected routes */}
             <Route
