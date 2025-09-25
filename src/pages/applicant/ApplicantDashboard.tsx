@@ -16,6 +16,8 @@ import { NotificationCenter } from '@/components/notifications/NotificationCente
 import { useWorkflowStatus } from '@/hooks/useWorkflowStatus';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AppleStyleDashboard } from '@/components/dashboard/AppleStyleDashboard';
+import { WorkflowProgressStepper } from '@/components/workflow/WorkflowProgressStepper';
+import { RejectionCountBadge } from '@/components/dashboard/RejectionCountBadge';
 
 interface ApplicationData {
   id: string;
@@ -256,14 +258,25 @@ const ApplicantDashboard = () => {
                 <div className="space-y-4">
                   {applications.slice(0, 3).map((app) => (
                     <div key={app.id} className="p-4 border border-border rounded-xl hover:bg-muted/50 transition-all duration-300 hover:shadow-soft">
-                      {/* Workflow Status Tracker for each application */}
-                      <div className="mb-4">
-                        <WorkflowStatusTracker 
-                          currentStatus={app.workflow_status}
-                          applicationData={app}
-                          userRole="applicant"
-                        />
-                      </div>
+                       {/* Workflow Progress Stepper for each application */}
+                       <div className="mb-4">
+                         <WorkflowProgressStepper 
+                           currentStatus={app.workflow_status}
+                           revisionCount={app.revision_count_current || 0}
+                           maxFreeRevisions={app.max_free_revisions || 2}
+                         />
+                       </div>
+                       
+                       {/* Show rejection count badge if applicable */}
+                       {(app.revision_count_current || 0) > 0 && (
+                         <div className="mb-3">
+                           <RejectionCountBadge
+                             revisionCount={app.revision_count_current || 0}
+                             maxFreeRevisions={app.max_free_revisions || 2}
+                             workflowStatus={app.workflow_status}
+                           />
+                         </div>
+                       )}
                       
                       <div className="flex justify-between items-start mb-2">
                         <div>

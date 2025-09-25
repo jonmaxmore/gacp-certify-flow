@@ -10,6 +10,7 @@ export type WorkflowStatus =
   | 'PAYMENT_CONFIRMED_REVIEW'
   | 'UNDER_REVIEW'
   | 'REVISION_REQUESTED'
+  | 'REJECTED_PAYMENT_REQUIRED'
   | 'REVIEW_APPROVED'
   | 'PAYMENT_PENDING_ASSESSMENT'
   | 'PAYMENT_CONFIRMED_ASSESSMENT'
@@ -233,6 +234,8 @@ export const useWorkflowStatus = () => {
       'PAYMENT_PENDING_REVIEW',
       'PAYMENT_CONFIRMED_REVIEW',
       'UNDER_REVIEW',
+      'REVISION_REQUESTED',
+      'REJECTED_PAYMENT_REQUIRED',
       'REVIEW_APPROVED',
       'PAYMENT_PENDING_ASSESSMENT',
       'PAYMENT_CONFIRMED_ASSESSMENT',
@@ -246,6 +249,11 @@ export const useWorkflowStatus = () => {
     const currentIndex = statusOrder.indexOf(status);
     if (currentIndex === -1) return 0;
 
+    // Special handling for rejection scenarios
+    if (status === 'REVISION_REQUESTED' || status === 'REJECTED_PAYMENT_REQUIRED') {
+      return 30; // Show as being in review stage
+    }
+
     return Math.round((currentIndex / (statusOrder.length - 1)) * 100);
   };
 
@@ -258,6 +266,7 @@ export const useWorkflowStatus = () => {
       'PAYMENT_CONFIRMED_REVIEW': 'รอการตรวจสอบเอกสาร',
       'UNDER_REVIEW': 'รอผลการตรวจสอบเอกสาร',
       'REVISION_REQUESTED': 'แก้ไขเอกสารตามข้อเสนอแนะ',
+      'REJECTED_PAYMENT_REQUIRED': 'ชำระค่าธรรมเนียม 5,000 บาท เพื่อส่งเอกสารใหม่',
       'REVIEW_APPROVED': 'เอกสารผ่านการตรวจสอบ',
       'PAYMENT_PENDING_ASSESSMENT': 'ชำระค่าประเมิน 25,000 บาท',
       'PAYMENT_CONFIRMED_ASSESSMENT': 'รอการจัดตารางเวลาประเมิน',

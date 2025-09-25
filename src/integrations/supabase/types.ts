@@ -36,6 +36,7 @@ export type Database = {
           farm_coordinates: string | null
           farm_name: string | null
           id: string
+          max_free_revisions: number | null
           max_revisions: number | null
           metadata: Json | null
           next_action_required: string | null
@@ -48,6 +49,7 @@ export type Database = {
           responsible_person: string | null
           reviewer_comments: string | null
           revision_count: number | null
+          revision_count_current: number | null
           revision_reason: string | null
           staff_count: number | null
           status: Database["public"]["Enums"]["application_status"] | null
@@ -81,6 +83,7 @@ export type Database = {
           farm_coordinates?: string | null
           farm_name?: string | null
           id?: string
+          max_free_revisions?: number | null
           max_revisions?: number | null
           metadata?: Json | null
           next_action_required?: string | null
@@ -93,6 +96,7 @@ export type Database = {
           responsible_person?: string | null
           reviewer_comments?: string | null
           revision_count?: number | null
+          revision_count_current?: number | null
           revision_reason?: string | null
           staff_count?: number | null
           status?: Database["public"]["Enums"]["application_status"] | null
@@ -126,6 +130,7 @@ export type Database = {
           farm_coordinates?: string | null
           farm_name?: string | null
           id?: string
+          max_free_revisions?: number | null
           max_revisions?: number | null
           metadata?: Json | null
           next_action_required?: string | null
@@ -138,6 +143,7 @@ export type Database = {
           responsible_person?: string | null
           reviewer_comments?: string | null
           revision_count?: number | null
+          revision_count_current?: number | null
           revision_reason?: string | null
           staff_count?: number | null
           status?: Database["public"]["Enums"]["application_status"] | null
@@ -1181,6 +1187,22 @@ export type Database = {
         Args: { target_user_id?: string }
         Returns: Json
       }
+      handle_document_approval: {
+        Args: {
+          p_application_id: string
+          p_comments: string
+          p_reviewer_id: string
+        }
+        Returns: Json
+      }
+      handle_document_rejection: {
+        Args: {
+          p_application_id: string
+          p_comments: string
+          p_reviewer_id: string
+        }
+        Returns: Json
+      }
       is_admin: {
         Args: { user_id: string }
         Returns: boolean
@@ -1239,6 +1261,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      update_workflow_status_v2: {
+        Args: {
+          p_application_id: string
+          p_new_status: Database["public"]["Enums"]["application_workflow_status"]
+          p_notes?: string
+          p_updated_by: string
+        }
+        Returns: Json
+      }
       verify_certificate: {
         Args: { cert_number: string }
         Returns: Json
@@ -1282,6 +1313,7 @@ export type Database = {
         | "REJECTED"
         | "EXPIRED"
         | "REVOKED"
+        | "REJECTED_PAYMENT_REQUIRED"
       assessment_status: "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"
       assessment_type: "ONLINE" | "ONSITE"
       document_type:
@@ -1463,6 +1495,7 @@ export const Constants = {
         "REJECTED",
         "EXPIRED",
         "REVOKED",
+        "REJECTED_PAYMENT_REQUIRED",
       ],
       assessment_status: ["SCHEDULED", "IN_PROGRESS", "COMPLETED", "CANCELLED"],
       assessment_type: ["ONLINE", "ONSITE"],

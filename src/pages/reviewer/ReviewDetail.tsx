@@ -51,33 +51,65 @@ const ReviewDetail = () => {
     }
   };
 
-  const updateApplicationStatus = async (newStatus) => {
+  const handleApproval = async () => {
     if (!application) return;
 
     setSubmitting(true);
     try {
-      const { error } = await supabase
-        .from('applications')
-        .update({ 
-          status: newStatus, 
-          reviewer_comments: reviewComments,
-          updated_at: new Date().toISOString() 
-        })
-        .eq('id', application.id);
+      const { data, error } = await supabase.rpc('handle_document_approval', {
+        p_application_id: application.id,
+        p_reviewer_id: application.profiles?.id || application.applicant_id, // Using current user ID
+        p_comments: reviewComments
+      });
 
       if (error) throw error;
 
       toast({
         title: "สำเร็จ",
-        description: `อัพเดทสถานะเป็น ${getStatusText(newStatus)} เรียบร้อยแล้ว`,
+        description: "อนุมัติเอกสารเรียบร้อยแล้ว ระบบจะสร้างใบแจ้งหนี้ค่าประเมิน 25,000 บาท",
       });
 
       navigate('/reviewer/queue');
     } catch (error) {
-      console.error('Error updating application:', error);
+      console.error('Error approving application:', error);
       toast({
         title: "ข้อผิดพลาด",
-        description: "ไม่สามารถอัพเดทสถานะได้",
+        description: "ไม่สามารถอนุมัติเอกสารได้",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleRejection = async () => {
+    if (!application) return;
+
+    setSubmitting(true);
+    try {
+      const { data, error } = await supabase.rpc('handle_document_rejection', {
+        p_application_id: application.id,
+        p_reviewer_id: application.profiles?.id || application.applicant_id, // Using current user ID
+        p_comments: reviewComments
+      });
+
+      if (error) throw error;
+
+      const result = data as any;
+      
+      toast({
+        title: "ส่งกลับแก้ไขเรียบร้อย",
+        description: result.payment_required 
+          ? `เอกสารถูกปฏิเสธครั้งที่ ${result.revision_count} ผู้สมัครต้องชำระ 5,000 บาท เพื่อส่งเอกสารใหม่`
+          : `เอกสารถูกปฏิเสธครั้งที่ ${result.revision_count} ผู้สมัครสามารถแก้ไขฟรีได้อีก ${result.max_free_revisions - result.revision_count + 1} ครั้ง`,
+      });
+
+      navigate('/reviewer/queue');
+    } catch (error) {
+      console.error('Error rejecting application:', error);
+      toast({
+        title: "ข้อผิดพลาด",
+        description: "ไม่สามารถปฏิเสธเอกสารได้",
         variant: "destructive",
       });
     } finally {
@@ -267,7 +299,7 @@ const ReviewDetail = () => {
                 <div className="space-y-2">
                   <Button
                     className="w-full"
-                    onClick={() => updateApplicationStatus('DOCS_APPROVED')}
+                    onClick={handleApproval}
                     disabled={submitting}
                   >
                     <Check className="h-4 w-4 mr-2" />
@@ -277,7 +309,7 @@ const ReviewDetail = () => {
                   <Button
                     variant="destructive"
                     className="w-full"
-                    onClick={() => updateApplicationStatus('RETURNED')}
+                    onClick={handleRejection}
                     disabled={submitting}
                   >
                     <X className="h-4 w-4 mr-2" />
