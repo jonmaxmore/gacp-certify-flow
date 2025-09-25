@@ -5,6 +5,7 @@ import { LoadingFallback } from '@/components/optimized/LazyComponents';
 const NewAdminDashboard = lazy(() => import('@/pages/admin/NewAdminDashboard'));
 const ProductManagement = lazy(() => import('@/pages/admin/ProductManagement'));
 const UserManagement = lazy(() => import('@/pages/admin/UserManagement'));
+const NewsManager = lazy(() => import('@/components/cms/NewsManager'));
 const AdminApplicationsHistoryPage = lazy(() => import('@/pages/admin/AdminApplicationsHistoryPage'));
 const PlatformAnalytics = lazy(() => import('@/pages/admin/PlatformAnalytics'));
 const CertificateManagement = lazy(() => import('@/pages/admin/CertificateManagement'));
@@ -17,6 +18,7 @@ const AdminRoutes = () => {
         <Route path="dashboard" element={<NewAdminDashboard />} />
         <Route path="products" element={<ProductManagement />} />
         <Route path="users" element={<UserManagement />} />
+        <Route path="news" element={<NewsManager />} />
         <Route path="applications" element={<AdminApplicationsHistoryPage />} />
         <Route path="analytics" element={<PlatformAnalytics />} />
         <Route path="certificates" element={<CertificateManagement />} />

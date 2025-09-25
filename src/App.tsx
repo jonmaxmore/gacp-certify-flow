@@ -9,7 +9,8 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { removeDebugLogs, collectPerformanceMetrics } from '@/utils/codeCleanup';
 import { LoadingFallback, ErrorFallback } from '@/components/optimized/LazyComponents';
 
-// Lazy load only the essential auth components immediately
+// Lazy load only the essential public and auth components immediately
+const HomePage = lazy(() => import('@/pages/public/HomePage'));
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
 const CertificateVerificationPage = lazy(() => import('@/pages/public/CertificateVerificationPage'));
@@ -68,6 +69,7 @@ function OptimizedApp() {
               <Suspense fallback={<LoadingFallback />}>
                 <Routes>
                   {/* Public routes */}
+                  <Route path="/" element={<HomePage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
                   <Route path="/verify-certificate" element={<CertificateVerificationPage />} />
@@ -125,8 +127,8 @@ function OptimizedApp() {
                     }
                   />
                   
-                  {/* Root redirect */}
-                  <Route path="/" element={<Navigate to="/login" replace />} />
+                  
+                  {/* Root redirect removed - now shows homepage */}
                 </Routes>
               </Suspense>
               

@@ -132,6 +132,10 @@ export default {
         'factory': 'var(--transition-factory)',
       },
       fontFamily: {
+        'sans': ['TH Sarabun New', 'Inter', 'system-ui', 'sans-serif'],
+        'heading': ['TH Chakra Petch', 'Inter', 'system-ui', 'sans-serif'],
+        'thai': ['TH Sarabun New', 'Noto Sans Thai', 'sans-serif'],
+        'english': ['Inter', 'system-ui', 'sans-serif'],
         'apple': ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
         'industrial': ['"SF Pro Display"', '"Roboto"', '"Helvetica Neue"', 'Arial', 'system-ui', 'sans-serif'],
         'mono-industrial': ['"SF Mono"', '"Monaco"', '"Cascadia Code"', '"Roboto Mono"', 'monospace'],
