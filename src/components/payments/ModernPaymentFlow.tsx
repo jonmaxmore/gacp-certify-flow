@@ -43,9 +43,10 @@ interface Invoice {
 interface ModernPaymentFlowProps {
   invoice: Invoice;
   onPaymentSuccess: () => void;
+  milestone?: number; // 1: Document Review (5,000), 2: Assessment (25,000), 3: Certificate (if needed)
 }
 
-export const ModernPaymentFlow = ({ invoice, onPaymentSuccess }: ModernPaymentFlowProps) => {
+export const ModernPaymentFlow = ({ invoice, onPaymentSuccess, milestone }: ModernPaymentFlowProps) => {
   const { toast } = useToast();
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
   const [showQRCode, setShowQRCode] = useState(false);
@@ -104,21 +105,48 @@ export const ModernPaymentFlow = ({ invoice, onPaymentSuccess }: ModernPaymentFl
   const handlePayment = async (method: PaymentMethod) => {
     setProcessing(true);
     
-    // Simulate payment processing
-    setTimeout(() => {
+    try {
+      // Simulate payment processing with different workflows based on milestone
+      const processingTime = milestone === 1 ? 2000 : milestone === 2 ? 3000 : 2500;
+      
+      setTimeout(async () => {
+        setProcessing(false);
+        setPaymentSuccess(true);
+        
+        const milestoneText = milestone === 1 ? 'ค่าตรวจเอกสาร' : 
+                             milestone === 2 ? 'ค่าประเมิน' : 'ค่าธรรมเนียม';
+        
+        toast({
+          title: "ชำระเงินสำเร็จ",
+          description: `ชำระ${milestoneText} ${invoice.amount.toLocaleString()} บาท ด้วย ${method.name}`,
+          variant: "default",
+        });
+        
+        // Trigger workflow progression based on milestone
+        if (milestone === 1) {
+          // Document review payment - trigger review process
+          console.log('Document review payment completed - triggering review workflow');
+          // In a real implementation, you would call the workflow hook
+          // const { processPaymentCompletion } = useWorkflowIntegration();
+          // await processPaymentCompletion(invoice.id, milestone, invoice.applicationId);
+        } else if (milestone === 2) {
+          // Assessment payment - trigger assessment scheduling
+          console.log('Assessment payment completed - triggering assessment scheduling');
+          // Similar workflow integration call
+        }
+        
+        setTimeout(() => {
+          onPaymentSuccess();
+        }, 2000);
+      }, processingTime);
+    } catch (error) {
       setProcessing(false);
-      setPaymentSuccess(true);
-      
       toast({
-        title: "ชำระเงินสำเร็จ",
-        description: `ชำระเงิน ${invoice.amount.toLocaleString()} บาท ด้วย ${method.name}`,
-        variant: "default",
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถดำเนินการชำระเงินได้ กรุณาลองใหม่อีกครั้ง",
+        variant: "destructive",
       });
-      
-      setTimeout(() => {
-        onPaymentSuccess();
-      }, 2000);
-    }, 3000);
+    }
   };
 
   const copyAccountNumber = () => {

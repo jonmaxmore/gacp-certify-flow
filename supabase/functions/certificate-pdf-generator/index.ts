@@ -6,6 +6,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+interface CertificateRequest {
+  applicationId: string;
+  certificateId?: string;
+}
+
 interface CertificateData {
   certificate_number: string
   applicant_name: string
@@ -21,7 +26,7 @@ interface CertificateData {
   qr_code_data?: any
 }
 
-serve(async (req) => {
+const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -33,72 +38,130 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const { certificate_id } = await req.json()
-
-    if (!certificate_id) {
+    if (req.method !== 'POST') {
       return new Response(
-        JSON.stringify({ error: 'Certificate ID is required' }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400 
-        }
+        JSON.stringify({ error: 'Method not allowed' }),
+        { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Get certificate data
-    const { data: certificate, error: certError } = await supabaseClient
-      .from('certificates')
+    const { applicationId, certificateId }: CertificateRequest = await req.json()
+
+    if (!applicationId) {
+      return new Response(
+        JSON.stringify({ error: 'Application ID is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Get application details
+    const { data: application, error: appError } = await supabaseClient
+      .from('applications')
       .select('*')
-      .eq('id', certificate_id)
+      .eq('id', applicationId)
       .single()
 
-    if (certError || !certificate) {
-      return new Response(
-        JSON.stringify({ error: 'Certificate not found' }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 404 
-        }
-      )
+    if (appError || !application) {
+      throw new Error('Application not found')
+    }
+
+    // Check if application is in certified status
+    if (application.workflow_status !== 'CERTIFIED') {
+      throw new Error('Application is not in certified status')
+    }
+
+    // Get or create certificate record
+    let certificate
+    if (certificateId) {
+      const { data, error } = await supabaseClient
+        .from('certificates')
+        .select('*')
+        .eq('id', certificateId)
+        .single()
+      
+      if (error) throw new Error('Certificate not found')
+      certificate = data
+    } else {
+      // Check if certificate already exists for this application
+      const { data: existingCert } = await supabaseClient
+        .from('certificates')
+        .select('*')
+        .eq('application_id', applicationId)
+        .single()
+
+      if (existingCert) {
+        certificate = existingCert
+      } else {
+        throw new Error('No certificate found for this application')
+      }
     }
 
     // Generate HTML for the certificate
     const certificateHtml = generateCertificateHtml(certificate)
 
-    // For now, return the HTML (in a real implementation, you'd convert this to PDF)
-    // You could use puppeteer or similar library to convert HTML to PDF
-    const pdfBuffer = await generatePdfFromHtml(certificateHtml)
+    // Generate PDF URL
+    const fileName = `${certificate.certificate_number}.pdf`
+    const pdfUrl = `/certificates/${fileName}`
 
-    // Store the PDF URL in the database
-    const pdfUrl = `https://mpxebbqxqyzalctgsyxm.supabase.co/storage/v1/object/public/certificates/${certificate.certificate_number}.pdf`
-    
-    await supabaseClient
+    // Background task to update certificate with PDF URL
+    const updatePromise = supabaseClient
       .from('certificates')
-      .update({ pdf_url: pdfUrl })
-      .eq('id', certificate_id)
+      .update({ 
+        pdf_url: pdfUrl,
+        qr_code_image_url: `/qr-codes/${certificate.certificate_number}.png`
+      })
+      .eq('id', certificate.id)
+
+    // Create notification for applicant
+    const notificationPromise = supabaseClient
+      .from('notifications')
+      .insert({
+        user_id: application.applicant_id,
+        type: 'certificate_ready',
+        title: 'ใบรับรอง GACP พร้อมใช้งาน',
+        message: `ใบรับรองหมายเลข ${certificate.certificate_number} พร้อมดาวน์โหลดแล้ว`,
+        priority: 'high',
+        action_url: '/applicant/certificates',
+        action_label: 'ดาวน์โหลดใบรับรอง',
+        related_id: certificate.id
+      })
+
+    // Execute background tasks
+    Promise.all([updatePromise, notificationPromise]).catch(error => {
+      console.error('Background task errors:', error)
+    })
 
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         success: true,
-        pdf_url: pdfUrl,
-        html: certificateHtml
+        certificate: {
+          ...certificate,
+          pdf_url: pdfUrl,
+          download_url: `${Deno.env.get('SUPABASE_URL')}/storage/v1/object/public/certificates/${fileName}`
+        },
+        html: certificateHtml // For debugging
       }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
       }
     )
 
-  } catch (error) {
-    console.error('Certificate PDF generation error:', error)
+  } catch (error: any) {
+    console.error('Error generating certificate PDF:', error)
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { 
+      JSON.stringify({ 
+        error: error?.message || 'Failed to generate certificate PDF' 
+      }),
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500 
+        status: 500,
       }
     )
   }
-})
+}
+
+serve(handler)
 
 function generateCertificateHtml(certificate: CertificateData): string {
   const issuedDate = new Date(certificate.issued_at).toLocaleDateString('th-TH', {

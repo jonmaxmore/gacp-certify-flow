@@ -229,6 +229,7 @@ const PaymentsPage = () => {
           {selectedInvoice && (
             <ModernPaymentFlow
               invoice={selectedInvoice}
+              milestone={selectedInvoice.milestone || 1}
               onPaymentSuccess={handlePaymentSuccess}
             />
           )}
