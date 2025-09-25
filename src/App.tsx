@@ -55,37 +55,13 @@ function App() {
           <Router>
             <div className="min-h-screen bg-background">
               <Routes>
-                {/* Auth routes (standalone layout) - no lazy loading for now */}
-                <Route path="/login" element={
-                  <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
-                    <LoginPage />
-                  </Suspense>
-                } />
-                <Route path="/register" element={
-                  <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
-                    <RegisterPage />
-                  </Suspense>
-                } />
-                
-                {/* Public routes with public layout */}
-                <Route
-                  path="/*"
-                  element={
-                    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
-                      <PublicLayout>
-                        <PublicRoutes />
-                      </PublicLayout>
-                    </Suspense>
-                  }
-                />
-                
-                {/* Protected dashboard routes */}
+                {/* Protected dashboard routes - MUST come before public routes */}
                 <Route
                   path="/applicant/*"
                   element={
                     <ProtectedRoute requiredRole="applicant">
                       <DashboardLayout>
-                        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
+                        <Suspense fallback={<LoadingFallback />}>
                           <LazyApplicantRoutes />
                         </Suspense>
                       </DashboardLayout>
@@ -98,7 +74,7 @@ function App() {
                   element={
                     <ProtectedRoute requiredRole="reviewer">
                       <DashboardLayout>
-                        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
+                        <Suspense fallback={<LoadingFallback />}>
                           <LazyReviewerRoutes />
                         </Suspense>
                       </DashboardLayout>
@@ -111,7 +87,7 @@ function App() {
                   element={
                     <ProtectedRoute requiredRole="auditor">
                       <DashboardLayout>
-                        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
+                        <Suspense fallback={<LoadingFallback />}>
                           <LazyAuditorRoutes />
                         </Suspense>
                       </DashboardLayout>
@@ -124,11 +100,35 @@ function App() {
                   element={
                     <ProtectedRoute requiredRole="admin">
                       <DashboardLayout>
-                        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
+                        <Suspense fallback={<LoadingFallback />}>
                           <LazyAdminRoutes />
                         </Suspense>
                       </DashboardLayout>
                     </ProtectedRoute>
+                  }
+                />
+
+                {/* Auth routes (standalone layout) */}
+                <Route path="/login" element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <LoginPage />
+                  </Suspense>
+                } />
+                <Route path="/register" element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <RegisterPage />
+                  </Suspense>
+                } />
+                
+                {/* Public routes with public layout - MUST be last */}
+                <Route
+                  path="*"
+                  element={
+                    <PublicLayout>
+                      <Suspense fallback={<LoadingFallback />}>
+                        <PublicRoutes />
+                      </Suspense>
+                    </PublicLayout>
                   }
                 />
               </Routes>
