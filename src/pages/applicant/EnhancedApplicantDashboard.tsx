@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import ApplicantStepper from '@/components/workflow/ApplicantStepper';
+import { MockPaymentFlow } from '@/components/payments/MockPaymentFlow';
 import { 
   User, 
   FileText, 
@@ -86,64 +88,8 @@ const EnhancedApplicantDashboard = () => {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="xl:col-span-2 space-y-6">
-          {/* Application Progress */}
-          <Card className="border-0 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-primary" />
-                GACP Certification Progress
-              </CardTitle>
-              <CardDescription>
-                Step {mockApplicationStatus.currentStep} of {mockApplicationStatus.totalSteps}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="mb-6">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium">Overall Progress</span>
-                  <span className="text-sm text-gray-500">{progress.toFixed(0)}%</span>
-                </div>
-                <Progress value={progress} className="h-3" />
-              </div>
-
-              <div className="grid gap-4">
-                {mockApplicationStatus.steps.map((step, index) => {
-                  const statusInfo = getStepStatus(step.status);
-                  const StepIcon = step.icon;
-                  
-                  return (
-                    <div
-                      key={step.id}
-                      className={`flex items-center gap-4 p-4 rounded-lg border transition-all ${
-                        step.status === 'current' 
-                          ? 'bg-blue-50 border-blue-200 ring-2 ring-blue-100' 
-                          : step.status === 'completed'
-                          ? 'bg-green-50 border-green-200'
-                          : 'bg-gray-50 border-gray-200'
-                      }`}
-                    >
-                      <div className={`w-10 h-10 rounded-full ${statusInfo.color} flex items-center justify-center`}>
-                        <StepIcon className="h-5 w-5 text-white" />
-                      </div>
-                      
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">{step.name}</h3>
-                        <Badge variant={statusInfo.variant} className="mt-1 capitalize">
-                          {step.status}
-                        </Badge>
-                      </div>
-
-                      {step.status === 'current' && (
-                        <Button size="sm" className="gap-2">
-                          Continue <ArrowRight className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
+          {/* Application Stepper - New Enhanced Version */}
+          <ApplicantStepper />
 
           {/* Current Step Details */}
           {currentStep && (
