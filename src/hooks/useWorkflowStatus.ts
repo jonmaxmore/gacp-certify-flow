@@ -151,9 +151,9 @@ export const useWorkflowStatus = () => {
   }: PaymentCreation): Promise<string | null> => {
     try {
       // Convert milestone number to enum string
-      const milestoneEnum = milestone === 1 ? 'DOCUMENT_REVIEW' : 
-                          milestone === 2 ? 'ASSESSMENT' : 
-                          milestone === 3 ? 'CERTIFICATION' : 'DOCUMENT_REVIEW';
+      const milestoneEnum = Number(milestone) === 1 ? 'DOCUMENT_REVIEW' : 
+                          Number(milestone) === 2 ? 'ASSESSMENT' : 
+                          Number(milestone) === 3 ? 'CERTIFICATION' : 'DOCUMENT_REVIEW';
       
       const { data, error } = await supabase
         .rpc('create_payment_record', {
