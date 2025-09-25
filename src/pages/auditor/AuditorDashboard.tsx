@@ -256,8 +256,8 @@ const AuditorDashboard = () => {
               <CardContent>
                 <div className="space-y-4">
                   {[
-                    { name: "John Doe", date: "July 23, 2025", time: "10:9am", type: "Online", avatar: "👨" },
-                    { name: "Jane Smith", date: "August 1 2025", time: "18:9am", type: "Onsite", avatar: "👩" }
+                    { name: "John Doe", date: "July 23, 2025", time: "10:9am", type: "Online", avatar: "👨", status: "รอการประเมิน" },
+                    { name: "Jane Smith", date: "August 1 2025", time: "18:9am", type: "Onsite", avatar: "👩", status: "ประเมินเสร็จ - ผ่าน" }
                   ].map((app, idx) => (
                     <div key={idx} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50">
                       <div className="flex items-center space-x-3">
@@ -267,9 +267,18 @@ const AuditorDashboard = () => {
                         <div>
                           <h4 className="font-medium">{app.name}</h4>
                           <p className="text-sm text-muted-foreground">{app.date} {app.time}</p>
+                          <p className="text-xs text-blue-600">{app.status}</p>
                         </div>
                       </div>
-                      <Badge variant="outline">{app.type}</Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">{app.type}</Badge>
+                        {app.status.includes('ผ่าน') && (
+                          <div className="flex items-center gap-1">
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            <span className="text-xs text-green-600">GACP ออกแล้ว</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>

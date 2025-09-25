@@ -180,6 +180,7 @@ const OnlineAssessment = () => {
     const passed = score >= 70; // 70% pass threshold
     
     try {
+      // Update assessment with results
       await supabase
         .from('assessments')
         .update({ 
@@ -188,18 +189,94 @@ const OnlineAssessment = () => {
           score: score,
           passed: passed,
           checklist_data: evaluationData,
-          notes: notes
+          notes: notes,
+          evidence_urls: evidence.map(e => e.description)
         })
         .eq('id', id);
 
+      // Update application workflow status based on assessment result
+      const newWorkflowStatus = passed ? 'CERTIFIED' : 'ASSESSMENT_FAILED';
+      
+      await supabase
+        .from('applications')
+        .update({ 
+          workflow_status: newWorkflowStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', assessment.application_id);
+
+      // If passed, create notification for certificate issuance
+      if (passed) {
+        await supabase
+          .from('workflow_notifications')
+          .insert({
+            user_id: assessment.applications.applicant_id,
+            application_id: assessment.application_id,
+            notification_type: 'assessment_passed',
+            title: 'การประเมินผ่านแล้ว - กำลังออกใบรับรอง',
+            message: `การประเมินออนไลน์ได้คะแนน ${score}% ผ่านแล้ว ระบบกำลังดำเนินการออกใบรับรอง GACP`,
+            priority: 'high',
+            action_url: '/applicant/certificates',
+            action_label: 'ดูใบรับรอง',
+            metadata: {
+              assessment_id: id,
+              score: score,
+              assessment_type: 'ONLINE'
+            }
+          });
+
+        // Auto-trigger certificate generation if passed
+        // This will be handled by the existing auto_issue_certificate trigger
+        // when the application status changes to CERTIFIED
+        await supabase
+          .from('applications')
+          .update({ 
+            status: 'CERTIFIED',
+            approved_at: new Date().toISOString()
+          })
+          .eq('id', assessment.application_id);
+      } else {
+        // Create notification for failed assessment
+        await supabase
+          .from('workflow_notifications')
+          .insert({
+            user_id: assessment.applications.applicant_id,
+            application_id: assessment.application_id,
+            notification_type: 'assessment_failed',
+            title: 'การประเมินไม่ผ่าน',
+            message: `การประเมินออนไลน์ได้คะแนน ${score}% ไม่ผ่านเกณฑ์ กรุณาทำการแก้ไขและประเมินใหม่`,
+            priority: 'high',
+            action_url: '/applicant/applications',
+            action_label: 'ดูรายละเอียด',
+            metadata: {
+              assessment_id: id,
+              score: score,
+              assessment_type: 'ONLINE'
+            }
+          });
+      }
+
       toast({
         title: "การประเมินเสร็จสิ้น",
-        description: `คะแนน: ${score}% - ${passed ? 'ผ่าน' : 'ไม่ผ่าน'}`,
+        description: `คะแนน: ${score}% - ${passed ? 'ผ่าน - กำลังออกใบรับรอง' : 'ไม่ผ่าน'}`,
+        variant: passed ? "default" : "destructive"
       });
 
-      navigate('/auditor/assessments');
+      // Navigate back with result status
+      navigate('/auditor/assessments', { 
+        state: { 
+          assessmentCompleted: true, 
+          result: passed ? 'passed' : 'failed',
+          score: score 
+        }
+      });
     } catch (error) {
       console.error('Error ending assessment:', error);
+      toast({
+        title: "ข้อผิดพลาด",
+        description: "ไม่สามารถบันทึกผลการประเมินได้",
+        variant: "destructive",
+      });
     }
   };
 
