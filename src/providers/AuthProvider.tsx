@@ -61,87 +61,67 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
-    let timeoutId: NodeJS.Timeout;
 
-    // Set up auth state listener with proper error handling
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!mounted) return;
-
-        console.log('Auth state change event:', event, 'session:', !!session);
-
-        try {
-          setSession(session);
-          
-          if (session?.user) {
-            await fetchUserProfile(session.user);
-          } else {
-            setUser(null);
-            if (mounted) setLoading(false);
-          }
-        } catch (error) {
-          console.error('Auth state change error:', error);
-          if (mounted) {
-            setUser(null);
-            setLoading(false);
-          }
-        }
-      }
-    );
-
-    // Get initial session with improved error handling and timeout
-    const initializeAuth = async () => {
+    const initAuth = async () => {
       try {
-        console.log('Initializing auth...');
+        console.log('🔄 Initializing auth...');
         
-        // Add timeout to prevent hanging
-        const authPromise = supabase.auth.getSession();
-        const timeoutPromise = new Promise((_, reject) => {
-          timeoutId = setTimeout(() => reject(new Error('Auth timeout')), 10000);
-        });
-
-        const { data: { session }, error } = await Promise.race([
-          authPromise,
-          timeoutPromise
-        ]) as any;
-        
-        clearTimeout(timeoutId);
+        // Get initial session
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('Error getting initial session:', error);
+          console.error('❌ Error getting initial session:', error);
           if (mounted) setLoading(false);
           return;
         }
 
-        console.log('Initial session:', !!session);
-
+        console.log('📋 Initial session:', !!initialSession);
+        
         if (mounted) {
-          setSession(session);
-          if (session?.user) {
-            await fetchUserProfile(session.user);
+          setSession(initialSession);
+          if (initialSession?.user) {
+            console.log('👤 User found, fetching profile...');
+            await handleUser(initialSession.user);
           } else {
+            console.log('👤 No user found');
             setLoading(false);
           }
         }
       } catch (err) {
-        console.error('Initialize auth error:', err);
-        clearTimeout(timeoutId);
+        console.error('❌ Auth initialization error:', err);
         if (mounted) setLoading(false);
       }
     };
 
-    initializeAuth();
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!mounted) return;
+
+        console.log('🔔 Auth event:', event, 'Session:', !!session);
+        
+        setSession(session);
+        
+        if (session?.user) {
+          await handleUser(session.user);
+        } else {
+          setUser(null);
+          if (mounted) setLoading(false);
+        }
+      }
+    );
+
+    initAuth();
 
     return () => {
       mounted = false;
-      clearTimeout(timeoutId);
       subscription.unsubscribe();
     };
   }, []);
 
-  const fetchUserProfile = async (authUser: User) => {
+  const handleUser = async (authUser: User) => {
     try {
-      console.log('Fetching profile for user:', authUser.id);
+      console.log('🔍 Fetching profile for:', authUser.email);
       
       const { data: profile, error } = await supabase
         .from('profiles')
@@ -149,47 +129,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq('id', authUser.id)
         .maybeSingle();
 
-      if (error) {
-        console.error('Error fetching profile:', error);
-        // Still set user but without profile to avoid white screen
+      if (error && error.code !== 'PGRST116') {
+        console.error('❌ Profile fetch error:', error);
         setUser({ ...authUser, profile: null } as AuthUser);
         setLoading(false);
         return;
       }
 
       if (!profile) {
-        console.log('No profile found, creating one...');
-        // Create missing profile immediately
-        await createMissingProfile(authUser);
+        console.log('➕ Creating missing profile...');
+        await createProfile(authUser);
         return;
       }
 
-      console.log('Profile found:', profile);
-      
-      const userWithProfile: AuthUser = {
-        ...authUser,
-        profile: profile
-      };
-
-      setUser(userWithProfile);
+      console.log('✅ Profile loaded:', profile.email);
+      setUser({ ...authUser, profile } as AuthUser);
       setLoading(false);
     } catch (error) {
-      console.error('Error in fetchUserProfile:', error);
-      // Set user without profile to avoid blocking the app
+      console.error('❌ Handle user error:', error);
       setUser({ ...authUser, profile: null } as AuthUser);
       setLoading(false);
     }
   };
 
-  const createMissingProfile = async (authUser: User) => {
+  const createProfile = async (authUser: User) => {
     try {
-      console.log('Creating missing profile for user:', authUser.id);
-      
       const profileData = {
         id: authUser.id,
         email: authUser.email || '',
         full_name: authUser.user_metadata?.full_name || 'User',
-        role: (authUser.user_metadata?.role as 'applicant' | 'reviewer' | 'auditor' | 'admin') || 'applicant',
+        role: (authUser.user_metadata?.role as UserProfile['role']) || 'applicant',
         phone: authUser.user_metadata?.phone || null,
         organization_name: authUser.user_metadata?.organization_name || null,
         thai_id_number: authUser.user_metadata?.thai_id_number || null,
@@ -205,21 +174,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .single();
 
       if (error) {
-        console.error('Error creating profile:', error);
-        // Set user without profile to avoid blocking
+        console.error('❌ Profile creation error:', error);
         setUser({ ...authUser, profile: null } as AuthUser);
         setLoading(false);
         return;
       }
 
-      console.log('Profile created successfully:', newProfile);
-
-      const userWithProfile: AuthUser = {
-        ...authUser,
-        profile: newProfile
-      };
-
-      setUser(userWithProfile);
+      console.log('✅ Profile created');
+      setUser({ ...authUser, profile: newProfile } as AuthUser);
       setLoading(false);
       
       toast({
@@ -227,8 +189,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: "บัญชีของคุณได้รับการตั้งค่าเรียบร้อยแล้ว",
       });
     } catch (error) {
-      console.error('Error creating missing profile:', error);
-      // Set user without profile to prevent app crash
+      console.error('❌ Create profile error:', error);
       setUser({ ...authUser, profile: null } as AuthUser);
       setLoading(false);
     }
@@ -242,45 +203,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     thai_id_number?: string;
   }) => {
     try {
-      setLoading(true);
-      
-      // Validate and sanitize inputs
+      // Validate inputs
       const emailValidation = validateInput(email, 'email');
       if (!emailValidation.isValid) {
-        throw new Error('Invalid email format: ' + emailValidation.errors.join(', '));
+        throw new Error('Invalid email: ' + emailValidation.errors.join(', '));
       }
       
-      // Validate email with schema
-      try {
-        emailSchema.parse(emailValidation.sanitized);
-      } catch (error: any) {
-        throw new Error('Email validation failed: ' + error.errors?.[0]?.message || 'Invalid email');
-      }
-      
-      // Validate password
-      try {
-        passwordSchema.parse(password);
-      } catch (error: any) {
-        throw new Error('Password validation failed: ' + error.errors?.[0]?.message || 'Invalid password');
-      }
-      
-      // Sanitize other inputs
-      const sanitizedData = {
-        full_name: validateInput(userData.full_name).sanitized,
-        role: userData.role,
-        phone: userData.phone ? validateInput(userData.phone).sanitized : undefined,
-        organization_name: userData.organization_name ? validateInput(userData.organization_name).sanitized : undefined,
-        thai_id_number: userData.thai_id_number ? validateInput(userData.thai_id_number).sanitized : undefined,
-      };
-      
-      const redirectUrl = `${window.location.origin}/`;
+      emailSchema.parse(emailValidation.sanitized);
+      passwordSchema.parse(password);
       
       const { data, error } = await supabase.auth.signUp({
         email: emailValidation.sanitized,
         password,
         options: {
-          emailRedirectTo: redirectUrl,
-          data: sanitizedData
+          emailRedirectTo: `${window.location.origin}/`,
+          data: userData
         }
       });
 
@@ -300,43 +237,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         variant: "destructive",
       });
       return { data: null, error };
-    } finally {
-      setLoading(false);
     }
   };
 
   const signIn = async (email: string, password: string) => {
     try {
-      setLoading(true);
+      console.log('🔐 Signing in:', email);
       
-      // Validate and sanitize email input
       const emailValidation = validateInput(email, 'email');
       if (!emailValidation.isValid) {
-        throw new Error('Invalid email format: ' + emailValidation.errors.join(', '));
+        throw new Error('Invalid email: ' + emailValidation.errors.join(', '));
       }
       
-      try {
-        emailSchema.parse(emailValidation.sanitized);
-      } catch (error: any) {
-        throw new Error('Email validation failed: ' + error.errors?.[0]?.message || 'Invalid email');
-      }
-      
-      // Skip rate limiting for now to fix login issues
-      // const { data: rateLimitCheck } = await supabase.rpc('check_rate_limit', {
-      //   identifier_val: emailValidation.sanitized,
-      //   action_type_val: 'login_attempt',
-      //   max_attempts: 5,
-      //   window_minutes: 15
-      // });
-
-      // if (!rateLimitCheck) {
-      //   toast({
-      //     title: "พยายามเข้าสู่ระบบหลายครั้งเกินไป",
-      //     description: "กรุณารอ 15 นาที ก่อนพยายามอีกครั้ง",
-      //     variant: "destructive",
-      //   });
-      //   return { data: null, error: { message: "Rate limit exceeded" } };
-      // }
+      emailSchema.parse(emailValidation.sanitized);
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email: emailValidation.sanitized,
@@ -344,14 +257,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
-        // Log authentication failure
-        await supabase.rpc('log_auth_failure', {
-          email_attempt: emailValidation.sanitized,
-          failure_reason: error.message
-        });
+        console.error('❌ Sign in error:', error);
         throw error;
       }
 
+      console.log('✅ Sign in successful');
       toast({
         title: "เข้าสู่ระบบสำเร็จ",
         description: "ยินดีต้อนรับ",
@@ -366,40 +276,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         variant: "destructive",
       });
       return { data: null, error };
-    } finally {
-      setLoading(false);
     }
   };
 
   const signOut = async () => {
     try {
-      setLoading(true);
-      
-      // First, try normal logout
       const { error } = await supabase.auth.signOut();
       
-      // If logout fails due to session issues, force local logout
-      if (error && (error.message?.includes('session_not_found') || error.message?.includes('Session from session_id'))) {
-        console.warn('Session not found on server, clearing local session');
-        // Force local logout only
-        await supabase.auth.signOut({ scope: 'local' });
-        
-        // Clear local state
-        setUser(null);
-        setSession(null);
-        
-        toast({
-          title: "ออกจากระบบสำเร็จ",
-          description: "ขอบคุณที่ใช้บริการ",
-        });
-        
-        return { error: null };
+      if (error && !error.message?.includes('session_not_found')) {
+        throw error;
       }
       
-      // If other error occurred, throw it
-      if (error) throw error;
-      
-      // Normal successful logout
       setUser(null);
       setSession(null);
       
@@ -411,30 +298,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error: null };
     } catch (error: any) {
       console.error('Sign out error:', error);
-      
-      // As a last resort, clear local session anyway
-      try {
-        await supabase.auth.signOut({ scope: 'local' });
-        setUser(null);
-        setSession(null);
-        
-        toast({
-          title: "ออกจากระบบสำเร็จ",
-          description: "ขอบคุณที่ใช้บริการ",
-        });
-        
-        return { error: null };
-      } catch (localError) {
-        console.error('Local sign out also failed:', localError);
-        toast({
-          title: "เกิดข้อผิดพลาด",
-          description: "ไม่สามารถออกจากระบบได้ กรุณาลองรีเฟรชหน้าเว็บ",
-          variant: "destructive",
-        });
-        return { error };
-      }
-    } finally {
-      setLoading(false);
+      // Force local logout
+      setUser(null);
+      setSession(null);
+      return { error: null };
     }
   };
 
@@ -444,8 +311,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      setLoading(true);
-      
       const { data, error } = await supabase
         .from('profiles')
         .update(updates)
@@ -455,7 +320,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) throw error;
 
-      // Update local user state
       setUser(prev => prev ? {
         ...prev,
         profile: { ...prev.profile!, ...data }
@@ -475,8 +339,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         variant: "destructive",
       });
       return { data: null, error };
-    } finally {
-      setLoading(false);
     }
   };
 
