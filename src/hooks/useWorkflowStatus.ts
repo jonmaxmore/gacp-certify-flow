@@ -80,19 +80,11 @@ export const useWorkflowStatus = () => {
 
       if (appsError) throw appsError;
 
-      // Fetch user workflow tasks - handle if function doesn't exist
-      let userTasks = null;
-      try {
-        const { data, error: tasksError } = await supabase
-          .rpc('get_user_workflow_tasks');
-        
-        if (!tasksError) {
-          userTasks = data;
-        }
-      } catch (error) {
-        console.log('get_user_workflow_tasks function not available, using default data');
-        userTasks = { unread_notifications: 0 };
-      }
+      // Fetch user workflow tasks
+      const { data: userTasks, error: tasksError } = await supabase
+        .rpc('get_user_workflow_tasks');
+
+      if (tasksError) throw tasksError;
 
       setWorkflowData({
         applications: applications || [],
