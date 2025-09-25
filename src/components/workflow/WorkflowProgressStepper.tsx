@@ -8,7 +8,12 @@ import {
   AlertTriangle, 
   VideoIcon,
   MapPin,
-  Award
+  Award,
+  UserCheck,
+  Brain,
+  Upload,
+  Calendar,
+  Download
 } from 'lucide-react';
 
 interface WorkflowStep {
@@ -23,20 +28,38 @@ interface WorkflowProgressStepperProps {
   currentStatus: string;
   revisionCount?: number;
   maxFreeRevisions?: number;
+  knowledgeTestPassed?: boolean;
+  applicationCreated?: boolean;
 }
 
 export const WorkflowProgressStepper: React.FC<WorkflowProgressStepperProps> = ({
   currentStatus,
   revisionCount = 0,
-  maxFreeRevisions = 2
+  maxFreeRevisions = 2,
+  knowledgeTestPassed = false,
+  applicationCreated = false
 }) => {
   const getSteps = (): WorkflowStep[] => [
     {
-      id: 'draft',
-      title: 'สร้างใบสมัคร',
-      description: 'กรอกข้อมูลและอัพโหลดเอกสาร',
-      status: getStepStatus(['DRAFT']),
-      icon: FileText
+      id: 'register',
+      title: 'ลงทะเบียน',
+      description: 'สมัครสมาชิกและยืนยันตัวตน',
+      status: 'completed', // Always completed if user is logged in
+      icon: UserCheck
+    },
+    {
+      id: 'knowledge-test',
+      title: 'ทดสอบความรู้',
+      description: 'แบบทดสอบ GACP',
+      status: knowledgeTestPassed ? 'completed' : (currentStatus === 'DRAFT' && !applicationCreated ? 'current' : 'pending'),
+      icon: Brain
+    },
+    {
+      id: 'submit-documents',
+      title: 'ส่งเอกสาร',
+      description: 'อัพโหลดฟอร์มและเอกสาร',
+      status: getStepStatus(['DRAFT', 'SUBMITTED']),
+      icon: Upload
     },
     {
       id: 'payment-review',
@@ -47,7 +70,7 @@ export const WorkflowProgressStepper: React.FC<WorkflowProgressStepperProps> = (
     },
     {
       id: 'review',
-      title: 'ตรวจสอบเอกสาร',
+      title: 'ตรวจเอกสาร',
       description: revisionCount > 0 
         ? `แก้ไขครั้งที่ ${revisionCount}${revisionCount > maxFreeRevisions ? ' (ต้องชำระเงิน)' : ''}`
         : 'ผู้ทบทวนตรวจสอบ',
@@ -67,31 +90,31 @@ export const WorkflowProgressStepper: React.FC<WorkflowProgressStepperProps> = (
       icon: CreditCard
     },
     {
-      id: 'online-assessment',
-      title: 'ประเมินออนไลน์',
-      description: 'การประเมินผ่านระบบออนไลน์',
+      id: 'assessment-scheduling',
+      title: 'นัดหมายประเมิน',
+      description: 'กำหนดวันเวลาประเมิน',
       status: getStepStatus([
         'ONLINE_ASSESSMENT_SCHEDULED',
+        'ONSITE_ASSESSMENT_SCHEDULED'
+      ]),
+      icon: Calendar
+    },
+    {
+      id: 'assessment',
+      title: 'ประเมิน',
+      description: 'ออนไลน์และในพื้นที่',
+      status: getStepStatus([
         'ONLINE_ASSESSMENT_IN_PROGRESS',
-        'ONLINE_ASSESSMENT_COMPLETED'
+        'ONLINE_ASSESSMENT_COMPLETED',
+        'ONSITE_ASSESSMENT_IN_PROGRESS',
+        'ONSITE_ASSESSMENT_COMPLETED'
       ]),
       icon: VideoIcon
     },
     {
-      id: 'onsite-assessment',
-      title: 'ประเมินในพื้นที่',
-      description: 'การตรวจสอบในพื้นที่จริง',
-      status: getStepStatus([
-        'ONSITE_ASSESSMENT_SCHEDULED',
-        'ONSITE_ASSESSMENT_IN_PROGRESS',
-        'ONSITE_ASSESSMENT_COMPLETED'
-      ]),
-      icon: MapPin
-    },
-    {
-      id: 'certified',
-      title: 'ได้รับใบรับรอง',
-      description: 'ใบรับรอง GACP',
+      id: 'certificate',
+      title: 'ใบรับรอง',
+      description: 'ดาวน์โหลดใบรับรอง GACP',
       status: getStepStatus(['CERTIFIED']),
       icon: Award
     }
@@ -117,8 +140,9 @@ export const WorkflowProgressStepper: React.FC<WorkflowProgressStepperProps> = (
       'PAYMENT_PENDING_REVIEW', 'PAYMENT_CONFIRMED_REVIEW',
       'UNDER_REVIEW', 'REVISION_REQUESTED', 'REJECTED_PAYMENT_REQUIRED', 'REVIEW_APPROVED',
       'PAYMENT_PENDING_ASSESSMENT', 'PAYMENT_CONFIRMED_ASSESSMENT',
-      'ONLINE_ASSESSMENT_SCHEDULED', 'ONLINE_ASSESSMENT_IN_PROGRESS', 'ONLINE_ASSESSMENT_COMPLETED',
-      'ONSITE_ASSESSMENT_SCHEDULED', 'ONSITE_ASSESSMENT_IN_PROGRESS', 'ONSITE_ASSESSMENT_COMPLETED',
+      'ONLINE_ASSESSMENT_SCHEDULED', 'ONSITE_ASSESSMENT_SCHEDULED',
+      'ONLINE_ASSESSMENT_IN_PROGRESS', 'ONSITE_ASSESSMENT_IN_PROGRESS',
+      'ONLINE_ASSESSMENT_COMPLETED', 'ONSITE_ASSESSMENT_COMPLETED',
       'CERTIFIED'
     ];
 
@@ -166,7 +190,7 @@ export const WorkflowProgressStepper: React.FC<WorkflowProgressStepperProps> = (
                 </div>
 
                 {/* Step Label */}
-                <div className="mt-2 text-center max-w-24">
+                <div className="mt-2 text-center max-w-20">
                   <p className={cn(
                     "text-xs font-medium",
                     {

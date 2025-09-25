@@ -19,6 +19,9 @@ import { AppleStyleDashboard } from '@/components/dashboard/AppleStyleDashboard'
 import { WorkflowProgressStepper } from '@/components/workflow/WorkflowProgressStepper';
 import { RejectionCountBadge } from '@/components/dashboard/RejectionCountBadge';
 import { FarmManagementDashboard } from '@/components/applicant/FarmManagementDashboard';
+import NotificationPanel from '@/components/notifications/NotificationPanel';
+import AssessmentScheduler from '@/components/assessment/AssessmentScheduler';
+import CertificateSection from '@/components/certificate/CertificateSection';
 
 interface ApplicationData {
   id: string;
@@ -281,16 +284,22 @@ const ApplicantDashboard = () => {
           </Card>
         </div>
 
-        {/* Progress Stepper */}
-        {applications && applications.length > 0 && (
-          <div className="mb-8">
+        {/* Progress Stepper - Always show the 9-step workflow */}
+        <Card>
+          <CardHeader>
+            <CardTitle>ขั้นตอนการขอใบรับรอง GACP</CardTitle>
+            <CardDescription>ติดตามความคืบหน้าของการสมัครขอใบรับรอง</CardDescription>
+          </CardHeader>
+          <CardContent>
             <WorkflowProgressStepper 
-              currentStatus={applications[0]?.workflow_status}
-              revisionCount={applications[0]?.revision_count_current || 0}
-              maxFreeRevisions={applications[0]?.max_free_revisions || 2}
+              currentStatus={applications?.[0]?.workflow_status || 'DRAFT'}
+              revisionCount={applications?.[0]?.revision_count_current || 0}
+              maxFreeRevisions={applications?.[0]?.max_free_revisions || 2}
+              knowledgeTestPassed={knowledgeTestPassed}
+              applicationCreated={applications && applications.length > 0}
             />
-          </div>
-        )}
+          </CardContent>
+        </Card>
 
         {/* Quick Actions */}
         <Card>
@@ -323,6 +332,18 @@ const ApplicantDashboard = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Assessment Scheduler - Show if assessment is scheduled */}
+        {applications && applications.some(app => 
+          ['ONLINE_ASSESSMENT_SCHEDULED', 'ONSITE_ASSESSMENT_SCHEDULED'].includes(app.workflow_status)
+        ) && (
+          <AssessmentScheduler />
+        )}
+
+        {/* Certificate Section - Show if certified */}
+        {applications && applications.some(app => app.workflow_status === 'CERTIFIED') && (
+          <CertificateSection />
+        )}
 
         {/* Farm Management Dashboard */}
         <FarmManagementDashboard />
@@ -419,6 +440,17 @@ const ApplicantDashboard = () => {
       </Dialog>
 
       {/* Notifications Dialog */}
+      <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>การแจ้งเตือน</DialogTitle>
+          </DialogHeader>
+          <NotificationPanel 
+            onMarkAsRead={(id) => console.log('Mark as read:', id)}
+            onMarkAllAsRead={() => console.log('Mark all as read')}
+          />
+        </DialogContent>
+      </Dialog>
       <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
