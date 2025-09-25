@@ -21,22 +21,28 @@ const LoginPage = () => {
 
   // Redirect authenticated users to their dashboard
   useEffect(() => {
-    if (!loading && user?.profile) {
-      switch (user.profile.role) {
-        case 'applicant':
-          navigate('/applicant/dashboard');
-          break;
-        case 'reviewer':
-          navigate('/reviewer/dashboard');
-          break;
-        case 'auditor':
-          navigate('/auditor/dashboard');
-          break;
-        case 'admin':
-          navigate('/admin/dashboard');
-          break;
-        default:
-          navigate('/applicant/dashboard');
+    if (!loading && user) {
+      // Handle users with profiles
+      if (user.profile) {
+        switch (user.profile.role) {
+          case 'applicant':
+            navigate('/applicant/dashboard');
+            break;
+          case 'reviewer':
+            navigate('/reviewer/dashboard');
+            break;
+          case 'auditor':
+            navigate('/auditor/dashboard');
+            break;
+          case 'admin':
+            navigate('/admin/dashboard');
+            break;
+          default:
+            navigate('/applicant/dashboard');
+        }
+      } else {
+        // User exists but no profile - redirect to applicant dashboard for now
+        navigate('/applicant/dashboard');
       }
     }
   }, [user, loading, navigate]);

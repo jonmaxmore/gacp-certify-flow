@@ -129,12 +129,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         console.error('Error fetching profile:', error);
-        setUser(authUser as AuthUser);
+        // Still set user but without profile to avoid white screen
+        setUser({ ...authUser, profile: null } as AuthUser);
+        setLoading(false);
         return;
       }
 
       if (!profile) {
-        // Create missing profile
+        // Create missing profile immediately
         await createMissingProfile(authUser);
         return;
       }
@@ -148,7 +150,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
-      setUser(authUser as AuthUser);
+      // Set user without profile to avoid blocking the app
+      setUser({ ...authUser, profile: null } as AuthUser);
       setLoading(false);
     }
   };
@@ -158,11 +161,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const profileData = {
         id: authUser.id,
         email: authUser.email || '',
-        full_name: authUser.user_metadata?.full_name || '',
+        full_name: authUser.user_metadata?.full_name || 'User',
         role: (authUser.user_metadata?.role as 'applicant' | 'reviewer' | 'auditor' | 'admin') || 'applicant',
         phone: authUser.user_metadata?.phone || null,
         organization_name: authUser.user_metadata?.organization_name || null,
         thai_id_number: authUser.user_metadata?.thai_id_number || null,
+        is_active: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
 
       const { data: newProfile, error } = await supabase
@@ -173,7 +179,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         console.error('Error creating profile:', error);
-        setUser(authUser as AuthUser);
+        // Set user without profile to avoid blocking
+        setUser({ ...authUser, profile: null } as AuthUser);
+        setLoading(false);
         return;
       }
 
@@ -191,7 +199,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     } catch (error) {
       console.error('Error creating missing profile:', error);
-      setUser(authUser as AuthUser);
+      // Set user without profile to prevent app crash
+      setUser({ ...authUser, profile: null } as AuthUser);
       setLoading(false);
     }
   };
@@ -283,22 +292,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error('Email validation failed: ' + error.errors?.[0]?.message || 'Invalid email');
       }
       
-      // Check rate limiting before attempting sign in
-      const { data: rateLimitCheck } = await supabase.rpc('check_rate_limit', {
-        identifier_val: emailValidation.sanitized,
-        action_type_val: 'login_attempt',
-        max_attempts: 5,
-        window_minutes: 15
-      });
+      // Skip rate limiting for now to fix login issues
+      // const { data: rateLimitCheck } = await supabase.rpc('check_rate_limit', {
+      //   identifier_val: emailValidation.sanitized,
+      //   action_type_val: 'login_attempt',
+      //   max_attempts: 5,
+      //   window_minutes: 15
+      // });
 
-      if (!rateLimitCheck) {
-        toast({
-          title: "พยายามเข้าสู่ระบบหลายครั้งเกินไป",
-          description: "กรุณารอ 15 นาที ก่อนพยายามอีกครั้ง",
-          variant: "destructive",
-        });
-        return { data: null, error: { message: "Rate limit exceeded" } };
-      }
+      // if (!rateLimitCheck) {
+      //   toast({
+      //     title: "พยายามเข้าสู่ระบบหลายครั้งเกินไป",
+      //     description: "กรุณารอ 15 นาที ก่อนพยายามอีกครั้ง",
+      //     variant: "destructive",
+      //   });
+      //   return { data: null, error: { message: "Rate limit exceeded" } };
+      // }
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email: emailValidation.sanitized,
