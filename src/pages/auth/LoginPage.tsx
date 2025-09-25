@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
+import { LoginTestHelper } from '@/components/auth/LoginTestHelper';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -145,6 +146,7 @@ const LoginPage = () => {
             </Link>
           </div>
         </CardContent>
+        <LoginTestHelper />
       </Card>
     </div>
   );
