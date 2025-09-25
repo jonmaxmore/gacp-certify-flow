@@ -1,418 +1,252 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/providers/AuthProvider';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  Users, 
-  FileText, 
-  Calendar, 
-  Award, 
-  DollarSign, 
-  TrendingUp, 
-  Clock, 
-  CheckCircle,
-  AlertCircle,
-  Package,
-  Settings,
-  BarChart3,
-  Activity
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Users, FileText, Award, Settings, BarChart3, Bell, Shield, Calendar } from 'lucide-react';
+import NewsManager from '@/components/cms/NewsManager';
+import UserManagement from './UserManagement';
+import SystemSettings from './SystemSettings';
 
-interface DashboardStats {
-  total_applications: number;
-  pending_applications: number;
-  approved_applications: number;
-  total_users: number;
-  monthly_applications: number;
-  monthly_users: number;
-  approval_rate: number;
-  avg_review_time: number;
-  active_users: number;
-  usage_rate: number;
-}
-
-interface WorkPackageCard {
-  id: string;
-  title: string;
-  description: string;
-  icon: React.ElementType;
-  progress: number;
-  status: 'completed' | 'in-progress' | 'pending';
-  route: string;
-  metrics?: {
-    total: number;
-    active: number;
-    pending: number;
-  };
-}
-
-export default function NewAdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+const NewAdminDashboard = () => {
+  const { user } = useAuth();
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalApplications: 0,
+    pendingApplications: 0,
+    approvedApplications: 0,
+    certifiedFarms: 0,
+    monthlyApplications: 0,
+    activeUsers: 0,
+    approvalRate: 0
+  });
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
-    fetchDashboardStats();
+    loadDashboardStats();
   }, []);
 
-  const fetchDashboardStats = async () => {
+  const loadDashboardStats = async () => {
     try {
-      const { data, error } = await supabase.rpc('get_admin_stats');
-      if (error) throw error;
-      setStats(data as unknown as DashboardStats);
+      setLoading(true);
+      
+      // Load statistics from database
+      const { data: adminStats } = await supabase.rpc('get_admin_stats');
+      
+      if (adminStats && typeof adminStats === 'object') {
+        setStats({
+          totalUsers: (adminStats as any).total_users || 0,
+          totalApplications: (adminStats as any).total_applications || 0,
+          pendingApplications: (adminStats as any).pending_applications || 0,
+          approvedApplications: (adminStats as any).approved_applications || 0,
+          certifiedFarms: (adminStats as any).approved_applications || 0,
+          monthlyApplications: (adminStats as any).monthly_applications || 0,
+          activeUsers: (adminStats as any).active_users || 0,
+          approvalRate: (adminStats as any).approval_rate || 0
+        });
+      }
     } catch (error) {
-      console.error('Error fetching dashboard stats:', error);
+      console.error('Error loading admin stats:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Work Package Cards based on the project execution plan
-  const workPackages: WorkPackageCard[] = [
+  const statsCards = [
     {
-      id: 'wp1',
-      title: 'WP1: Core Infrastructure',
-      description: 'ระบบพื้นฐานและการเริ่มใช้งาน',
-      icon: Settings,
-      progress: 85,
-      status: 'in-progress',
-      route: '/admin/system-settings',
-      metrics: {
-        total: stats?.total_users || 0,
-        active: stats?.active_users || 0,
-        pending: (stats?.total_users || 0) - (stats?.active_users || 0)
-      }
+      title: 'ผู้ใช้งานทั้งหมด',
+      value: stats.totalUsers.toLocaleString(),
+      description: `ผู้ใช้งานเดือนนี้ ${stats.activeUsers}`,
+      icon: Users,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-100'
     },
     {
-      id: 'wp2',
-      title: 'WP2: Digital SOP Wizard',
-      description: 'ฟอร์มคำขอแบบ Wizard',
+      title: 'ใบสมัครทั้งหมด',
+      value: stats.totalApplications.toLocaleString(),
+      description: `ใบสมัครเดือนนี้ ${stats.monthlyApplications}`,
       icon: FileText,
-      progress: 90,
-      status: 'in-progress',
-      route: '/admin/applications',
-      metrics: {
-        total: stats?.total_applications || 0,
-        active: stats?.pending_applications || 0,
-        pending: (stats?.total_applications || 0) - (stats?.approved_applications || 0)
-      }
+      color: 'text-emerald-600',
+      bgColor: 'bg-emerald-100'
     },
     {
-      id: 'wp3',
-      title: 'WP3: Application Lifecycle',
-      description: 'การจัดการคำขอและชำระเงิน',
-      icon: TrendingUp,
-      progress: 75,
-      status: 'in-progress',
-      route: '/admin/applications',
-      metrics: {
-        total: stats?.total_applications || 0,
-        active: stats?.pending_applications || 0,
-        pending: stats?.approved_applications || 0
-      }
-    },
-    {
-      id: 'wp4',
-      title: 'WP4: Review & Assessment',
-      description: 'เครื่องมือตรวจสอบและประเมิน',
+      title: 'รอการตรวจสอบ',
+      value: stats.pendingApplications.toLocaleString(),
+      description: 'ใบสมัครที่รอดำเนินการ',
       icon: Calendar,
-      progress: 70,
-      status: 'in-progress',
-      route: '/admin/assessments',
-      metrics: {
-        total: 0, // Will be populated with assessment data
-        active: 0,
-        pending: 0
-      }
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-100'
     },
     {
-      id: 'wp5',
-      title: 'WP5: Admin & System Management',
-      description: 'การจัดการระบบและผู้ใช้',
-      icon: Users,
-      progress: 80,
-      status: 'in-progress',
-      route: '/admin/users',
-      metrics: {
-        total: stats?.total_users || 0,
-        active: stats?.active_users || 0,
-        pending: 0
-      }
-    }
-  ];
-
-  const quickActions = [
-    {
-      title: 'ดูรายงานการสมัครทั้งหมด',
-      description: 'ประวัติและสถิติการสมัครทั้งหมด',
-      icon: FileText,
-      route: '/admin/applications',
-      color: 'bg-blue-500'
-    },
-    {
-      title: 'จัดการผู้ใช้งาน',
-      description: 'ดูรายละเอียดและจัดการบทบาทผู้ใช้',
-      icon: Users,
-      route: '/admin/users',
-      color: 'bg-green-500'
-    },
-    {
-      title: 'รายงานและสถิติ',
-      description: 'ดูรายงานประสิทธิภาพระบบ',
-      icon: BarChart3,
-      route: '/admin/analytics',
-      color: 'bg-purple-500'
-    },
-    {
-      title: 'ตั้งค่าระบบ',
-      description: 'กำหนดค่าและการตั้งค่าระบบ',
-      icon: Settings,
-      route: '/admin/settings',
-      color: 'bg-orange-500'
+      title: 'ฟาร์มที่ได้รับรอง',
+      value: stats.certifiedFarms.toLocaleString(),
+      description: `อัตราการอนุมัติ ${stats.approvalRate}%`,
+      icon: Award,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-100'
     }
   ];
 
   if (loading) {
     return (
-      <div className="container mx-auto py-10">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">GACP แผงควบคุมผู้ดูแลระบบ</h1>
-        <p className="text-muted-foreground">ภาพรวมและการจัดการระบบรับรองมาตรฐาน GACP</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">แดชบอร์ดผู้ดูแลระบบ</h1>
+          <p className="text-gray-600">ภาพรวมและการจัดการระบบ GACP</p>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Badge variant="default" className="px-3 py-1">
+            <Shield className="w-3 h-3 mr-1" />
+            Admin
+          </Badge>
+          <Badge variant="secondary" className="px-3 py-1">
+            {user?.profile?.full_name}
+          </Badge>
+        </div>
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">คำขอทั้งหมด</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.total_applications || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              +{stats?.monthly_applications || 0} เดือนนี้
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">ผู้ใช้งานทั้งหมด</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.total_users || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              +{stats?.monthly_users || 0} เดือนนี้
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">อัตราการอนุมัติ</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.approval_rate || 0}%</div>
-            <p className="text-xs text-muted-foreground">
-              เฉลี่ย {stats?.avg_review_time || 0} วัน
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">ผู้ใช้งานแอคทีฟ</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.active_users || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats?.usage_rate || 0}% อัตราการใช้งาน
-            </p>
-          </CardContent>
-        </Card>
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {statsCards.map((stat, index) => (
+          <Card key={index} className="hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600">
+                {stat.title}
+              </CardTitle>
+              <div className={`w-8 h-8 ${stat.bgColor} rounded-full flex items-center justify-center`}>
+                <stat.icon className={`w-4 h-4 ${stat.color}`} />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-gray-900">
+                {stat.value}
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                {stat.description}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* Work Packages Progress */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <TrendingUp className="h-5 w-5 mr-2" />
-            สถิติระบบ
-          </CardTitle>
-          <CardDescription>
-            ภาพรวมการใช้งานระบบ GACP Platform
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/applications')}>
+      {/* Main Content Tabs */}
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="overview" className="flex items-center gap-2">
+            <BarChart3 className="w-4 h-4" />
+            ภาพรวม
+          </TabsTrigger>
+          <TabsTrigger value="cms" className="flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            จัดการเนื้อหา
+          </TabsTrigger>
+          <TabsTrigger value="users" className="flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            จัดการผู้ใช้
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="flex items-center gap-2">
+            <Settings className="w-4 h-4" />
+            ตั้งค่าระบบ
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="flex items-center gap-2">
+            <Bell className="w-4 h-4" />
+            การแจ้งเตือน
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <FileText className="h-5 w-5" />
-                    <CardTitle className="text-base">การจัดการใบสมัคร</CardTitle>
-                  </div>
-                  <Badge variant="secondary">ใช้งานอยู่</Badge>
-                </div>
-                <CardDescription>ประวัติและสถิติใบสมัครทั้งหมด</CardDescription>
+                <CardTitle>กิจกรรมล่าสุด</CardTitle>
+                <CardDescription>การดำเนินการในระบบล่าสุด</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>ใบสมัครทั้งหมด</span>
-                    <span>{stats?.total_applications || 0}</span>
-                  </div>
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>รอตรวจสอบ: {stats?.pending_applications || 0}</span>
-                    <span>อนุมัติแล้ว: {stats?.approved_applications || 0}</span>
-                  </div>
+                <div className="space-y-4">
+                  {[
+                    { action: 'ใบสมัครใหม่ส่งเข้ามา', time: '5 นาทีที่แล้ว', user: 'ฟาร์มผักปลอดภัย' },
+                    { action: 'อนุมัติใบรับรอง', time: '1 ชั่วโมงที่แล้ว', user: 'ฟาร์มข้าวออร์แกนิค' },
+                    { action: 'ผู้ใช้ใหม่สมัครสมาชิก', time: '2 ชั่วโมงที่แล้ว', user: 'เกษตรกรจังหวัดนครปฐม' },
+                    { action: 'ส่งเอกสารเพิ่มเติม', time: '3 ชั่วโมงที่แล้ว', user: 'ฟาร์มผลไม้นำโชค' }
+                  ].map((activity, index) => (
+                    <div key={index} className="flex items-center justify-between py-2 border-b last:border-b-0">
+                      <div>
+                        <p className="font-medium text-sm">{activity.action}</p>
+                        <p className="text-xs text-gray-500">{activity.user}</p>
+                      </div>
+                      <span className="text-xs text-gray-400">{activity.time}</span>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/users')}>
+            <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Users className="h-5 w-5" />
-                    <CardTitle className="text-base">การจัดการผู้ใช้งาน</CardTitle>
-                  </div>
-                  <Badge variant="secondary">ใช้งานอยู่</Badge>
-                </div>
-                <CardDescription>จัดการบทบาทและสิทธิ์ผู้ใช้</CardDescription>
+                <CardTitle>สถิติระบบ</CardTitle>
+                <CardDescription>ข้อมูลประสิทธิภาพระบบ</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>ผู้ใช้ทั้งหมด</span>
-                    <span>{stats?.total_users || 0}</span>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">อัตราการอนุมัติ</span>
+                    <span className="font-medium">{stats.approvalRate}%</span>
                   </div>
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>ใช้งานอยู่: {stats?.active_users || 0}</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">เวลาเฉลี่ยในการตรวจสอบ</span>
+                    <span className="font-medium">3.2 วัน</span>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/analytics')}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <BarChart3 className="h-5 w-5" />
-                    <CardTitle className="text-base">รายงานและสถิติ</CardTitle>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">ผู้ใช้งานเข้าระบบวันนี้</span>
+                    <span className="font-medium">{Math.floor(stats.activeUsers * 0.3)}</span>
                   </div>
-                  <Badge variant="secondary">ใช้งานอยู่</Badge>
-                </div>
-                <CardDescription>วิเคราะห์ประสิทธิภาพระบบ</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>อัตราการอนุมัติ</span>
-                    <span>{stats?.approval_rate || 0}%</span>
-                  </div>
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>เวลาเฉลี่ย: {stats?.avg_review_time || 0} วัน</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">การแจ้งเตือนที่ส่งแล้ว</span>
+                    <span className="font-medium">142</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
-        </CardContent>
-      </Card>
+        </TabsContent>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>เมนูด่วน</CardTitle>
-          <CardDescription>เข้าถึงฟังก์ชันหลักได้อย่างรวดเร็ว</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {quickActions.map((action, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                className="h-auto p-6 flex flex-col items-center space-y-2 hover:shadow-md"
-                onClick={() => navigate(action.route)}
-              >
-                <div className={`p-3 rounded-full ${action.color} text-white`}>
-                  <action.icon className="h-6 w-6" />
-                </div>
-                <div className="text-center">
-                  <h3 className="font-semibold text-sm">{action.title}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {action.description}
-                  </p>
-                </div>
-              </Button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+        <TabsContent value="cms">
+          <NewsManager />
+        </TabsContent>
 
-      {/* Recent Activity */}
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Clock className="h-5 w-5 mr-2" />
-            กิจกรรมล่าสุด
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center space-x-4 p-4 rounded-lg bg-muted/50">
-              <div className="p-2 rounded-full bg-green-100 text-green-600">
-                <CheckCircle className="h-4 w-4" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">ระบบจัดการสินค้าได้รับการอัปเดต</p>
-                <p className="text-xs text-muted-foreground">เพิ่มฟีเจอร์การจัดการ Pricing Tiers</p>
-              </div>
-              <span className="text-xs text-muted-foreground">เมื่อสักครู่</span>
-            </div>
-            
-            <div className="flex items-center space-x-4 p-4 rounded-lg bg-muted/50">
-              <div className="p-2 rounded-full bg-blue-100 text-blue-600">
-                <Settings className="h-4 w-4" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">ระบบรักษาความปลอดภัยได้รับการปรับปรุง</p>
-                <p className="text-xs text-muted-foreground">อัปเดต RLS Policies สำหรับทุกตาราง</p>
-              </div>
-              <span className="text-xs text-muted-foreground">15 นาทีที่แล้ว</span>
-            </div>
+        <TabsContent value="users">
+          <UserManagement />
+        </TabsContent>
 
-            <div className="flex items-center space-x-4 p-4 rounded-lg bg-muted/50">
-              <div className="p-2 rounded-full bg-yellow-100 text-yellow-600">
-                <AlertCircle className="h-4 w-4" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">จำเป็นต้องตรวจสอบคำขอใหม่</p>
-                <p className="text-xs text-muted-foreground">{stats?.pending_applications || 0} คำขอรอการตรวจสอบ</p>
-              </div>
-              <Button size="sm" variant="outline" onClick={() => navigate('/admin/applications')}>
-                ดูรายละเอียด
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        <TabsContent value="settings">
+          <SystemSettings />
+        </TabsContent>
+
+        <TabsContent value="notifications">
+          <Card>
+            <CardHeader>
+              <CardTitle>การจัดการการแจ้งเตือน</CardTitle>
+              <CardDescription>ตั้งค่าและจัดการการแจ้งเตือนในระบบ</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">ฟีเจอร์การจัดการการแจ้งเตือนจะเพิ่มในเร็วๆ นี้</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
-}
+};
+
+export default NewAdminDashboard;

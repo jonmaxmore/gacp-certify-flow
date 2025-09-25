@@ -1,343 +1,393 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '@/providers/AuthProvider';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  LogIn, 
-  UserPlus, 
-  ShieldCheck, 
-  TrendingUp, 
-  Users, 
-  Award,
-  ArrowRight,
-  Calendar,
-  MapPin,
-  Phone,
-  Mail,
-  ExternalLink
-} from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { ArrowRight, Award, Shield, Users, CheckCircle, Clock, FileText, Calendar } from 'lucide-react';
+
+interface NewsItem {
+  id: string;
+  title: string;
+  content: string;
+  published_at: string;
+  image_url?: string;
+  category?: string;
+  featured: boolean;
+}
 
 const HomePage = () => {
-  const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { user } = useAuth();
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalApplications: 0,
+    certifiedFarms: 0,
+    activeUsers: 0
+  });
 
-  const newsItems = [
-    {
-      id: 1,
-      title: "ประกาศหลักเกณฑ์ใหม่ GACP 2024",
-      excerpt: "กรมวิชาการเกษตรประกาศหลักเกณฑ์ใหม่สำหรับการรับรอง GACP ประจำปี 2024",
-      date: "2024-01-15",
-      category: "ประกาศ",
-      image: "/api/placeholder/400/200"
-    },
-    {
-      id: 2,
-      title: "เปิดรับสมัครผู้ประเมิน GACP",
-      excerpt: "เปิดรับสมัครผู้ประเมินคุณภาพการปฏิบัติทางการเกษตรที่ดี",
-      date: "2024-01-10", 
-      category: "ข่าวสาร",
-      image: "/api/placeholder/400/200"
-    },
-    {
-      id: 3,
-      title: "อบรมเกษตรกรออนไลน์",
-      excerpt: "จัดอบรมเกษตรกรเรื่องมาตรฐาน GACP ผ่านระบบออนไลน์",
-      date: "2024-01-05",
-      category: "กิจกรรม", 
-      image: "/api/placeholder/400/200"
+  useEffect(() => {
+    loadContent();
+    loadStats();
+  }, []);
+
+  const loadContent = async () => {
+    try {
+      // Mock news data - in real implementation, this would come from CMS
+      const mockNews = [
+        {
+          id: '1',
+          title: 'ประกาศเปิดรับสมัครใบรับรอง GACP รอบใหม่',
+          content: 'กรมวิชาการเกษตร เปิดรับสมัครใบรับรอง GACP สำหรับฟาร์มเกษตรอินทรีย์ รอบที่ 2/2568',
+          published_at: '2024-01-15',
+          category: 'ประกาศ',
+          featured: true,
+          image_url: '/api/placeholder/400/200'
+        },
+        {
+          id: '2',
+          title: 'อบรมเชิงปฏิบัติการ GACP ออนไลน์',
+          content: 'จัดอบรมออนไลน์สำหรับเกษตรกรที่สนใจสมัครใบรับรอง GACP ทุกวันศุกร์',
+          published_at: '2024-01-10',
+          category: 'อบรม',
+          featured: false
+        },
+        {
+          id: '3',
+          title: 'ข่าวดี! ลดค่าธรรมเนียมการสมัคร 20%',
+          content: 'ในโอกาสปีใหม่ 2568 ทางกรมฯ ขอลดค่าธรรมเนียมการสมัครใบรับรอง GACP',
+          published_at: '2024-01-01',
+          category: 'โปรโมชั่น',
+          featured: true
+        }
+      ];
+      setNews(mockNews);
+    } catch (error) {
+      console.error('Error loading content:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  const statistics = [
-    { icon: Users, label: "เกษตรกรที่ลงทะเบียน", value: "2,847", color: "text-blue-600" },
-    { icon: Award, label: "ใบรับรองออกแล้ว", value: "1,256", color: "text-green-600" },
-    { icon: ShieldCheck, label: "ฟาร์มได้รับรอง", value: "892", color: "text-purple-600" },
-    { icon: TrendingUp, label: "อัตราความสำเร็จ", value: "94%", color: "text-orange-600" }
-  ];
+  const loadStats = async () => {
+    try {
+      // Load basic stats
+      const { data: applications } = await supabase
+        .from('applications')
+        .select('id, status');
+      
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id');
+
+      setStats({
+        totalApplications: applications?.length || 0,
+        certifiedFarms: applications?.filter(app => app.status === 'CERTIFIED').length || 0,
+        activeUsers: profiles?.length || 0
+      });
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    }
+  };
+
+  const featuredNews = news.filter(item => item.featured);
+  const regularNews = news.filter(item => !item.featured);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-border/50 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-                <ShieldCheck className="w-7 h-7 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-foreground">GACP Certification</h1>
-                <p className="text-sm text-muted-foreground">Good Agricultural Certification Platform</p>
-              </div>
-            </div>
-
-            <nav className="hidden md:flex items-center space-x-8">
-              <a href="#home" className="text-foreground hover:text-primary transition-colors">หน้าหลัก</a>
-              <a href="#about" className="text-muted-foreground hover:text-primary transition-colors">เกี่ยวกับเรา</a>
-              <a href="#news" className="text-muted-foreground hover:text-primary transition-colors">ข่าวสาร</a>
-              <a href="#services" className="text-muted-foreground hover:text-primary transition-colors">บริการออนไลน์</a>
-              <a href="#contact" className="text-muted-foreground hover:text-primary transition-colors">ติดต่อ</a>
-            </nav>
-
-            <div className="flex items-center space-x-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate('/login')}
-                className="flex items-center space-x-2"
-              >
-                <LogIn className="w-4 h-4" />
-                <span>เข้าสู่ระบบ</span>
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => navigate('/register')}
-                className="flex items-center space-x-2"
-              >
-                <UserPlus className="w-4 h-4" />
-                <span>สมัครสมาชิก</span>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
+    <div className="min-h-screen">
       {/* Hero Section */}
-      <section id="home" className="py-20 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <Badge variant="secondary" className="w-fit">
+      <section className="relative bg-gradient-to-br from-emerald-50 via-blue-50 to-slate-50 py-20">
+        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+        <div className="container mx-auto px-4 relative">
+          <div className="text-center max-w-4xl mx-auto">
+            <div className="mb-6">
+              <Badge variant="secondary" className="px-4 py-2 text-sm font-medium">
+                <Shield className="w-4 h-4 mr-2" />
                 ระบบรับรองมาตรฐาน GACP
               </Badge>
-              <h1 className="text-4xl md:text-5xl font-bold text-foreground leading-tight">
-                ระบบรับรอง
-                <span className="text-primary block">การปฏิบัติทางการเกษตรที่ดี</span>
-              </h1>
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                ยกระดับคุณภาพการผลิตทางการเกษตรของคุณด้วยมาตรฐาน GACP 
-                ที่ได้รับการยอมรับในระดับสากล เพื่อความปลอดภัยของผู้บริโภคและสิ่งแวดล้อม
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
-                  size="lg" 
-                  onClick={() => navigate('/register')}
-                  className="flex items-center space-x-2"
-                >
-                  <span>เริ่มต้นสมัครรับรอง</span>
-                  <ArrowRight className="w-5 h-5" />
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  onClick={() => navigate('/verify-certificate')}
-                >
-                  ตรวจสอบใบรับรอง
-                </Button>
-              </div>
             </div>
-            <div className="relative">
-              <div className="w-full h-80 bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl flex items-center justify-center">
-                <ShieldCheck className="w-32 h-32 text-primary/60" />
-              </div>
+            
+            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              ระบบใบรับรอง
+              <span className="bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+                {" "}GACP{" "}
+              </span>
+              ออนไลน์
+            </h1>
+            
+            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+              สมัครใบรับรองมาตรฐานการปฏิบัติทางการเกษตรที่ดี (Good Agricultural Practices) 
+              ผ่านระบบออนไลน์ที่สะดวก รวดเร็ว และโปร่งใส
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              {user ? (
+                <Button 
+                  asChild 
+                  size="lg" 
+                  className="px-8 py-4 text-lg font-semibold bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700"
+                >
+                  <Link to={`/${user.profile?.role || 'applicant'}/dashboard`}>
+                    <Users className="w-5 h-5 mr-2" />
+                    เข้าสู่ระบบ
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Link>
+                </Button>
+              ) : (
+                <>
+                  <Button 
+                    asChild 
+                    size="lg" 
+                    className="px-8 py-4 text-lg font-semibold bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700"
+                  >
+                    <Link to="/login">
+                      <Users className="w-5 h-5 mr-2" />
+                      เข้าสู่ระบบ
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </Link>
+                  </Button>
+                  
+                  <Button 
+                    asChild 
+                    variant="outline" 
+                    size="lg" 
+                    className="px-8 py-4 text-lg font-semibold border-2 border-emerald-200 hover:border-emerald-300"
+                  >
+                    <Link to="/register">
+                      <FileText className="w-5 h-5 mr-2" />
+                      สมัครสมาชิก
+                    </Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Statistics */}
+      {/* Stats Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {statistics.map((stat, index) => (
-              <Card key={index} className="text-center border-0 shadow-sm hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <stat.icon className={`w-8 h-8 mx-auto mb-3 ${stat.color}`} />
-                  <div className="text-2xl font-bold text-foreground mb-1">{stat.value}</div>
-                  <div className="text-sm text-muted-foreground">{stat.label}</div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* News Section */}
-      <section id="news" className="py-16 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">ข่าวสารและประกาศ</h2>
-            <p className="text-muted-foreground">อัปเดตข่าวสารและประกาศสำคัญเกี่ยวกับ GACP</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {newsItems.map((news) => (
-              <Card key={news.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
-                <div className="h-48 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
-                  <Calendar className="w-16 h-16 text-primary/40" />
-                </div>
-                <CardHeader>
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="secondary" className="text-xs">
-                      {news.category}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">{news.date}</span>
-                  </div>
-                  <CardTitle className="text-lg">{news.title}</CardTitle>
-                  <CardDescription className="line-clamp-2">
-                    {news.excerpt}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button variant="ghost" size="sm" className="p-0 h-auto font-medium text-primary hover:text-primary/80">
-                    อ่านเพิ่มเติม
-                    <ArrowRight className="w-4 h-4 ml-1" />
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <div className="text-center mt-8">
-            <Button variant="outline">
-              ดูข่าวสารทั้งหมด
-              <ExternalLink className="w-4 h-4 ml-2" />
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Services Section */}
-      <section id="services" className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">บริการออนไลน์</h2>
-            <p className="text-muted-foreground">บริการครบวงจรสำหรับการรับรองมาตรฐาน GACP</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FileText className="w-8 h-8 text-emerald-600" />
+              </div>
+              <h3 className="text-3xl font-bold text-gray-900 mb-2">{stats.totalApplications.toLocaleString()}</h3>
+              <p className="text-gray-600">ใบสมัครทั้งหมด</p>
+            </div>
+            
+            <div className="text-center">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <UserPlus className="w-8 h-8 text-blue-600" />
+                <Award className="w-8 h-8 text-blue-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">สมัครรับรอง</h3>
-              <p className="text-muted-foreground mb-4">ส่งใบสมัครรับรองมาตรฐาน GACP ออนไลน์</p>
-              <Button onClick={() => navigate('/register')}>เริ่มต้น</Button>
-            </Card>
-
-            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <ShieldCheck className="w-8 h-8 text-green-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">ตรวจสอบใบรับรอง</h3>
-              <p className="text-muted-foreground mb-4">ตรวจสอบความถูกต้องของใบรับรอง</p>
-              <Button onClick={() => navigate('/verify-certificate')}>ตรวจสอบ</Button>
-            </Card>
-
-            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <h3 className="text-3xl font-bold text-gray-900 mb-2">{stats.certifiedFarms.toLocaleString()}</h3>
+              <p className="text-gray-600">ฟาร์มที่ได้รับรอง</p>
+            </div>
+            
+            <div className="text-center">
               <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <TrendingUp className="w-8 h-8 text-purple-600" />
+                <Users className="w-8 h-8 text-purple-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">ติดตามสถานะ</h3>
-              <p className="text-muted-foreground mb-4">ติดตามความคืบหน้าการรับรอง</p>
-              <Button onClick={() => navigate('/login')}>เข้าสู่ระบบ</Button>
-            </Card>
+              <h3 className="text-3xl font-bold text-gray-900 mb-2">{stats.activeUsers.toLocaleString()}</h3>
+              <p className="text-gray-600">ผู้ใช้งานทั้งหมด</p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Contact Section */}
-      <section id="contact" className="py-16 bg-muted/30">
+      {/* Featured News Section */}
+      {featuredNews.length > 0 && (
+        <section className="py-16 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">ข่าวสารเด่น</h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                ติดตามข่าวสารและประกาศสำคัญเกี่ยวกับระบบใบรับรอง GACP
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {featuredNews.map((item) => (
+                <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  {item.image_url && (
+                    <div className="h-48 bg-gradient-to-br from-emerald-100 to-blue-100"></div>
+                  )}
+                  <CardHeader>
+                    <div className="flex items-center gap-2 mb-2">
+                      {item.category && (
+                        <Badge variant="secondary" className="text-xs">
+                          {item.category}
+                        </Badge>
+                      )}
+                      <div className="flex items-center text-xs text-gray-500">
+                        <Calendar className="w-3 h-3 mr-1" />
+                        {new Date(item.published_at).toLocaleDateString('th-TH')}
+                      </div>
+                    </div>
+                    <CardTitle className="line-clamp-2">{item.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="line-clamp-3">
+                      {item.content}
+                    </CardDescription>
+                    <Button variant="ghost" className="mt-4 p-0 h-auto text-emerald-600 hover:text-emerald-700">
+                      อ่านต่อ
+                      <ArrowRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Process Steps Section */}
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">ติดต่อเรา</h2>
-            <p className="text-muted-foreground">สอบถามข้อมูลเพิ่มเติมเกี่ยวกับการรับรองมาตรฐาน GACP</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">ขั้นตอนการสมัคร</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              กระบวนการสมัครใบรับรอง GACP ที่เข้าใจง่าย
+            </p>
           </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="text-center p-6">
-              <MapPin className="w-8 h-8 text-primary mx-auto mb-4" />
-              <h3 className="font-semibold mb-2">ที่อยู่</h3>
-              <p className="text-muted-foreground text-sm">
-                กรมวิชาการเกษตร กระทรวงเกษตรและสหกรณ์<br />
-                ถนนพหลโยธิน แขวงลาดยาว เขตจตุจักร<br />
-                กรุงเทพมหานคร 10900
-              </p>
-            </Card>
-
-            <Card className="text-center p-6">
-              <Phone className="w-8 h-8 text-primary mx-auto mb-4" />
-              <h3 className="font-semibold mb-2">โทรศัพท์</h3>
-              <p className="text-muted-foreground text-sm">
-                02-579-8000<br />
-                02-940-6000
-              </p>
-            </Card>
-
-            <Card className="text-center p-6">
-              <Mail className="w-8 h-8 text-primary mx-auto mb-4" />
-              <h3 className="font-semibold mb-2">อีเมล</h3>
-              <p className="text-muted-foreground text-sm">
-                gacp@doa.go.th<br />
-                info@gacp-thailand.org
-              </p>
-            </Card>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              {
+                step: 1,
+                title: 'สมัครสมาชิก',
+                description: 'ลงทะเบียนและยืนยันตัวตน',
+                icon: Users,
+                color: 'emerald'
+              },
+              {
+                step: 2,
+                title: 'ส่งเอกสาร',
+                description: 'อัพโหลดเอกสารที่จำเป็น',
+                icon: FileText,
+                color: 'blue'
+              },
+              {
+                step: 3,
+                title: 'ตรวจประเมิน',
+                description: 'ผู้เชี่ยวชาญตรวจสอบ',
+                icon: CheckCircle,
+                color: 'purple'
+              },
+              {
+                step: 4,
+                title: 'รับใบรับรอง',
+                description: 'ดาวน์โหลดใบรับรอง',
+                icon: Award,
+                color: 'orange'
+              }
+            ].map((item) => (
+              <div key={item.step} className="text-center">
+                <div className={`w-16 h-16 bg-${item.color}-100 rounded-full flex items-center justify-center mx-auto mb-4`}>
+                  <item.icon className={`w-8 h-8 text-${item.color}-600`} />
+                </div>
+                <div className={`text-2xl font-bold text-${item.color}-600 mb-2`}>
+                  {item.step}
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {item.title}
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  {item.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-slate-900 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <ShieldCheck className="w-8 h-8 text-primary" />
-                <span className="text-xl font-bold">GACP</span>
-              </div>
-              <p className="text-slate-300 text-sm">
-                ระบบรับรองการปฏิบัติทางการเกษตรที่ดี เพื่อความปลอดภัยและคุณภาพของผลผลิตทางการเกษตร
-              </p>
+      {/* Regular News Section */}
+      {regularNews.length > 0 && (
+        <section className="py-16 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">ข่าวสารทั่วไป</h2>
             </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">ลิงก์สำคัญ</h4>
-              <ul className="space-y-2 text-sm text-slate-300">
-                <li><a href="#" className="hover:text-white transition-colors">เกี่ยวกับเรา</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">มาตรฐาน GACP</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">คู่มือการใช้งาน</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">คำถามที่พบบ่อย</a></li>
-              </ul>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {regularNews.map((item) => (
+                <Card key={item.id} className="hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      {item.category && (
+                        <Badge variant="outline" className="text-xs">
+                          {item.category}
+                        </Badge>
+                      )}
+                      <div className="flex items-center text-xs text-gray-500">
+                        <Clock className="w-3 h-3 mr-1" />
+                        {new Date(item.published_at).toLocaleDateString('th-TH')}
+                      </div>
+                    </div>
+                    <CardTitle className="text-lg line-clamp-2">{item.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <CardDescription className="line-clamp-2">
+                      {item.content}
+                    </CardDescription>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">บริการ</h4>
-              <ul className="space-y-2 text-sm text-slate-300">
-                <li><a href="#" className="hover:text-white transition-colors">สมัครรับรอง</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">ตรวจสอบใบรับรอง</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">ติดตามสถานะ</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">ดาวน์โหลดเอกสาร</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">ติดต่อเรา</h4>
-              <ul className="space-y-2 text-sm text-slate-300">
-                <li>02-579-8000</li>
-                <li>gacp@doa.go.th</li>
-                <li>กรมวิชาการเกษตร</li>
-                <li>กระทรวงเกษตรและสหกรณ์</li>
-              </ul>
+            
+            <div className="text-center mt-8">
+              <Button asChild variant="outline">
+                <Link to="/news">
+                  ดูข่าวสารทั้งหมด
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
+              </Button>
             </div>
           </div>
+        </section>
+      )}
 
-          <div className="border-t border-slate-700 pt-8 mt-8 text-center text-sm text-slate-400">
-            <p>&copy; 2024 GACP Certification Platform. All rights reserved.</p>
-          </div>
+      {/* CTA Section */}
+      <section className="py-16 bg-gradient-to-r from-emerald-600 to-blue-600">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold text-white mb-4">
+            พร้อมเริ่มต้นการสมัครใบรับรอง GACP แล้วหรือยัง?
+          </h2>
+          <p className="text-emerald-100 mb-8 max-w-2xl mx-auto">
+            เริ่มต้นการเดินทางสู่มาตรฐานการปฏิบัติทางการเกษตรที่ดี วันนี้
+          </p>
+          
+          {!user && (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                asChild 
+                size="lg" 
+                variant="secondary" 
+                className="bg-white text-emerald-600 hover:bg-gray-100"
+              >
+                <Link to="/register">
+                  เริ่มต้นสมัคร
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Link>
+              </Button>
+              
+              <Button 
+                asChild 
+                size="lg" 
+                variant="outline" 
+                className="border-white text-white hover:bg-white hover:text-emerald-600"
+              >
+                <Link to="/about">
+                  เรียนรู้เพิ่มเติม
+                </Link>
+              </Button>
+            </div>
+          )}
         </div>
-      </footer>
+      </section>
     </div>
   );
 };
