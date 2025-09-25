@@ -254,7 +254,7 @@ export const EnhancedApplicantDashboard: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">แดshboartเกษตรกร</h1>
+          <h1 className="text-2xl font-bold">แดชบอร์ดเกษตรกร</h1>
           <p className="text-muted-foreground">
             ยินดีต้อนรับ, {user?.profile?.full_name}
           </p>
