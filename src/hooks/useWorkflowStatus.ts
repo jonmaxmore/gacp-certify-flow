@@ -159,14 +159,27 @@ export const useWorkflowStatus = () => {
 
       if (error) throw error;
 
-      toast({
-        title: "สร้างรายการชำระเงินสำเร็จ",
-        description: "รายการชำระเงินได้รับการสร้างแล้ว",
-      });
+      if (data) {
+        // Create invoice for the payment
+        const { data: invoiceId, error: invoiceError } = await supabase.rpc('create_invoice_from_payment', {
+          p_payment_id: data
+        });
 
-      // Refresh data
-      await fetchWorkflowData();
-      return data;
+        if (invoiceError) {
+          console.error('Error creating invoice:', invoiceError);
+        }
+
+        toast({
+          title: "สร้างใบแจ้งหนี้สำเร็จ",
+          description: "ระบบได้สร้างใบแจ้งหนี้และรายการชำระเงินแล้ว",
+        });
+
+        // Refresh data
+        await fetchWorkflowData();
+        return data;
+      }
+
+      return null;
 
     } catch (error: any) {
       console.error('Error creating payment record:', error);

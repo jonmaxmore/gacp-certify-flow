@@ -500,6 +500,87 @@ export type Database = {
           },
         ]
       }
+      invoices: {
+        Row: {
+          amount: number
+          application_id: string
+          created_at: string
+          currency: string
+          description: string
+          due_date: string
+          id: string
+          invoice_number: string
+          issued_at: string
+          notes: string | null
+          paid_at: string | null
+          payment_id: string | null
+          payment_method: string | null
+          pdf_url: string | null
+          qr_code_data: string | null
+          receipt_number: string | null
+          receipt_url: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          application_id: string
+          created_at?: string
+          currency?: string
+          description: string
+          due_date: string
+          id?: string
+          invoice_number: string
+          issued_at?: string
+          notes?: string | null
+          paid_at?: string | null
+          payment_id?: string | null
+          payment_method?: string | null
+          pdf_url?: string | null
+          qr_code_data?: string | null
+          receipt_number?: string | null
+          receipt_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          application_id?: string
+          created_at?: string
+          currency?: string
+          description?: string
+          due_date?: string
+          id?: string
+          invoice_number?: string
+          issued_at?: string
+          notes?: string | null
+          paid_at?: string | null
+          payment_id?: string | null
+          payment_method?: string | null
+          pdf_url?: string | null
+          qr_code_data?: string | null
+          receipt_number?: string | null
+          receipt_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           action_label: string | null
@@ -1051,6 +1132,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      create_invoice_from_payment: {
+        Args: { p_payment_id: string }
+        Returns: string
+      }
       create_payment_record: {
         Args: {
           p_amount: number
@@ -1065,6 +1150,14 @@ export type Database = {
         Returns: string
       }
       generate_certificate_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_invoice_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_receipt_number: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
@@ -1116,6 +1209,10 @@ export type Database = {
           p_user_id: string
         }
         Returns: string
+      }
+      mark_invoice_paid: {
+        Args: { p_invoice_id: string; p_payment_method?: string }
+        Returns: boolean
       }
       update_application_status: {
         Args: {

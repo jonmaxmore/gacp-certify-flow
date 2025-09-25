@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { DollarSign, Clock, CheckCircle, AlertCircle, ArrowLeft, Receipt, CreditCard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { InvoiceManager } from '@/components/invoices/InvoiceManager';
 
 interface PaymentData {
   id: string;
@@ -110,122 +111,7 @@ const PaymentsPage = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {payments.length === 0 ? (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <DollarSign className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">ยังไม่มีรายการชำระเงิน</h3>
-              <p className="text-muted-foreground mb-4">
-                เมื่อคุณส่งใบสมัครแล้ว ระบบจะสร้างรายการชำระเงินให้อัตโนมัติ
-              </p>
-              <Button onClick={() => navigate('/applicant/application/new')}>
-                สร้างใบสมัครใหม่
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-6">
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">ยอดรวมที่ต้องชำระ</p>
-                      <p className="text-2xl font-bold">
-                        {payments.reduce((sum, p) => sum + p.amount, 0).toLocaleString()} THB
-                      </p>
-                    </div>
-                    <DollarSign className="h-8 w-8 text-blue-500" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">ชำระแล้ว</p>
-                      <p className="text-2xl font-bold text-green-600">
-                        {payments
-                          .filter(p => p.status === 'COMPLETED')
-                          .reduce((sum, p) => sum + p.amount, 0)
-                          .toLocaleString()} THB
-                      </p>
-                    </div>
-                    <CheckCircle className="h-8 w-8 text-green-500" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">รอชำระ</p>
-                      <p className="text-2xl font-bold text-orange-600">
-                        {payments
-                          .filter(p => p.status === 'PENDING')
-                          .reduce((sum, p) => sum + p.amount, 0)
-                          .toLocaleString()} THB
-                      </p>
-                    </div>
-                    <Clock className="h-8 w-8 text-orange-500" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Payments List */}
-            <Card>
-              <CardHeader>
-                <CardTitle>รายการชำระเงิน</CardTitle>
-                <CardDescription>รายละเอียดการชำระเงินทั้งหมด</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {payments.map((payment) => (
-                    <div key={payment.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <h4 className="font-medium">{getMilestoneLabel(payment.milestone)}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            {payment.applications?.application_number} - {payment.applications?.farm_name}
-                          </p>
-                        </div>
-                        {getStatusBadge(payment.status)}
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <div className="text-lg font-semibold text-primary">
-                          {payment.amount.toLocaleString()} THB
-                        </div>
-                        <div className="flex gap-2">
-                          {payment.status === 'PENDING' && (
-                            <Button size="sm">
-                              <CreditCard className="h-4 w-4 mr-2" />
-                              ชำระเงิน
-                            </Button>
-                          )}
-                          {payment.status === 'COMPLETED' && (
-                            <Button variant="outline" size="sm">
-                              <Receipt className="h-4 w-4 mr-2" />
-                              ใบเสร็จ
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <p className="text-xs text-muted-foreground mt-2">
-                        สร้างเมื่อ: {new Date(payment.created_at).toLocaleDateString('th-TH')}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+        <InvoiceManager />
       </main>
     </div>
   );
