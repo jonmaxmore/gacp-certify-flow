@@ -1,13 +1,17 @@
-import { createClient } from '@supabase/supabase-js';
-import type { Database } from './types';
+import { createClient } from '@supabase/supabase-js'
+import type { Database } from './types'
 
-const SUPABASE_URL = "https://mpxebbqxqyzalctgsyxm.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1weGViYnF4cXl6YWxjdGdzeXhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1MjAxNjksImV4cCI6MjA3NDA5NjE2OX0.dSQ9q5KN3p2Ix2lZBdNs8CE3P3c1eiv-7BWzSBfB1j8";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.warn('[Supabase] Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY. Check your environment variables.')</code>
+}
+
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
   }
-});
+})
