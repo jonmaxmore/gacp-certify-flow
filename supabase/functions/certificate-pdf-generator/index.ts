@@ -1,10 +1,28 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+// SECURITY FIX: Restrictive CORS configuration
+const allowedOrigins = [
+  'https://mpxebbqxqyzalctgsyxm.supabase.co',
+  'https://24a232ca-9899-428e-a9ab-a4c88dd25128.lovableproject.com',
+  'http://localhost:3000',
+  'http://localhost:5173'
+];
+
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': '', // Will be set dynamically
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Credentials': 'true',
+};
+
+const getCorsHeaders = (origin?: string | null) => {
+  const isAllowedOrigin = origin && allowedOrigins.includes(origin);
+  return {
+    ...corsHeaders,
+    'Access-Control-Allow-Origin': isAllowedOrigin ? origin : allowedOrigins[0],
+  };
+};
 
 interface CertificateRequest {
   applicationId: string;
@@ -27,9 +45,10 @@ interface CertificateData {
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
+  // Handle CORS preflight requests with secure headers
+  const secureHeaders = getCorsHeaders(req.headers.get('origin'));
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { headers: secureHeaders })
   }
 
   try {
@@ -41,7 +60,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (req.method !== 'POST') {
       return new Response(
         JSON.stringify({ error: 'Method not allowed' }),
-        { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 405, headers: { ...secureHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
@@ -50,7 +69,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (!applicationId) {
       return new Response(
         JSON.stringify({ error: 'Application ID is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...secureHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
@@ -142,7 +161,7 @@ const handler = async (req: Request): Promise<Response> => {
         html: certificateHtml // For debugging
       }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...secureHeaders, 'Content-Type': 'application/json' },
         status: 200,
       }
     )
@@ -154,7 +173,7 @@ const handler = async (req: Request): Promise<Response> => {
         error: error?.message || 'Failed to generate certificate PDF' 
       }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...secureHeaders, 'Content-Type': 'application/json' },
         status: 500,
       }
     )
