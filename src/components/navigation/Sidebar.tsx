@@ -32,7 +32,6 @@ const getNavigation = (t: any) => ({
   reviewer: [
     { name: t('menu.dashboard'), href: '/reviewer/dashboard', icon: LayoutDashboard },
     { name: t('menu.queue'), href: '/reviewer/queue', icon: FileText },
-    { name: t('menu.assessments'), href: '/reviewer/assessments', icon: Calendar },
   ],
   auditor: [
     { name: t('menu.dashboard'), href: '/auditor/dashboard', icon: LayoutDashboard },
