@@ -60,38 +60,62 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Set up auth state listener
+    let mounted = true;
+
+    // Set up auth state listener with proper error handling
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        
-        if (session?.user) {
-          // Use setTimeout to avoid blocking auth state change
-          setTimeout(() => {
-            fetchUserProfile(session.user);
-          }, 0);
-        } else {
-          setUser(null);
-          setLoading(false);
+      async (event, session) => {
+        if (!mounted) return;
+
+        try {
+          setSession(session);
+          
+          if (session?.user) {
+            await fetchUserProfile(session.user);
+          } else {
+            setUser(null);
+            if (mounted) setLoading(false);
+          }
+        } catch (error) {
+          console.error('Auth state change error:', error);
+          if (mounted) {
+            setUser(null);
+            setLoading(false);
+          }
         }
       }
     );
 
-    // Get initial session
-    supabase.auth.getSession()
-      .then(async ({ data: { session } }) => {
-        setSession(session);
-        if (session?.user) {
-          await fetchUserProfile(session.user);
+    // Get initial session with improved error handling
+    const initializeAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting initial session:', error);
+          if (mounted) setLoading(false);
+          return;
         }
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Error getting initial session:', err);
-        setLoading(false);
-      });
 
-    return () => subscription.unsubscribe();
+        if (mounted) {
+          setSession(session);
+          if (session?.user) {
+            await fetchUserProfile(session.user);
+          }
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error('Initialize auth error:', err);
+        if (mounted) setLoading(false);
+      }
+    };
+
+    initializeAuth();
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const fetchUserProfile = async (authUser: User) => {

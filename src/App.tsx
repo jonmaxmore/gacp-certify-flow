@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/providers/AuthProvider';
@@ -6,135 +6,138 @@ import { LanguageProvider } from '@/providers/LanguageProvider';
 import { SecurityMonitor } from '@/components/security/SecurityMonitor';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import LoginPage from '@/pages/auth/LoginPage';
-import RegisterPage from '@/pages/auth/RegisterPage';
-import CertificateVerificationPage from '@/pages/public/CertificateVerificationPage';
-import { SystemTestDashboard } from '@/components/testing/SystemTestDashboard';
-import { SystemAnalysisReport } from '@/components/analysis/SystemAnalysisReport';
-import ApplicantDashboard from '@/pages/applicant/ApplicantDashboard';
-import ApplicationWizard from '@/pages/applicant/ApplicationWizard';
-import PaymentsPage from '@/pages/applicant/PaymentsPage';
-import CertificatesPage from '@/pages/applicant/CertificatesPage';
-import AccountSettings from '@/pages/applicant/AccountSettings';
-import CertificateManagement from '@/pages/admin/CertificateManagement';
-import ApplicationsListPage from '@/pages/applicant/ApplicationsListPage';
-import AdminApplicationsHistoryPage from '@/pages/admin/AdminApplicationsHistoryPage';
-import SchedulePage from '@/pages/applicant/SchedulePage';
-import ReviewerDashboard from '@/pages/reviewer/ReviewerDashboard';
-import ReviewQueue from '@/pages/reviewer/ReviewQueue';
-import ReviewDetail from '@/pages/reviewer/ReviewDetail';
-import AuditorDashboard from '@/pages/auditor/AuditorDashboard';
-import AssessmentManagement from '@/pages/auditor/AssessmentManagement';
-import AdminDashboard from '@/pages/admin/AdminDashboard';
-import NewAdminDashboard from '@/pages/admin/NewAdminDashboard';
-import ProductManagement from '@/pages/admin/ProductManagement';
-import PlatformAnalytics from '@/pages/admin/PlatformAnalytics';
-import UserManagement from '@/pages/admin/UserManagement';
-import SystemSettings from '@/pages/admin/SystemSettings';
-import AssessmentCalendar from '@/pages/auditor/AssessmentCalendar';
-import OnlineAssessment from '@/pages/auditor/OnlineAssessment';
-import AssessmentReport from '@/pages/auditor/AssessmentReport';
-import AssessmentScheduling from '@/pages/reviewer/AssessmentScheduling';
+import { removeDebugLogs, collectPerformanceMetrics } from '@/utils/codeCleanup';
+import { LoadingFallback, ErrorFallback } from '@/components/optimized/LazyComponents';
 
-function App() {
+// Lazy load only the essential auth components immediately
+const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
+const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
+const CertificateVerificationPage = lazy(() => import('@/pages/public/CertificateVerificationPage'));
+
+// Lazy load dashboard pages with chunking
+const LazyApplicantRoutes = lazy(() => import('@/components/routes/ApplicantRoutes'));
+const LazyReviewerRoutes = lazy(() => import('@/components/routes/ReviewerRoutes'));
+const LazyAuditorRoutes = lazy(() => import('@/components/routes/AuditorRoutes'));
+const LazyAdminRoutes = lazy(() => import('@/components/routes/AdminRoutes'));
+
+// Error boundary for better error handling
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error?: Error }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Application error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <ErrorFallback error={this.state.error || new Error('Unknown error')} />;
+    }
+
+    return this.props.children;
+  }
+}
+
+function OptimizedApp() {
+  useEffect(() => {
+    // Remove debug logs in production
+    removeDebugLogs();
+    
+    // Collect performance metrics
+    const metrics = collectPerformanceMetrics();
+    if (metrics && process.env.NODE_ENV === 'development') {
+      console.log('📊 Performance Metrics:', metrics);
+    }
+  }, []);
+
   return (
-    <AuthProvider>
-      <LanguageProvider>
-        <Router>
-          <div className="min-h-screen bg-background">
-          <Routes>
-            {/* Public routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/verify-certificate" element={<CertificateVerificationPage />} />
-            <Route path="/system-test" element={<SystemTestDashboard />} />
-            <Route path="/system-analysis" element={<SystemAnalysisReport />} />
-            
-            {/* Protected routes */}
-            <Route
-              path="/applicant/*"
-              element={
-                <ProtectedRoute requiredRole="applicant">
-                  <DashboardLayout>
-                    <Routes>
-                      <Route path="dashboard" element={<ApplicantDashboard />} />
-                      <Route path="application/new" element={<ApplicationWizard />} />
-                      <Route path="application/:id/edit" element={<ApplicationWizard />} />
-                      <Route path="applications" element={<ApplicationsListPage />} />
-                      <Route path="payments" element={<PaymentsPage />} />
-                      <Route path="certificates" element={<CertificatesPage />} />
-                      <Route path="schedule" element={<SchedulePage />} />
-                      <Route path="settings" element={<AccountSettings />} />
-                    </Routes>
-                  </DashboardLayout>
-                </ProtectedRoute>
-              }
-            />
-            
-            <Route
-              path="/reviewer/*"
-              element={
-                <ProtectedRoute requiredRole="reviewer">
-                  <DashboardLayout>
-                    <Routes>
-                      <Route path="dashboard" element={<ReviewerDashboard />} />
-                      <Route path="queue" element={<ReviewQueue />} />
-                      <Route path="review/:id" element={<ReviewDetail />} />
-                      <Route path="assessments" element={<AssessmentScheduling />} />
-                    </Routes>
-                  </DashboardLayout>
-                </ProtectedRoute>
-              }
-            />
-            
-            <Route
-              path="/auditor/*"
-              element={
-                <ProtectedRoute requiredRole="auditor">
-                  <DashboardLayout>
-                    <Routes>
-                      <Route path="dashboard" element={<AuditorDashboard />} />
-                      <Route path="assessment-management" element={<AssessmentManagement />} />
-                      <Route path="assessments" element={<AssessmentManagement />} />
-                      <Route path="calendar" element={<AssessmentCalendar />} />
-                      <Route path="assessment/:id" element={<OnlineAssessment />} />
-                      <Route path="report/:id" element={<AssessmentReport />} />
-                    </Routes>
-                  </DashboardLayout>
-                </ProtectedRoute>
-              }
-            />
-            
-            <Route
-              path="/admin/*"
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <DashboardLayout>
-                    <Routes>
-                      <Route path="dashboard" element={<NewAdminDashboard />} />
-                      <Route path="products" element={<ProductManagement />} />
-                      <Route path="users" element={<UserManagement />} />
-                      <Route path="applications" element={<AdminApplicationsHistoryPage />} />
-                      <Route path="analytics" element={<PlatformAnalytics />} />
-                      <Route path="certificates" element={<CertificateManagement />} />
-                      <Route path="settings" element={<SystemSettings />} />
-                    </Routes>
-                  </DashboardLayout>
-                </ProtectedRoute>
-              }
-            />
-            
-            {/* Root redirect based on user role */}
-            <Route path="/" element={<Navigate to="/login" replace />} />
-          </Routes>
-          
-          <Toaster />
-          <SecurityMonitor />
-        </div>
-      </Router>
-      </LanguageProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <LanguageProvider>
+          <Router>
+            <div className="min-h-screen bg-background">
+              <Suspense fallback={<LoadingFallback />}>
+                <Routes>
+                  {/* Public routes */}
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/verify-certificate" element={<CertificateVerificationPage />} />
+                  
+                  {/* Protected routes with lazy loading */}
+                  <Route
+                    path="/applicant/*"
+                    element={
+                      <ProtectedRoute requiredRole="applicant">
+                        <DashboardLayout>
+                          <Suspense fallback={<LoadingFallback />}>
+                            <LazyApplicantRoutes />
+                          </Suspense>
+                        </DashboardLayout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  
+                  <Route
+                    path="/reviewer/*"
+                    element={
+                      <ProtectedRoute requiredRole="reviewer">
+                        <DashboardLayout>
+                          <Suspense fallback={<LoadingFallback />}>
+                            <LazyReviewerRoutes />
+                          </Suspense>
+                        </DashboardLayout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  
+                  <Route
+                    path="/auditor/*"
+                    element={
+                      <ProtectedRoute requiredRole="auditor">
+                        <DashboardLayout>
+                          <Suspense fallback={<LoadingFallback />}>
+                            <LazyAuditorRoutes />
+                          </Suspense>
+                        </DashboardLayout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  
+                  <Route
+                    path="/admin/*"
+                    element={
+                      <ProtectedRoute requiredRole="admin">
+                        <DashboardLayout>
+                          <Suspense fallback={<LoadingFallback />}>
+                            <LazyAdminRoutes />
+                          </Suspense>
+                        </DashboardLayout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  
+                  {/* Root redirect */}
+                  <Route path="/" element={<Navigate to="/login" replace />} />
+                </Routes>
+              </Suspense>
+              
+              <Toaster />
+              <SecurityMonitor />
+            </div>
+          </Router>
+        </LanguageProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 
-export default App;
+export default OptimizedApp;

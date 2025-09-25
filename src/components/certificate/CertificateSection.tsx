@@ -122,7 +122,10 @@ const CertificateSection: React.FC<CertificateSectionProps> = ({
           url: certificate.qrVerificationUrl
         });
       } catch (error) {
-        console.log('Error sharing:', error);
+        // Safe logging for development only
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Error sharing:', error);
+        }
       }
     } else if (certificate.qrVerificationUrl) {
       // Fallback to copying to clipboard
