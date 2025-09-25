@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/providers/AuthProvider';
 import { LanguageProvider } from '@/providers/LanguageProvider';
+import NotificationProvider from '@/providers/NotificationProvider';
+import ChatbotProvider from '@/providers/ChatbotProvider';
 import { SecurityMonitor } from '@/components/security/SecurityMonitor';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { PublicLayout } from '@/components/layout/PublicLayout';
@@ -52,10 +54,12 @@ function App() {
     <ErrorBoundary>
       <AuthProvider>
         <LanguageProvider>
-          <Router>
-            <div className="min-h-screen bg-background">
-              <Routes>
-                {/* Protected dashboard routes - MUST come before public routes */}
+          <NotificationProvider>
+            <Router>
+              <ChatbotProvider>
+                <div className="min-h-screen bg-background">
+                  <Routes>
+                    {/* Protected dashboard routes - MUST come before public routes */}
                 <Route
                   path="/applicant/*"
                   element={
@@ -131,12 +135,14 @@ function App() {
                     </PublicLayout>
                   }
                 />
-              </Routes>
-              
-              <Toaster />
-              <SecurityMonitor />
-            </div>
-          </Router>
+                  </Routes>
+                  
+                  <Toaster />
+                  <SecurityMonitor />
+                </div>
+              </ChatbotProvider>
+            </Router>
+          </NotificationProvider>
         </LanguageProvider>
       </AuthProvider>
     </ErrorBoundary>
