@@ -165,13 +165,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "applications_applicant_id_fkey"
-            columns: ["applicant_id"]
-            isOneToOne: false
-            referencedRelation: "secure_profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "applications_payment_assessment_id_fkey"
             columns: ["payment_assessment_id"]
             isOneToOne: false
@@ -284,24 +277,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "assessments_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "secure_applications"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "assessments_auditor_id_fkey"
             columns: ["auditor_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "assessments_auditor_id_fkey"
-            columns: ["auditor_id"]
-            isOneToOne: false
-            referencedRelation: "secure_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -370,13 +349,6 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "audit_logs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "secure_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -463,24 +435,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "certificates_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "secure_applications"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "certificates_revoked_by_fkey"
             columns: ["revoked_by"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "certificates_revoked_by_fkey"
-            columns: ["revoked_by"]
-            isOneToOne: false
-            referencedRelation: "secure_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -540,24 +498,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "documents_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "secure_applications"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "documents_uploaded_by_fkey"
             columns: ["uploaded_by"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "documents_uploaded_by_fkey"
-            columns: ["uploaded_by"]
-            isOneToOne: false
-            referencedRelation: "secure_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -632,13 +576,6 @@ export type Database = {
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "applications"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "invoices_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "secure_applications"
             referencedColumns: ["id"]
           },
           {
@@ -786,13 +723,6 @@ export type Database = {
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "applications"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payments_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "secure_applications"
             referencedColumns: ["id"]
           },
         ]
@@ -1075,24 +1005,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "reviews_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "secure_applications"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "reviews_reviewer_id_fkey"
             columns: ["reviewer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reviews_reviewer_id_fkey"
-            columns: ["reviewer_id"]
-            isOneToOne: false
-            referencedRelation: "secure_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1128,13 +1044,6 @@ export type Database = {
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "system_config_updated_by_fkey"
-            columns: ["updated_by"]
-            isOneToOne: false
-            referencedRelation: "secure_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1242,251 +1151,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "workflow_notifications_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "secure_applications"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "workflow_notifications_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "workflow_notifications_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "secure_profiles"
             referencedColumns: ["id"]
           },
         ]
       }
     }
     Views: {
-      secure_applications: {
-        Row: {
-          applicant_address: string | null
-          applicant_email: string | null
-          applicant_id: string | null
-          applicant_id_number: string | null
-          applicant_name: string | null
-          applicant_phone: string | null
-          application_number: string | null
-          approved_at: string | null
-          created_at: string | null
-          crop_types: string[] | null
-          cultivation_methods: string[] | null
-          estimated_completion_date: string | null
-          expected_yield: string | null
-          farm_address: string | null
-          farm_area_ngan: number | null
-          farm_area_rai: number | null
-          farm_area_wah: number | null
-          farm_coordinates: string | null
-          farm_name: string | null
-          id: string | null
-          max_free_revisions: number | null
-          max_revisions: number | null
-          metadata: Json | null
-          next_action_required: string | null
-          organization_name: string | null
-          organization_registration: string | null
-          payment_assessment_id: string | null
-          payment_review_id: string | null
-          representative_name: string | null
-          representative_position: string | null
-          responsible_person: string | null
-          reviewer_comments: string | null
-          revision_count: number | null
-          revision_count_current: number | null
-          revision_reason: string | null
-          staff_count: number | null
-          status: Database["public"]["Enums"]["application_status"] | null
-          submitted_at: string | null
-          training_completed: boolean | null
-          training_date: string | null
-          updated_at: string | null
-          workflow_history: Json | null
-          workflow_status:
-            | Database["public"]["Enums"]["application_workflow_status"]
-            | null
-        }
-        Insert: {
-          applicant_address?: string | null
-          applicant_email?: string | null
-          applicant_id?: string | null
-          applicant_id_number?: string | null
-          applicant_name?: string | null
-          applicant_phone?: string | null
-          application_number?: string | null
-          approved_at?: string | null
-          created_at?: string | null
-          crop_types?: string[] | null
-          cultivation_methods?: string[] | null
-          estimated_completion_date?: string | null
-          expected_yield?: string | null
-          farm_address?: string | null
-          farm_area_ngan?: number | null
-          farm_area_rai?: number | null
-          farm_area_wah?: number | null
-          farm_coordinates?: never
-          farm_name?: string | null
-          id?: string | null
-          max_free_revisions?: number | null
-          max_revisions?: number | null
-          metadata?: Json | null
-          next_action_required?: string | null
-          organization_name?: string | null
-          organization_registration?: string | null
-          payment_assessment_id?: string | null
-          payment_review_id?: string | null
-          representative_name?: string | null
-          representative_position?: string | null
-          responsible_person?: string | null
-          reviewer_comments?: string | null
-          revision_count?: number | null
-          revision_count_current?: number | null
-          revision_reason?: string | null
-          staff_count?: number | null
-          status?: Database["public"]["Enums"]["application_status"] | null
-          submitted_at?: string | null
-          training_completed?: boolean | null
-          training_date?: string | null
-          updated_at?: string | null
-          workflow_history?: Json | null
-          workflow_status?:
-            | Database["public"]["Enums"]["application_workflow_status"]
-            | null
-        }
-        Update: {
-          applicant_address?: string | null
-          applicant_email?: string | null
-          applicant_id?: string | null
-          applicant_id_number?: string | null
-          applicant_name?: string | null
-          applicant_phone?: string | null
-          application_number?: string | null
-          approved_at?: string | null
-          created_at?: string | null
-          crop_types?: string[] | null
-          cultivation_methods?: string[] | null
-          estimated_completion_date?: string | null
-          expected_yield?: string | null
-          farm_address?: string | null
-          farm_area_ngan?: number | null
-          farm_area_rai?: number | null
-          farm_area_wah?: number | null
-          farm_coordinates?: never
-          farm_name?: string | null
-          id?: string | null
-          max_free_revisions?: number | null
-          max_revisions?: number | null
-          metadata?: Json | null
-          next_action_required?: string | null
-          organization_name?: string | null
-          organization_registration?: string | null
-          payment_assessment_id?: string | null
-          payment_review_id?: string | null
-          representative_name?: string | null
-          representative_position?: string | null
-          responsible_person?: string | null
-          reviewer_comments?: string | null
-          revision_count?: number | null
-          revision_count_current?: number | null
-          revision_reason?: string | null
-          staff_count?: number | null
-          status?: Database["public"]["Enums"]["application_status"] | null
-          submitted_at?: string | null
-          training_completed?: boolean | null
-          training_date?: string | null
-          updated_at?: string | null
-          workflow_history?: Json | null
-          workflow_status?:
-            | Database["public"]["Enums"]["application_workflow_status"]
-            | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "applications_applicant_id_fkey"
-            columns: ["applicant_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "applications_applicant_id_fkey"
-            columns: ["applicant_id"]
-            isOneToOne: false
-            referencedRelation: "secure_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "applications_payment_assessment_id_fkey"
-            columns: ["payment_assessment_id"]
-            isOneToOne: false
-            referencedRelation: "payments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "applications_payment_review_id_fkey"
-            columns: ["payment_review_id"]
-            isOneToOne: false
-            referencedRelation: "payments"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      secure_profiles: {
-        Row: {
-          address: string | null
-          created_at: string | null
-          email: string | null
-          full_name: string | null
-          id: string | null
-          is_active: boolean | null
-          last_login_at: string | null
-          organization_name: string | null
-          phone: string | null
-          preferred_language: string | null
-          role: Database["public"]["Enums"]["user_role"] | null
-          thai_id_number: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          address?: string | null
-          created_at?: string | null
-          email?: string | null
-          full_name?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          last_login_at?: string | null
-          organization_name?: string | null
-          phone?: string | null
-          preferred_language?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
-          thai_id_number?: never
-          updated_at?: string | null
-        }
-        Update: {
-          address?: string | null
-          created_at?: string | null
-          email?: string | null
-          full_name?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          last_login_at?: string | null
-          organization_name?: string | null
-          phone?: string | null
-          preferred_language?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
-          thai_id_number?: never
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       can_access_application_sensitive_data: {
@@ -1495,6 +1170,10 @@ export type Database = {
       }
       can_access_farm_coordinates: {
         Args: { app_id: string }
+        Returns: boolean
+      }
+      can_access_sensitive_data: {
+        Args: { target_user_id: string }
         Returns: boolean
       }
       check_rate_limit: {
@@ -1511,6 +1190,10 @@ export type Database = {
         Returns: undefined
       }
       cleanup_old_audit_logs: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      cleanup_security_logs: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
