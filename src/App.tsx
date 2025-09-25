@@ -87,6 +87,7 @@ function App() {
                   <DashboardLayout>
                     <Routes>
                       <Route path="dashboard" element={<AuditorDashboard />} />
+                      <Route path="assessment-management" element={<AssessmentManagement />} />
                       <Route path="assessments" element={<AssessmentManagement />} />
                       <Route path="calendar" element={<AssessmentCalendar />} />
                       <Route path="assessment/:id" element={<OnlineAssessment />} />

@@ -1318,6 +1318,7 @@ export type Database = {
         | "EXPIRED"
         | "REVOKED"
         | "REJECTED_PAYMENT_REQUIRED"
+        | "ASSESSMENT_FAILED"
       assessment_status: "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"
       assessment_type: "ONLINE" | "ONSITE"
       document_type:
@@ -1500,6 +1501,7 @@ export const Constants = {
         "EXPIRED",
         "REVOKED",
         "REJECTED_PAYMENT_REQUIRED",
+        "ASSESSMENT_FAILED",
       ],
       assessment_status: ["SCHEDULED", "IN_PROGRESS", "COMPLETED", "CANCELLED"],
       assessment_type: ["ONLINE", "ONSITE"],

@@ -195,15 +195,28 @@ const OnlineAssessment = () => {
         .eq('id', id);
 
       // Update application workflow status based on assessment result
-      const newWorkflowStatus = passed ? 'CERTIFIED' : 'ASSESSMENT_FAILED';
-      
-      await supabase
-        .from('applications')
-        .update({ 
-          workflow_status: newWorkflowStatus,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', assessment.application_id);
+      if (passed) {
+        // If passed, mark as certified
+        await supabase
+          .from('applications')
+          .update({ 
+            workflow_status: 'CERTIFIED',
+            status: 'CERTIFIED',
+            approved_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', assessment.application_id);
+      } else {
+        // If failed, mark as revoked (closest available status for failed)
+        await supabase
+          .from('applications')
+          .update({ 
+            workflow_status: 'REVOKED',
+            status: 'REVOKED',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', assessment.application_id);
+      }
 
       // If passed, create notification for certificate issuance
       if (passed) {
@@ -228,13 +241,6 @@ const OnlineAssessment = () => {
         // Auto-trigger certificate generation if passed
         // This will be handled by the existing auto_issue_certificate trigger
         // when the application status changes to CERTIFIED
-        await supabase
-          .from('applications')
-          .update({ 
-            status: 'CERTIFIED',
-            approved_at: new Date().toISOString()
-          })
-          .eq('id', assessment.application_id);
       } else {
         // Create notification for failed assessment
         await supabase
@@ -244,7 +250,7 @@ const OnlineAssessment = () => {
             application_id: assessment.application_id,
             notification_type: 'assessment_failed',
             title: 'การประเมินไม่ผ่าน',
-            message: `การประเมินออนไลน์ได้คะแนน ${score}% ไม่ผ่านเกณฑ์ กรุณาทำการแก้ไขและประเมินใหม่`,
+            message: `การประเมินออนไลน์ได้คะแนน ${score}% ไม่ผ่านเกณฑ์ กรุณาติดต่อเจ้าหน้าที่เพื่อการประเมินใหม่`,
             priority: 'high',
             action_url: '/applicant/applications',
             action_label: 'ดูรายละเอียด',
