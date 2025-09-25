@@ -1330,10 +1330,6 @@ export type Database = {
         }
         Returns: string
       }
-      log_auth_failure: {
-        Args: { email_attempt: string; failure_reason: string }
-        Returns: undefined
-      }
       log_security_event: {
         Args: {
           p_details?: Json
