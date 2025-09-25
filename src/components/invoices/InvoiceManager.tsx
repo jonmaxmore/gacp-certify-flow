@@ -33,11 +33,13 @@ interface Invoice {
 interface InvoiceManagerProps {
   applicationId?: string;
   className?: string;
+  onPayInvoice?: (invoice: Invoice) => void;
 }
 
 export const InvoiceManager: React.FC<InvoiceManagerProps> = ({
   applicationId,
-  className
+  className,
+  onPayInvoice
 }) => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
@@ -90,8 +92,12 @@ export const InvoiceManager: React.FC<InvoiceManagerProps> = ({
   };
 
   const handlePayInvoice = (invoice: Invoice) => {
-    setSelectedInvoice(invoice);
-    setShowPaymentDialog(true);
+    if (onPayInvoice) {
+      onPayInvoice(invoice);
+    } else {
+      setSelectedInvoice(invoice);
+      setShowPaymentDialog(true);
+    }
   };
 
   const handlePaymentSuccess = () => {

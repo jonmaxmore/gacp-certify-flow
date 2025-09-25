@@ -115,15 +115,17 @@ const CertificatesPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-green-50/30 via-background to-blue-50/30">
+      <header className="bg-white/80 backdrop-blur-lg border-b border-border/50 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center gap-4">
           <Button variant="ghost" onClick={() => navigate('/applicant/dashboard')}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-2xl font-semibold">ใบรับรองของฉัน</h1>
-            <p className="text-muted-foreground">ใบรับรองมาตรฐาน GACP ที่ได้รับทั้งหมด</p>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+              ใบรับรองของฉัน
+            </h1>
+            <p className="text-muted-foreground">ประวัติและสถานะใบรับรองมาตรฐาน GACP ทั้งหมด</p>
           </div>
         </div>
       </header>

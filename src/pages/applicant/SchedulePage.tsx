@@ -82,28 +82,32 @@ const SchedulePage = () => {
     try {
       setLoading(true);
       
-      // Load user's applications
+      // Load all user's applications (not just specific statuses)
       const { data: appsData, error: appsError } = await supabase
         .from('applications')
-        .select('id, application_number, farm_name, status, created_at')
+        .select('id, application_number, farm_name, status, workflow_status, created_at')
         .eq('applicant_id', user?.id)
-        .in('status', ['DOCS_APPROVED', 'PAYMENT_PENDING', 'ONLINE_SCHEDULED', 'ONSITE_SCHEDULED'])
         .order('created_at', { ascending: false });
 
       if (appsError) throw appsError;
       setApplications(appsData || []);
 
-      // Load assessments for user's applications
+      // Load all assessments for user's applications
       if (appsData && appsData.length > 0) {
         const { data: assessmentsData, error: assessmentsError } = await supabase
           .from('assessments')
           .select(`
             *,
-            applications!inner(application_number, farm_name, applicant_name),
+            applications!inner(
+              application_number, 
+              farm_name, 
+              applicant_name,
+              applicant_id
+            ),
             profiles(full_name, phone)
           `)
           .in('application_id', appsData.map(app => app.id))
-          .order('scheduled_at', { ascending: true });
+          .order('scheduled_at', { ascending: false });
 
         if (assessmentsError) throw assessmentsError;
         setAssessments(assessmentsData || []);
