@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/providers/AuthProvider'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -10,17 +10,39 @@ import { Separator } from '@/components/ui/separator'
 import { Eye, EyeOff, LogIn } from 'lucide-react'
 import { LoginTestHelper } from '@/components/auth/LoginTestHelper'
 
-const safeText = (val?: string, fallback?: string) => (val && !val.startsWith('login.')) ? val : (fallback || '')
+const safeText = (val?: string, fallback?: string) =>
+  val && !val.startsWith('login.') ? val : fallback || ''
+
+const mapAuthError = (message?: string) => {
+  if (!message) return 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ กรุณาลองใหม่'
+  const m = message.toLowerCase()
+  if (m.includes('invalid login')) return 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
+  if (m.includes('email not confirmed')) return 'ยังไม่ได้ยืนยันอีเมล โปรดตรวจสอบกล่องอีเมลของคุณ'
+  if (m.includes('rate limit')) return 'พยายามเข้าสู่ระบบบ่อยเกินไป โปรดลองใหม่ภายหลัง'
+  return 'ไม่สามารถเข้าสู่ระบบได้ กรุณาลองใหม่'
+}
 
 const LoginPage = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [infoMsg, setInfoMsg] = useState<string | null>(null)
+
   const { signIn, user, loading } = useAuth()
   const { t } = useTranslation('auth')
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
 
+  // แสดงข้อความเมื่อสมัครเสร็จแล้วกลับมาหน้า login
+  useEffect(() => {
+    if (searchParams.get('registered') === '1') {
+      setInfoMsg('สมัครสมาชิกสำเร็จ โปรดยืนยันอีเมลก่อนเข้าสู่ระบบ')
+    }
+  }, [searchParams])
+
+  // นำทางเมื่อมีผู้ใช้แล้ว
   useEffect(() => {
     if (!loading && user) {
       const role = user.profile?.role
@@ -33,12 +55,18 @@ const LoginPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setErrorMsg(null)
     setIsLoading(true)
     const { error } = await signIn(email, password)
-    // Navigation handled by useEffect above
+
     if (error) {
-      // Optional: show toast error here
+      setErrorMsg(mapAuthError(error.message))
+      setIsLoading(false)
+      return
     }
+
+    // นำทางแบบมองบวก เพื่อไม่ให้ผู้ใช้รู้สึกว่า “ไม่เกิดอะไรขึ้น”
+    navigate('/applicant/dashboard')
     setIsLoading(false)
   }
 
@@ -62,6 +90,17 @@ const LoginPage = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {infoMsg && (
+            <div className="mb-4 rounded-md border border-blue-200 bg-blue-50 text-blue-900 px-3 py-2 text-sm">
+              {infoMsg}
+            </div>
+          )}
+          {errorMsg && (
+            <div className="mb-4 rounded-md border border-red-200 bg-red-50 text-red-800 px-3 py-2 text-sm">
+              {errorMsg}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">{safeText(t('login.email'), 'อีเมล')}</Label>
