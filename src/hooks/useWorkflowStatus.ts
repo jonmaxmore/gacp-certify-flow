@@ -155,8 +155,6 @@ export const useWorkflowStatus = () => {
           p_application_id: applicationId,
           p_milestone: milestone, // milestone is already a number
           p_amount: amount,
-        .rpc('create_payment_record', {
-          p_application_id: applicationId,
           p_due_date: dueDate?.toISOString() || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
         });
 
