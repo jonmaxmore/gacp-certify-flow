@@ -1565,8 +1565,13 @@ export type Database = {
         Returns: Json
       }
       get_user_workflow_tasks: {
-        Args: { target_user_id?: string }
-        Returns: Json
+        Args: Record<PropertyKey, never> | { target_user_id?: string }
+        Returns: {
+          next_assessments: number
+          pending_applications: number
+          pending_payments: number
+          unread_notifications: number
+        }[]
       }
       handle_document_approval: {
         Args: {
