@@ -3,7 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import { LoadingFallback } from '@/components/optimized/LazyComponents';
 
 // Lazy load applicant pages
-const ApplicantDashboard = lazy(() => import('@/pages/applicant/ApplicantDashboard'));
+const EnhancedApplicantDashboard = lazy(() => import('@/pages/applicant/EnhancedApplicantDashboard'));
 const ApplicationWizard = lazy(() => import('@/pages/applicant/ApplicationWizard'));
 const ApplicationsListPage = lazy(() => import('@/pages/applicant/ApplicationsListPage'));
 const PaymentsPage = lazy(() => import('@/pages/applicant/PaymentsPage'));
@@ -15,7 +15,7 @@ const ApplicantRoutes = () => {
   return (
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
-        <Route path="dashboard" element={<ApplicantDashboard />} />
+        <Route path="dashboard" element={<EnhancedApplicantDashboard />} />
         <Route path="application/new" element={<ApplicationWizard />} />
         <Route path="application/:id/edit" element={<ApplicationWizard />} />
         <Route path="applications" element={<ApplicationsListPage />} />

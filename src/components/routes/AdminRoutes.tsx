@@ -2,7 +2,7 @@ import React, { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { LoadingFallback } from '@/components/optimized/LazyComponents';
 
-const NewAdminDashboard = lazy(() => import('@/pages/admin/NewAdminDashboard'));
+const EnhancedAdminDashboard = lazy(() => import('@/pages/admin/EnhancedAdminDashboard'));
 const ProductManagement = lazy(() => import('@/pages/admin/ProductManagement'));
 const UserManagement = lazy(() => import('@/pages/admin/UserManagement'));
 const NewsManager = lazy(() => import('@/components/cms/NewsManager'));
@@ -15,7 +15,7 @@ const AdminRoutes = () => {
   return (
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
-        <Route path="dashboard" element={<NewAdminDashboard />} />
+        <Route path="dashboard" element={<EnhancedAdminDashboard />} />
         <Route path="products" element={<ProductManagement />} />
         <Route path="users" element={<UserManagement />} />
         <Route path="news" element={<NewsManager />} />
