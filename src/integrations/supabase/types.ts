@@ -287,7 +287,7 @@ export type Database = {
       }
       audit_logs: {
         Row: {
-          action: string
+          action: string | null
           application_number: string | null
           details: Json | null
           error_message: string | null
@@ -297,7 +297,7 @@ export type Database = {
           old_values: Json | null
           outcome: string | null
           resource_id: string | null
-          resource_type: string
+          resource_type: string | null
           session_id: string | null
           timestamp: string | null
           user_agent: string | null
@@ -306,7 +306,7 @@ export type Database = {
           user_role: Database["public"]["Enums"]["user_role"] | null
         }
         Insert: {
-          action: string
+          action?: string | null
           application_number?: string | null
           details?: Json | null
           error_message?: string | null
@@ -316,7 +316,7 @@ export type Database = {
           old_values?: Json | null
           outcome?: string | null
           resource_id?: string | null
-          resource_type: string
+          resource_type?: string | null
           session_id?: string | null
           timestamp?: string | null
           user_agent?: string | null
@@ -325,7 +325,7 @@ export type Database = {
           user_role?: Database["public"]["Enums"]["user_role"] | null
         }
         Update: {
-          action?: string
+          action?: string | null
           application_number?: string | null
           details?: Json | null
           error_message?: string | null
@@ -335,7 +335,7 @@ export type Database = {
           old_values?: Json | null
           outcome?: string | null
           resource_id?: string | null
-          resource_type?: string
+          resource_type?: string | null
           session_id?: string | null
           timestamp?: string | null
           user_agent?: string | null
