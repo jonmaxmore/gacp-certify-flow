@@ -28,6 +28,7 @@ const getNavigation = (t: any) => ({
     { name: t('menu.payments'), href: '/applicant/payments', icon: CreditCard },
     { name: t('menu.schedule'), href: '/applicant/schedule', icon: Calendar },
     { name: t('menu.certificates'), href: '/applicant/certificates', icon: Award },
+    { name: t('menu.settings'), href: '/applicant/settings', icon: Settings },
   ],
   reviewer: [
     { name: t('menu.dashboard'), href: '/reviewer/dashboard', icon: LayoutDashboard },

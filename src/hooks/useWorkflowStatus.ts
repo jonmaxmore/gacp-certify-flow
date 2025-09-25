@@ -73,7 +73,7 @@ export const useWorkflowStatus = () => {
         .from('applications')
         .select(`
           *,
-          payments:payments!application_id (*)
+          payments:payments!payments_application_id_fkey (*)
         `)
         .eq('applicant_id', user.id)
         .order('created_at', { ascending: false });

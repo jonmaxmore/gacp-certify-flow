@@ -41,7 +41,7 @@ const PaymentsPage = () => {
         .from('payments')
         .select(`
           *,
-          applications!inner(
+          applications!payments_application_id_fkey(
             application_number,
             farm_name,
             applicant_id
