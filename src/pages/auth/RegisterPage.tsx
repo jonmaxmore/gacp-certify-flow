@@ -9,6 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Eye, EyeOff, UserPlus } from 'lucide-react';
 
+const mapSignUpError = (message?: string) => {
+  if (!message) return 'ไม่สามารถสมัครสมาชิกได้ กรุณาลองใหม่';
+  const m = message.toLowerCase();
+  if (m.includes('already registered') || m.includes('duplicate')) return 'อีเมลนี้ถูกใช้แล้ว';
+  if (m.includes('rate limit')) return 'สมัครบ่อยเกินไป โปรดลองใหม่ภายหลัง';
+  return 'ไม่สามารถสมัครสมาชิกได้ กรุณาลองใหม่';
+};
+
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
     email: '',
@@ -23,6 +31,8 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   const { signUp } = useAuth();
   const navigate = useNavigate();
 
@@ -32,8 +42,10 @@ const RegisterPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setErrorMsg(null);
+
     if (formData.password !== formData.confirmPassword) {
+      setErrorMsg('รหัสผ่านไม่ตรงกัน');
       return;
     }
 
@@ -46,11 +58,17 @@ const RegisterPage = () => {
       organization_name: formData.organization_name || undefined,
       thai_id_number: formData.thai_id_number || undefined,
     });
-    
-    if (data && !error) {
-      navigate('/login');
+
+    if (error) {
+      setErrorMsg(mapSignUpError(error.message));
+      setIsLoading(false);
+      return;
     }
-    
+
+    if (data) {
+      navigate('/login?registered=1');
+    }
+
     setIsLoading(false);
   };
 
@@ -62,11 +80,15 @@ const RegisterPage = () => {
       <Card className="w-full max-w-lg">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-2xl font-semibold">สมัครสมาชิก</CardTitle>
-          <CardDescription>
-            สร้างบัญชีใหม่สำหรับระบบรับรองมาตรฐาน GACP
-          </CardDescription>
+          <CardDescription>สร้างบัญชีใหม่สำหรับระบบรับรองมาตรฐาน GACP</CardDescription>
         </CardHeader>
         <CardContent>
+          {errorMsg && (
+            <div className="mb-4 rounded-md border border-red-200 bg-red-50 text-red-800 px-3 py-2 text-sm">
+              {errorMsg}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
