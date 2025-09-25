@@ -101,8 +101,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setSession(session);
           if (session?.user) {
             await fetchUserProfile(session.user);
+          } else {
+            setLoading(false);
           }
-          setLoading(false);
         }
       } catch (err) {
         console.error('Initialize auth error:', err);
@@ -144,9 +145,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
 
       setUser(userWithProfile);
+      setLoading(false);
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
       setUser(authUser as AuthUser);
+      setLoading(false);
     }
   };
 
@@ -180,6 +183,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
 
       setUser(userWithProfile);
+      setLoading(false);
       
       toast({
         title: "ยินดีต้อนรับ",
@@ -188,6 +192,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error creating missing profile:', error);
       setUser(authUser as AuthUser);
+      setLoading(false);
     }
   };
 

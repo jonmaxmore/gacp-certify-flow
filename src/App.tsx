@@ -54,76 +54,84 @@ function App() {
         <LanguageProvider>
           <Router>
             <div className="min-h-screen bg-background">
-              <Suspense fallback={<LoadingFallback />}>
-                <Routes>
-                  {/* Auth routes (standalone layout) */}
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/register" element={<RegisterPage />} />
-                  
-                  {/* Public routes with public layout */}
-                  <Route
-                    path="/*"
-                    element={
+              <Routes>
+                {/* Auth routes (standalone layout) - no lazy loading for now */}
+                <Route path="/login" element={
+                  <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
+                    <LoginPage />
+                  </Suspense>
+                } />
+                <Route path="/register" element={
+                  <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
+                    <RegisterPage />
+                  </Suspense>
+                } />
+                
+                {/* Public routes with public layout */}
+                <Route
+                  path="/*"
+                  element={
+                    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
                       <PublicLayout>
                         <PublicRoutes />
                       </PublicLayout>
-                    }
-                  />
-                  
-                  {/* Protected dashboard routes */}
-                  <Route
-                    path="/applicant/*"
-                    element={
-                      <ProtectedRoute requiredRole="applicant">
-                        <DashboardLayout>
-                          <Suspense fallback={<LoadingFallback />}>
-                            <LazyApplicantRoutes />
-                          </Suspense>
-                        </DashboardLayout>
-                      </ProtectedRoute>
-                    }
-                  />
-                  
-                  <Route
-                    path="/reviewer/*"
-                    element={
-                      <ProtectedRoute requiredRole="reviewer">
-                        <DashboardLayout>
-                          <Suspense fallback={<LoadingFallback />}>
-                            <LazyReviewerRoutes />
-                          </Suspense>
-                        </DashboardLayout>
-                      </ProtectedRoute>
-                    }
-                  />
-                  
-                  <Route
-                    path="/auditor/*"
-                    element={
-                      <ProtectedRoute requiredRole="auditor">
-                        <DashboardLayout>
-                          <Suspense fallback={<LoadingFallback />}>
-                            <LazyAuditorRoutes />
-                          </Suspense>
-                        </DashboardLayout>
-                      </ProtectedRoute>
-                    }
-                  />
-                  
-                  <Route
-                    path="/admin/*"
-                    element={
-                      <ProtectedRoute requiredRole="admin">
-                        <DashboardLayout>
-                          <Suspense fallback={<LoadingFallback />}>
-                            <LazyAdminRoutes />
-                          </Suspense>
-                        </DashboardLayout>
-                      </ProtectedRoute>
-                    }
-                  />
-                </Routes>
-              </Suspense>
+                    </Suspense>
+                  }
+                />
+                
+                {/* Protected dashboard routes */}
+                <Route
+                  path="/applicant/*"
+                  element={
+                    <ProtectedRoute requiredRole="applicant">
+                      <DashboardLayout>
+                        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
+                          <LazyApplicantRoutes />
+                        </Suspense>
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                
+                <Route
+                  path="/reviewer/*"
+                  element={
+                    <ProtectedRoute requiredRole="reviewer">
+                      <DashboardLayout>
+                        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
+                          <LazyReviewerRoutes />
+                        </Suspense>
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                
+                <Route
+                  path="/auditor/*"
+                  element={
+                    <ProtectedRoute requiredRole="auditor">
+                      <DashboardLayout>
+                        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
+                          <LazyAuditorRoutes />
+                        </Suspense>
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                
+                <Route
+                  path="/admin/*"
+                  element={
+                    <ProtectedRoute requiredRole="admin">
+                      <DashboardLayout>
+                        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
+                          <LazyAdminRoutes />
+                        </Suspense>
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  }
+                />
+              </Routes>
               
               <Toaster />
               <SecurityMonitor />
