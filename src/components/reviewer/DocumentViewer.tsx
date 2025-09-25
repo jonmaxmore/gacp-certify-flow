@@ -131,7 +131,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
           </CardTitle>
           <Button variant="outline" size="sm" onClick={handlePrintDocuments}>
             <Printer className="h-4 w-4 mr-2" />
-            พิมพ์เอกสารทั้งหมด
+            พิมพ์รายการเอกสาร
           </Button>
         </CardHeader>
         <CardContent>

@@ -158,176 +158,61 @@ const ReviewDetail = () => {
     };
   };
 
-  const handlePrintSummary = () => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
+  const handleGeneratePDF = async () => {
+    if (!application) return;
 
-    const paymentStatus = getPaymentStatus(application);
-    
-    const printContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>สรุปการตรวจสอบใบสมัคร ${application.application_number}</title>
-          <style>
-            body { font-family: 'Sarabun', Arial, sans-serif; margin: 20px; line-height: 1.6; }
-            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-            .section { margin-bottom: 25px; }
-            .section h3 { color: #333; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
-            .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-            .info-item { padding: 8px; background: #f9f9f9; border-radius: 4px; }
-            .info-label { font-weight: bold; color: #555; }
-            .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-            .status-approved { background: #d4edda; color: #155724; }
-            .status-pending { background: #f8d7da; color: #721c24; }
-            .status-revision { background: #fff3cd; color: #856404; }
-            @media print { .no-print { display: none; } body { margin: 0; } }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>สรุปการตรวจสอบใบสมัครรับรอง GACP</h1>
-            <p>หมายเลข: ${application.application_number}</p>
-            <p>พิมพ์เมื่อ: ${new Date().toLocaleDateString('th-TH', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            })}</p>
-          </div>
-          
-          <div class="section">
-            <h3>ข้อมูลผู้สมัคร</h3>
-            <div class="info-grid">
-              <div class="info-item">
-                <div class="info-label">ชื่อผู้สมัคร:</div>
-                <div>${application.profiles?.full_name || application.applicant_name}</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">องค์กร:</div>
-                <div>${application.profiles?.organization_name || application.organization_name || '-'}</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">อีเมล:</div>
-                <div>${application.profiles?.email || application.applicant_email}</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">เบอร์โทร:</div>
-                <div>${application.profiles?.phone || application.applicant_phone}</div>
-              </div>
-            </div>
-          </div>
+    try {
+      setSubmitting(true);
+      
+      // Call the edge function to get HTML content
+      const response = await fetch(
+        `https://mpxebbqxqyzalctgsyxm.supabase.co/functions/v1/generate-application-pdf`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+          },
+          body: JSON.stringify({ applicationId: application.id })
+        }
+      );
 
-          <div class="section">
-            <h3>ข้อมูลฟาร์ม</h3>
-            <div class="info-grid">
-              <div class="info-item">
-                <div class="info-label">ชื่อฟาร์ม:</div>
-                <div>${application.farm_name}</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">พื้นที่:</div>
-                <div>${application.farm_area_rai}-${application.farm_area_ngan}-${application.farm_area_wah} ไร่-งาน-วา</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">ประเภทพืช:</div>
-                <div>${application.crop_types?.join(', ') || '-'}</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">วิธีการเพาะปลูก:</div>
-                <div>${application.cultivation_methods?.join(', ') || '-'}</div>
-              </div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">ที่อยู่ฟาร์ม:</div>
-              <div>${application.farm_address}</div>
-            </div>
-          </div>
+      if (!response.ok) {
+        throw new Error('Failed to generate PDF');
+      }
 
-          <div class="section">
-            <h3>สถานะการตรวจสอบ</h3>
-            <div class="info-grid">
-              <div class="info-item">
-                <div class="info-label">สถานะปัจจุบัน:</div>
-                <div class="status-badge ${
-                  application.workflow_status === 'REVIEW_APPROVED' ? 'status-approved' :
-                  application.workflow_status?.includes('REJECTED') ? 'status-pending' : 'status-revision'
-                }">${getWorkflowStatusText(application.workflow_status)}</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">สถานะการชำระเงิน:</div>
-                <div class="status-badge ${paymentStatus.status === 'paid' ? 'status-approved' : 'status-pending'}">
-                  ${paymentStatus.label} (${paymentStatus.amount?.toLocaleString()} บาท)
-                </div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">จำนวนครั้งที่แก้ไข:</div>
-                <div>${application.revision_count_current || 0} ครั้ง</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">การแก้ไขฟรีคงเหลือ:</div>
-                <div>${Math.max(0, (application.max_free_revisions || 2) - (application.revision_count_current || 0))} ครั้ง</div>
-              </div>
-            </div>
-          </div>
+      const { html } = await response.json();
 
-          <div class="section">
-            <h3>เอกสารประกอบ</h3>
-            <div style="margin-bottom: 15px;">
-              <strong>จำนวนเอกสาร:</strong> ${application.documents?.length || 0} ไฟล์<br>
-              <strong>เอกสารที่ตรวจสอบแล้ว:</strong> ${application.documents?.filter(d => d.verified).length || 0} ไฟล์
-            </div>
-            ${application.documents?.map((doc, index) => `
-              <div class="info-item" style="margin-bottom: 10px;">
-                <div class="info-label">${index + 1}. ${doc.document_type}</div>
-                <div>${doc.file_name}</div>
-                <div class="status-badge ${doc.verified ? 'status-approved' : 'status-pending'}">
-                  ${doc.verified ? 'ตรวจสอบแล้ว' : 'รอตรวจสอบ'}
-                </div>
-              </div>
-            `).join('') || '<div class="info-item">ไม่มีเอกสารประกอบ</div>'}
-          </div>
+      // Open HTML in new window for printing
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        throw new Error('Please allow popups for this site');
+      }
 
-          ${reviewComments ? `
-            <div class="section">
-              <h3>ความเห็นผู้ตรวจสอบ</h3>
-              <div class="info-item">
-                <div>${reviewComments}</div>
-              </div>
-            </div>
-          ` : ''}
+      printWindow.document.write(html);
+      printWindow.document.close();
+      printWindow.focus();
+      
+      // Auto print after content loads
+      setTimeout(() => {
+        printWindow.print();
+      }, 1000);
 
-          <div class="section">
-            <h3>ประวัติการดำเนินการ</h3>
-            <div class="info-grid">
-              <div class="info-item">
-                <div class="info-label">สร้างใบสมัคร:</div>
-                <div>${new Date(application.created_at).toLocaleDateString('th-TH')}</div>
-              </div>
-              ${application.submitted_at ? `
-                <div class="info-item">
-                  <div class="info-label">ส่งใบสมัคร:</div>
-                  <div>${new Date(application.submitted_at).toLocaleDateString('th-TH')}</div>
-                </div>
-              ` : ''}
-              <div class="info-item">
-                <div class="info-label">อัพเดทล่าสุด:</div>
-                <div>${new Date(application.updated_at).toLocaleDateString('th-TH')}</div>
-              </div>
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
+      toast({
+        title: "สำเร็จ",
+        description: "เปิดหน้าต่างสำหรับพิมพ์ PDF รายงานใบสมัครแล้ว",
+      });
 
-    printWindow.document.write(printContent);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 250);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถสร้าง PDF ได้ กรุณาลองใหม่อีกครั้ง",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (loading) {
@@ -366,9 +251,9 @@ const ReviewDetail = () => {
             <p className="text-muted-foreground">รายละเอียดใบสมัครและการตรวจสอบ</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={handlePrintSummary}>
-              <Printer className="h-4 w-4 mr-2" />
-              พิมพ์สรุป
+            <Button variant="outline" onClick={handleGeneratePDF} disabled={submitting}>
+              <Download className="h-4 w-4 mr-2" />
+              {submitting ? 'กำลังสร้างรายงาน...' : 'สร้างรายงาน PDF'}
             </Button>
           </div>
         </div>
