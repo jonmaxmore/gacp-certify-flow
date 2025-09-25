@@ -1180,6 +1180,10 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: boolean
       }
+      check_auth_status: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       check_rate_limit: {
         Args: {
           action_type_val: string

@@ -61,11 +61,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
+    let timeoutId: NodeJS.Timeout;
 
     // Set up auth state listener with proper error handling
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return;
+
+        console.log('Auth state change event:', event, 'session:', !!session);
 
         try {
           setSession(session);
@@ -86,16 +89,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    // Get initial session with improved error handling
+    // Get initial session with improved error handling and timeout
     const initializeAuth = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        console.log('Initializing auth...');
+        
+        // Add timeout to prevent hanging
+        const authPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise((_, reject) => {
+          timeoutId = setTimeout(() => reject(new Error('Auth timeout')), 10000);
+        });
+
+        const { data: { session }, error } = await Promise.race([
+          authPromise,
+          timeoutPromise
+        ]) as any;
+        
+        clearTimeout(timeoutId);
         
         if (error) {
           console.error('Error getting initial session:', error);
           if (mounted) setLoading(false);
           return;
         }
+
+        console.log('Initial session:', !!session);
 
         if (mounted) {
           setSession(session);
@@ -107,6 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch (err) {
         console.error('Initialize auth error:', err);
+        clearTimeout(timeoutId);
         if (mounted) setLoading(false);
       }
     };
@@ -115,12 +134,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       mounted = false;
+      clearTimeout(timeoutId);
       subscription.unsubscribe();
     };
   }, []);
 
   const fetchUserProfile = async (authUser: User) => {
     try {
+      console.log('Fetching profile for user:', authUser.id);
+      
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('*')
@@ -136,11 +158,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (!profile) {
+        console.log('No profile found, creating one...');
         // Create missing profile immediately
         await createMissingProfile(authUser);
         return;
       }
 
+      console.log('Profile found:', profile);
+      
       const userWithProfile: AuthUser = {
         ...authUser,
         profile: profile
@@ -158,6 +183,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const createMissingProfile = async (authUser: User) => {
     try {
+      console.log('Creating missing profile for user:', authUser.id);
+      
       const profileData = {
         id: authUser.id,
         email: authUser.email || '',
@@ -184,6 +211,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
         return;
       }
+
+      console.log('Profile created successfully:', newProfile);
 
       const userWithProfile: AuthUser = {
         ...authUser,

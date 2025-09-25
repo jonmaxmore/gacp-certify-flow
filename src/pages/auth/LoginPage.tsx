@@ -21,14 +21,10 @@ const LoginPage = () => {
 
   // Redirect authenticated users to their dashboard
   useEffect(() => {
-    console.log('LoginPage useEffect - loading:', loading, 'user:', user);
-    
     if (!loading && user) {
-      console.log('User authenticated, redirecting to dashboard');
       // Handle users with profiles
       if (user.profile) {
         const role = user.profile.role;
-        console.log('User role:', role);
         switch (role) {
           case 'applicant':
             navigate('/applicant/dashboard');
@@ -46,7 +42,6 @@ const LoginPage = () => {
             navigate('/applicant/dashboard');
         }
       } else {
-        console.log('User exists but no profile - redirecting to applicant dashboard');
         // User exists but no profile - redirect to applicant dashboard for now
         navigate('/applicant/dashboard');
       }
