@@ -37,23 +37,41 @@ const PaymentsPage = () => {
 
   const fetchPayments = async () => {
     try {
-      const { data, error } = await supabase
+      // First, get applications for this user
+      const { data: userApplications, error: appError } = await supabase
+        .from('applications')
+        .select('id, application_number, farm_name, workflow_status')
+        .eq('applicant_id', user?.id);
+
+      if (appError) throw appError;
+
+      if (!userApplications || userApplications.length === 0) {
+        setPayments([]);
+        setLoading(false);
+        return;
+      }
+
+      // Get payments for these applications
+      const applicationIds = userApplications.map(app => app.id);
+      
+      const { data: paymentsData, error: paymentsError } = await supabase
         .from('payments')
-        .select(`
-          *,
-          applications!payments_application_id_fkey(
-            application_number,
-            farm_name,
-            applicant_id
-          )
-        `)
-        .eq('applications.applicant_id', user?.id)
+        .select('*')
+        .in('application_id', applicationIds)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setPayments(data || []);
+      if (paymentsError) throw paymentsError;
+
+      // Combine data
+      const enrichedPayments = paymentsData?.map(payment => ({
+        ...payment,
+        applications: userApplications.find(app => app.id === payment.application_id)
+      })) || [];
+
+      setPayments(enrichedPayments);
     } catch (error) {
       console.error('Error fetching payments:', error);
+      setPayments([]);
     } finally {
       setLoading(false);
     }

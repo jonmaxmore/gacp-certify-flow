@@ -26,6 +26,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { PaymentPrompt } from '@/components/dashboard/PaymentPrompt';
 
 interface ApplicationSummary {
   id: string;
@@ -316,6 +317,29 @@ export const EnhancedApplicantDashboard: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Payment Prompts - Show if payment is required */}
+      {applications.length > 0 && applications.map(app => {
+        const needsPayment = [
+          'PAYMENT_PENDING_REVIEW',
+          'SUBMITTED',
+          'REJECTED_PAYMENT_REQUIRED',
+          'PAYMENT_PENDING_ASSESSMENT',
+          'REVIEW_APPROVED'
+        ].includes(app.workflow_status);
+        
+        if (needsPayment) {
+          return (
+            <PaymentPrompt
+              key={app.id}
+              applicationId={app.id}
+              workflowStatus={app.workflow_status}
+              revisionCount={3} // You can pass actual revision count if available
+            />
+          );
+        }
+        return null;
+      })}
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
