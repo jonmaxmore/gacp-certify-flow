@@ -6,6 +6,7 @@ import { LoadingFallback } from '@/components/optimized/LazyComponents';
 const EnhancedApplicantDashboard = lazy(() => import('@/pages/applicant/EnhancedApplicantDashboard'));
 const ApplicationWizard = lazy(() => import('@/pages/applicant/ApplicationWizard'));
 const ApplicationsListPage = lazy(() => import('@/pages/applicant/ApplicationsListPage'));
+const ApplicationStatusPage = lazy(() => import('@/pages/applicant/ApplicationStatusPage'));
 const PaymentsPage = lazy(() => import('@/pages/applicant/PaymentsPage'));
 const CertificatesPage = lazy(() => import('@/pages/applicant/CertificatesPage'));
 const SchedulePage = lazy(() => import('@/pages/applicant/SchedulePage'));
@@ -19,6 +20,7 @@ const ApplicantRoutes = () => {
         <Route path="application/new" element={<ApplicationWizard />} />
         <Route path="application/:id/edit" element={<ApplicationWizard />} />
         <Route path="applications" element={<ApplicationsListPage />} />
+        <Route path="application/:id/status" element={<ApplicationStatusPage />} />
         <Route path="payments" element={<PaymentsPage />} />
         <Route path="certificates" element={<CertificatesPage />} />
         <Route path="schedule" element={<SchedulePage />} />

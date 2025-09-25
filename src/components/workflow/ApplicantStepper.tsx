@@ -291,7 +291,20 @@ const ApplicantStepper = () => {
                 </div>
 
                 {step.status === 'current' && (
-                  <Button size="sm" className="gap-2">
+                  <Button 
+                    size="sm" 
+                    className="gap-2"
+                    onClick={() => {
+                      if (step.id === 'document-review') {
+                        // Navigate to status page - need to get application ID
+                        window.location.href = '/applicant/applications';
+                      } else if (step.id === 'initial-payment' || step.id === 'assessment-payment') {
+                        window.location.href = '/applicant/payments';
+                      } else if (step.id === 'certificate') {
+                        window.location.href = '/applicant/certificates';
+                      }
+                    }}
+                  >
                     {step.id === 'document-review' ? (
                       <>
                         <Eye className="h-4 w-4" />

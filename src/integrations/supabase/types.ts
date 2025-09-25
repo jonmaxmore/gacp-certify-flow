@@ -1219,19 +1219,12 @@ export type Database = {
         Returns: string
       }
       create_payment_record: {
-        Args:
-          | {
-              p_amount: number
-              p_application_id: string
-              p_due_date?: string
-              p_milestone: Database["public"]["Enums"]["payment_milestone"]
-            }
-          | {
-              p_amount: number
-              p_application_id: string
-              p_due_date?: string
-              p_milestone: number
-            }
+        Args: {
+          p_amount: number
+          p_application_id: string
+          p_due_date?: string
+          p_milestone: number
+        }
         Returns: string
       }
       create_security_alert: {
@@ -1268,6 +1261,16 @@ export type Database = {
       get_admin_stats: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      get_application_status: {
+        Args: { app_id: string }
+        Returns: {
+          application_status: string
+          completed_payments: Json
+          current_step: string
+          next_action: string
+          pending_payments: Json
+        }[]
       }
       get_auth_user_email: {
         Args: { user_uuid: string }

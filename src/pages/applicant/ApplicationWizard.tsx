@@ -271,7 +271,7 @@ const ApplicationWizard = () => {
         const { data, error } = await supabase
           .rpc('create_payment_record', {
             p_application_id: applicationId,
-            p_milestone: 'DOCUMENT_REVIEW' as const,
+            p_milestone: 1, // Use integer instead of enum
             p_amount: 5000,
             p_due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days from now
           });

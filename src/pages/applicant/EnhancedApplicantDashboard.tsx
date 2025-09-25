@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import ApplicantStepper from '@/components/workflow/ApplicantStepper';
+import LiveApplicationStepper from '@/components/workflow/LiveApplicationStepper';
 import { MockPaymentFlow } from '@/components/payments/MockPaymentFlow';
 import { 
   User, 
@@ -88,8 +88,8 @@ const EnhancedApplicantDashboard = () => {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="xl:col-span-2 space-y-6">
-          {/* Application Stepper - New Enhanced Version */}
-          <ApplicantStepper />
+          {/* Live Application Stepper with Real Data */}
+          <LiveApplicationStepper />
 
           {/* Current Step Details */}
           {currentStep && (

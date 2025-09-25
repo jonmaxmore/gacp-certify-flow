@@ -25,11 +25,7 @@ export type WorkflowStatus =
   | 'EXPIRED'
   | 'REVOKED';
 
-export type PaymentMilestone = 
-  | 'DOCUMENT_REVIEW'
-  | 'ASSESSMENT'
-  | 'CERTIFICATION'
-  | 'REINSPECTION';
+export type PaymentMilestone = 1 | 2 | 3 | 4;
 
 interface WorkflowStatusUpdate {
   applicationId: string;
