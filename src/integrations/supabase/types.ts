@@ -703,6 +703,7 @@ export type Database = {
           checkout_url: string | null
           created_at: string | null
           currency: string | null
+          due_date: string | null
           gateway_name: string | null
           gateway_payment_id: string | null
           gateway_session_id: string | null
@@ -730,6 +731,7 @@ export type Database = {
           checkout_url?: string | null
           created_at?: string | null
           currency?: string | null
+          due_date?: string | null
           gateway_name?: string | null
           gateway_payment_id?: string | null
           gateway_session_id?: string | null
@@ -757,6 +759,7 @@ export type Database = {
           checkout_url?: string | null
           created_at?: string | null
           currency?: string | null
+          due_date?: string | null
           gateway_name?: string | null
           gateway_payment_id?: string | null
           gateway_session_id?: string | null
