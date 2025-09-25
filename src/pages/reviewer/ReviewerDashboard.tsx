@@ -42,15 +42,15 @@ const ReviewerDashboard = () => {
 
   const fetchApplications = async () => {
     try {
-      const { data, error } = await supabase
-        .from('applications')
-        .select(`
-          *,
-          profiles:applicant_id(full_name, organization_name, phone, email),
-          payments!inner(id, milestone, amount, status)
-        `)
-        .in('workflow_status', ['SUBMITTED', 'UNDER_REVIEW', 'PAYMENT_CONFIRMED_REVIEW', 'REVISION_REQUESTED', 'REJECTED_PAYMENT_REQUIRED'])
-        .order('created_at', { ascending: false });
+    const { data, error } = await supabase
+      .from('applications')
+      .select(`
+        *,
+        profiles:applicant_id(full_name, organization_name, phone, email),
+        payments!payments_application_id_fkey(id, milestone, amount, status)
+      `)
+      .in('workflow_status', ['SUBMITTED', 'UNDER_REVIEW', 'PAYMENT_CONFIRMED_REVIEW', 'REVISION_REQUESTED', 'REJECTED_PAYMENT_REQUIRED'])
+      .order('created_at', { ascending: false });
 
       if (error) throw error;
       setApplications(data || []);

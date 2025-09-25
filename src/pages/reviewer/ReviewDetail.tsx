@@ -28,16 +28,16 @@ const ReviewDetail = () => {
 
   const fetchApplicationDetail = async () => {
     try {
-      const { data, error } = await supabase
-        .from('applications')
-        .select(`
-          *,
-          profiles:applicant_id(full_name, organization_name, email, phone),
-          documents(*),
-          payments!inner(id, milestone, amount, status)
-        `)
-        .eq('id', id)
-        .single();
+    const { data, error } = await supabase
+      .from('applications')
+      .select(`
+        *,
+        profiles:applicant_id(full_name, organization_name, email, phone),
+        documents(*),
+        payments!payments_application_id_fkey(id, milestone, amount, status)
+      `)
+      .eq('id', id)
+      .single();
 
       if (error) throw error;
       setApplication(data);
