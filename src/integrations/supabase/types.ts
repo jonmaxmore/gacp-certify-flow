@@ -1183,6 +1183,10 @@ export type Database = {
         Args: { target_user_id?: string }
         Returns: Json
       }
+      get_status_display_text: {
+        Args: { status_value: string }
+        Returns: Json
+      }
       get_user_workflow_tasks: {
         Args: { target_user_id?: string }
         Returns: Json
