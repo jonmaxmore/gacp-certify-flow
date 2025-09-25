@@ -1164,6 +1164,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      automated_security_maintenance: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       can_access_application_sensitive_data: {
         Args: { app_id: string }
         Returns: boolean
@@ -1184,6 +1188,15 @@ export type Database = {
           window_minutes?: number
         }
         Returns: boolean
+      }
+      check_rate_limit_with_progressive_delay: {
+        Args: {
+          action_type_val: string
+          identifier_val: string
+          max_attempts?: number
+          window_minutes?: number
+        }
+        Returns: Json
       }
       cleanup_expired_sessions: {
         Args: Record<PropertyKey, never>
@@ -1215,6 +1228,17 @@ export type Database = {
               p_due_date?: string
               p_milestone: number
             }
+        Returns: string
+      }
+      create_security_alert: {
+        Args: {
+          alert_type: string
+          message: string
+          metadata?: Json
+          severity: string
+          target_user_id?: string
+          title: string
+        }
         Returns: string
       }
       encrypt_sensitive_data: {
