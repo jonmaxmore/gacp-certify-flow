@@ -74,6 +74,24 @@
     
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-quick: all 0.15s ease-out;
+    --transition-elegant: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --transition-mechanical: all 0.2s cubic-bezier(0.4, 0, 0.6, 1);
+    --transition-factory: all 0.3s ease-in-out;
+    
+    /* Additional shadows */
+    --shadow-panel: 0 2px 8px -2px hsl(var(--primary) / 0.1), 0 4px 16px -4px hsl(var(--primary) / 0.05);
+    --shadow-control: 0 1px 3px hsl(var(--primary) / 0.12), 0 1px 2px hsl(var(--primary) / 0.24);
+    --shadow-pressed: inset 0 2px 4px hsl(var(--primary) / 0.2);
+    --shadow-soft: 0 1px 3px hsl(var(--primary) / 0.1);
+    --shadow-medium: 0 4px 12px hsl(var(--primary) / 0.15);
+    
+    /* Additional gradients */
+    --gradient-card: linear-gradient(145deg, hsl(var(--card)), hsl(var(--muted)));
+    --gradient-steel: linear-gradient(135deg, hsl(220 13% 95%), hsl(220 13% 90%));
+    --gradient-machine: linear-gradient(145deg, hsl(var(--muted)), hsl(var(--accent)));
+    --gradient-precision: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--muted)));
     
     /* Grid pattern for backgrounds */
     --grid-size: 60px;
@@ -113,12 +131,13 @@
   }
   
   body {
-    @apply bg-background text-foreground font-body;
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
     font-feature-settings: "rlig" 1, "calt" 1;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-heading;
+    font-family: var(--font-heading);
   }
 }
 
@@ -201,7 +220,6 @@
   .status-info {
     @apply bg-info/10 text-info border-info/20;
   }
-}
   
   .shadow-panel {
     box-shadow: var(--shadow-panel);
