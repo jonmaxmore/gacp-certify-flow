@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, FileText, CreditCard, Calendar, Download, LogOut, Clock, CheckCircle, AlertCircle, Users, Brain, Award, BookOpen } from 'lucide-react';
+import { Plus, FileText, CreditCard, Calendar, Download, LogOut, Clock, CheckCircle, AlertCircle, Users, Brain, Award, BookOpen, ArrowLeft, ChevronRight, Video, QrCode } from 'lucide-react';
 import { formatDate } from '@/utils/dateFormatter';
 import { Link, useNavigate } from 'react-router-dom';
 import { KnowledgeTestModule } from '@/components/modules/knowledge-test/KnowledgeTestModule';
@@ -187,13 +187,10 @@ const ApplicantDashboard = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-soft">
-                <span className="text-white font-bold text-lg">G</span>
-              </div>
-              <div>
-                <h1 className="text-xl font-semibold text-foreground">แพลตฟอร์ม GACP</h1>
-                <p className="text-sm text-muted-foreground">ยินดีต้อนรับ, {user?.profile?.full_name}</p>
-              </div>
+              <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <h1 className="text-2xl font-semibold">Applicant Dashboard</h1>
             </div>
             
             <div className="flex items-center space-x-3">
@@ -215,11 +212,6 @@ const ApplicantDashboard = () => {
                 )}
               </Button>
               
-              <div className="hidden md:flex items-center space-x-2 text-sm text-muted-foreground">
-                <Users className="h-4 w-4" />
-                <span>ผู้สมัคร</span>
-              </div>
-              
               <Button variant="outline" onClick={handleSignOut} size="sm">
                 <LogOut className="h-4 w-4 mr-2" />
                 ออกจากระบบ
@@ -229,103 +221,151 @@ const ApplicantDashboard = () => {
         </div>
       </header>
 
-      {/* Apple Style Dashboard */}
-      <AppleStyleDashboard
-        userName={user?.profile?.full_name || 'ผู้ใช้'}
-        stats={stats}
-        quickActions={quickActions}
-        nextSteps={nextSteps}
-        knowledgeTestPassed={knowledgeTestPassed}
-        onKnowledgeTestClick={() => setShowKnowledgeTest(true)}
-      />
+      <main className="container mx-auto px-6 py-8 space-y-8">
+        {/* Progress Stepper */}
+        {applications && applications.length > 0 && (
+          <div className="mb-8">
+            <WorkflowProgressStepper 
+              currentStatus={applications[0]?.workflow_status}
+              revisionCount={applications[0]?.revision_count_current || 0}
+              maxFreeRevisions={applications[0]?.max_free_revisions || 2}
+            />
+          </div>
+        )}
 
-      {/* Applications and Workflow - Additional Section */}
-      {knowledgeTestPassed && applications && applications.length > 0 && (
-        <div className="container mx-auto px-6 pb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Applications List */}
-            <Card className="shadow-soft">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <FileText className="h-5 w-5" />
-                  <span>ใบสมัครล่าสุด</span>
-                </CardTitle>
-                <CardDescription>
-                  ติดตามสถานะใบสมัครของคุณ
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {applications.slice(0, 3).map((app) => (
-                    <div key={app.id} className="p-4 border border-border rounded-xl hover:bg-muted/50 transition-all duration-300 hover:shadow-soft">
-                       {/* Workflow Progress Stepper for each application */}
-                       <div className="mb-4">
-                         <WorkflowProgressStepper 
-                           currentStatus={app.workflow_status}
-                           revisionCount={app.revision_count_current || 0}
-                           maxFreeRevisions={app.max_free_revisions || 2}
-                         />
-                       </div>
-                       
-                       {/* Show rejection count badge if applicable */}
-                       {(app.revision_count_current || 0) > 0 && (
-                         <div className="mb-3">
-                           <RejectionCountBadge
-                             revisionCount={app.revision_count_current || 0}
-                             maxFreeRevisions={app.max_free_revisions || 2}
-                             workflowStatus={app.workflow_status}
-                           />
-                         </div>
-                       )}
-                      
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <p className="font-medium text-foreground">{app.application_number}</p>
-                          <p className="text-sm text-muted-foreground">{app.farm_name || 'ไม่ระบุชื่อฟาร์ม'}</p>
-                        </div>
-                        {getStatusBadge(app.workflow_status)}
-                      </div>
-                      
-                      <div className="mt-3 flex justify-between items-center">
-                        <span className="text-xs text-muted-foreground">
-                          สร้างเมื่อ {formatDate(app.created_at, language)}
-                        </span>
-                        <div className="flex space-x-2">
-                          <Button size="sm" variant="outline" asChild>
-                            <Link to={`/applicant/application/${app.id}`}>
-                              ดูรายละเอียด
-                            </Link>
-                          </Button>
-                        </div>
-                      </div>
+        {/* Status Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Document Status */}
+          {applications && applications.length > 0 && (applications[0]?.revision_count_current || 0) > 0 && (
+            <Card className="border-red-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-red-100 rounded-full">
+                      <AlertCircle className="h-5 w-5 text-red-600" />
                     </div>
-                  ))}
+                    <div>
+                      <h3 className="font-semibold text-red-900">Document Rejected ({applications[0]?.revision_count_current || 0}/{applications[0]?.max_free_revisions || 2})</h3>
+                      <p className="text-sm text-red-600">Please review and resubmit</p>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm">
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </div>
               </CardContent>
             </Card>
+          )}
 
-            {/* Payments for each application */}
-            <Card className="shadow-soft">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <CreditCard className="h-5 w-5" />
-                  <span>การชำระเงิน</span>
-                </CardTitle>
-                <CardDescription>
-                  ค่าธรรมเนียมและสถานะการชำระเงิน
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {applications.map((app) => (
-                  <div key={app.id} className="mb-4">
-                    <PaymentManager applicationId={app.id} />
+          {/* Assessment Scheduled */}
+          <Card className="border-blue-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-blue-100 rounded-full">
+                    <Calendar className="h-5 w-5 text-blue-600" />
                   </div>
-                ))}
+                  <div>
+                    <h3 className="font-semibold text-blue-900">Assessment Scheduled</h3>
+                    <p className="text-sm text-blue-600">Online assessment ready</p>
+                  </div>
+                </div>
+                <Button variant="outline" size="sm">
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Payment Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Payment for Rejected 3rd time */}
+          {applications && applications.length > 0 && applications[0]?.workflow_status === 'REJECTED_PAYMENT_REQUIRED' && (
+            <Card>
+              <CardContent className="p-6">
+                <Button className="w-full h-20 bg-green-600 hover:bg-green-700 text-white text-lg">
+                  <div className="text-center">
+                    <div className="font-bold">Pay 5,000</div>
+                    <div className="text-sm">Rejected 3times</div>
+                  </div>
+                </Button>
               </CardContent>
             </Card>
-          </div>
+          )}
+
+          {/* Payment before scheduling */}
+          <Card>
+            <CardContent className="p-6">
+              <Button variant="outline" className="w-full h-20 text-lg">
+                <div className="text-center">
+                  <div className="font-bold">Pay 5,000</div>
+                  <div className="text-sm">Before scheduling</div>
+                </div>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
-      )}
+
+        {/* Assessment Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Assessment</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <Calendar className="h-4 w-4" />
+                    <span>Jul 26, 2025</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Clock className="h-4 w-4" />
+                    <span>10:00 am</span>
+                  </div>
+                  <Badge variant="outline">In line</Badge>
+                  <Badge variant="outline">Online Assessment</Badge>
+                </div>
+              </div>
+              
+              <div className="flex space-x-4">
+                <Button className="flex-1">
+                  <Video className="h-4 w-4 mr-2" />
+                  Join Meeting
+                </Button>
+                <Button variant="outline" className="flex-1">
+                  Coin Meeting
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Certificate Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Certificate</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <Button variant="outline" className="flex items-center space-x-2">
+                <Download className="h-4 w-4" />
+                <span>Download Certificate</span>
+              </Button>
+              <div className="flex space-x-2">
+                <Button variant="outline" size="sm">
+                  <QrCode className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="sm">
+                  <QrCode className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="text-sm text-muted-foreground">USAL9Q</div>
+            </div>
+          </CardContent>
+        </Card>
+      </main>
 
       {/* Knowledge Test Dialog */}
       <Dialog open={showKnowledgeTest} onOpenChange={setShowKnowledgeTest}>

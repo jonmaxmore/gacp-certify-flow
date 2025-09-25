@@ -3,7 +3,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Clock, CheckCircle, XCircle, LogOut, Search, Filter, Eye, MessageSquare, ArrowRight } from 'lucide-react';
+import { FileText, Clock, CheckCircle, XCircle, LogOut, Search, Filter, Eye, MessageSquare, ArrowRight, ArrowLeft, User, Upload, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -88,9 +88,17 @@ const ReviewerDashboard = () => {
       {/* Header */}
       <header className="border-b bg-white">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-semibold">Reviewer Dashboard</h1>
-            <p className="text-muted-foreground">ยินดีต้อนรับ, {user?.profile?.full_name}</p>
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div>
+              <h1 className="text-2xl font-semibold">Reviewer Dashboard</h1>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                <span className="text-sm text-muted-foreground">3 pending notifications</span>
+              </div>
+            </div>
           </div>
           <Button variant="outline" onClick={handleSignOut}>
             <LogOut className="h-4 w-4 mr-2" />
@@ -206,81 +214,92 @@ const ReviewerDashboard = () => {
           </Card>
         </div>
 
-        {/* Applications Queue */}
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5" />
-                    ใบสมัครรอตรวจสอบ
-                  </CardTitle>
-                  <CardDescription>
-                    รายการใบสมัครที่ต้องการการตรวจสอบเอกสาร
-                  </CardDescription>
-                </div>
-                <Button variant="outline" size="sm">
-                  <Filter className="h-4 w-4 mr-2" />
-                  กรอง
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-              ) : applications.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  ไม่มีใบสมัครรอตรวจสอบ
-                </div>
-              ) : (
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Application Queue */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Application queue</CardTitle>
+              </CardHeader>
+              <CardContent>
                 <div className="space-y-4">
-                  {applications.map((app) => (
-                    <div key={app.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-medium">{app.application_number}</h4>
-                            {getStatusBadge(app.status)}
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            {app.profiles?.full_name} - {app.profiles?.organization_name || app.farm_name}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            ส่งเมื่อ: {new Date(app.created_at).toLocaleDateString('th-TH')}
-                          </p>
+                  {[
+                    { name: "John Doe", status: "Payment pending", avatar: "👨", action: "💳" },
+                    { name: "Jane Smith", status: "Document submitted", avatar: "👩", action: "📄" },
+                    { name: "Bob Johnson", status: "Payment paid", avatar: "👨", action: "🗂️" },
+                    { name: "Alice Davis", status: "Documents rejected", avatar: "👩", action: "📋" }
+                  ].map((app, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                          <span className="text-xl">{app.avatar}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => navigate(`/reviewer/review/${app.id}`)}
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            ตรวจสอบ
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => navigate('/reviewer/queue')}
-                          >
-                            <ArrowRight className="h-4 w-4" />
-                          </Button>
+                        <div>
+                          <h4 className="font-medium">{app.name}</h4>
+                          <p className="text-sm text-muted-foreground">{app.status}</p>
                         </div>
                       </div>
+                      <div className="text-xl">{app.action}</div>
                     </div>
                   ))}
-                  {applications.length > 0 && (
-                    <div className="text-center pt-4">
-                      <Button variant="outline" onClick={() => navigate('/reviewer/queue')}>ดูรายการทั้งหมด</Button>
-                    </div>
-                  )}
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            {/* Document Review */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Document Review</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                      <span className="text-xl">👨</span>
+                    </div>
+                    <div>
+                      <h4 className="font-medium">John Doe</h4>
+                      <p className="text-sm text-muted-foreground">(in part sec)</p>
+                    </div>
+                  </div>
+
+                  {/* Document Grid */}
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    {[1, 2, 3, 4].map((doc) => (
+                      <div key={doc} className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
+                        <FileText className="h-8 w-8 text-gray-400" />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex space-x-3">
+                    <Button variant="outline" className="flex-1">
+                      <ThumbsUp className="h-4 w-4 mr-2" />
+                      Approve
+                    </Button>
+                    <Button className="flex-1">
+                      <ThumbsDown className="h-4 w-4 mr-2" />
+                      Reject
+                    </Button>
+                  </div>
+
+                  {/* Notification */}
+                  <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs">ℹ️</span>
+                      </div>
+                      <div className="text-sm">
+                        <strong>Applicant: John Doe, with Application #123 has been approved</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </main>
     </div>

@@ -3,7 +3,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Video, FileText, MapPin, LogOut, Clock, Play, Upload, Camera, Monitor } from 'lucide-react';
+import { Calendar, Video, FileText, MapPin, LogOut, Clock, Play, Upload, Camera, Monitor, ArrowLeft, ChevronDown, Users, CheckCircle, RotateCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -108,9 +108,11 @@ const AuditorDashboard = () => {
       {/* Header */}
       <header className="border-b bg-white">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div>
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
             <h1 className="text-2xl font-semibold">Auditor Dashboard</h1>
-            <p className="text-muted-foreground">ยินดีต้อนรับ, {user?.profile?.full_name}</p>
           </div>
           <Button variant="outline" onClick={handleSignOut}>
             <LogOut className="h-4 w-4 mr-2" />
@@ -243,101 +245,130 @@ const AuditorDashboard = () => {
           </Card>
         </div>
 
-        {/* Assessment Schedule */}
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5" />
-                    ตารางการประเมิน
-                  </CardTitle>
-                  <CardDescription>
-                    รายการการประเมินที่กำหนดการไว้
-                  </CardDescription>
-                </div>
-                <Button variant="outline" size="sm" onClick={() => navigate('/auditor/calendar')}>
-                  <Calendar className="h-4 w-4 mr-2" />
-                  ดูปฏิทิน
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-              ) : assessments.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  ไม่มีการประเมินที่กำหนดการไว้
-                </div>
-              ) : (
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Approved Applications */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Approved Applications</CardTitle>
+              </CardHeader>
+              <CardContent>
                 <div className="space-y-4">
-                  {assessments.map((assessment) => (
-                    <div key={assessment.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-medium">{assessment.applications.application_number}</h4>
-                            {getTypeBadge(assessment.type)}
-                            {getStatusBadge(assessment.status)}
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            {assessment.applications.profiles?.full_name} - {assessment.applications.farm_name}
-                          </p>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-4 w-4" />
-                              {assessment.scheduled_at ? new Date(assessment.scheduled_at).toLocaleString('th-TH') : 'ยังไม่กำหนด'}
-                            </div>
-                            {assessment.duration_minutes && (
-                              <span>ระยะเวลา: {assessment.duration_minutes} นาที</span>
-                            )}
-                          </div>
+                  {[
+                    { name: "John Doe", date: "July 23, 2025", time: "10:9am", type: "Online", avatar: "👨" },
+                    { name: "Jane Smith", date: "August 1 2025", time: "18:9am", type: "Onsite", avatar: "👩" }
+                  ].map((app, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                          <span className="text-xl">{app.avatar}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                        {assessment.type === 'ONLINE' && (
-                          <Button 
-                            variant="default" 
-                            size="sm"
-                            onClick={() => navigate(`/auditor/assessment/${assessment.id}`)}
-                          >
-                            <Video className="h-4 w-4 mr-2" />
-                            เข้าร่วม
-                          </Button>
-                        )}
-                        {assessment.type === 'ONSITE' && (
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => navigate(`/auditor/assessment/${assessment.id}`)}
-                          >
-                            <MapPin className="h-4 w-4 mr-2" />
-                            ดูรายละเอียด
-                          </Button>
-                        )}
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => navigate(`/auditor/report/${assessment.id}`)}
-                        >
-                          <FileText className="h-4 w-4 mr-2" />
-                          รายงาน
-                        </Button>
+                        <div>
+                          <h4 className="font-medium">{app.name}</h4>
+                          <p className="text-sm text-muted-foreground">{app.date} {app.time}</p>
                         </div>
                       </div>
+                      <Badge variant="outline">{app.type}</Badge>
                     </div>
                   ))}
-                  {assessments.length > 0 && (
-                    <div className="text-center pt-4">
-                      <Button variant="outline" onClick={() => navigate('/auditor/assessments')}>ดูรายการทั้งหมด</Button>
-                    </div>
-                  )}
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            {/* Schedule Assessment */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Schedule Assessment</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* Applicant Selection */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Applicant</label>
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <span>Applicant</span>
+                      <ChevronDown className="h-4 w-4" />
+                    </div>
+                  </div>
+
+                  {/* Date & Time */}
+                  <div className="flex space-x-2">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                        <span>Oct</span>
+                        <span className="font-bold">4</span>
+                        <span>24</span>
+                        <sup className="text-xs">16</sup>
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between p-3 border rounded-lg">
+                        <span>Online</span>
+                        <Calendar className="h-4 w-4" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Assessment Type */}
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-4">
+                      <label className="flex items-center space-x-2">
+                        <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center">
+                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        </div>
+                        <span>Online</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <div className="w-4 h-4 border rounded-full"></div>
+                        <span>Onsite</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Generate Link Button */}
+                  <Button className="w-full">
+                    Generate Link
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Assessment Panel */}
+          <div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Assessment</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* Applicant Photo */}
+                  <div className="flex justify-center">
+                    <div className="w-32 h-32 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
+                      <img 
+                        src="/api/placeholder/200/200" 
+                        alt="Applicant" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button variant="outline" className="flex flex-col h-16">
+                      <FileText className="h-5 w-5 mb-1" />
+                      <span className="text-xs">Upload Report</span>
+                    </Button>
+                    <Button variant="outline" className="flex flex-col h-16">
+                      <Camera className="h-5 w-5 mb-1" />
+                      <span className="text-xs">Capture Screen</span>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </main>
     </div>
