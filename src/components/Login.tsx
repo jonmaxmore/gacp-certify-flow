@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,9 +22,9 @@ const Login: React.FC = () => {
     if (user) {
       // Role-based redirection
       if (user.role === 'admin') {
-        history.push('/admin-dashboard');
+        navigate('/admin-dashboard');
       } else {
-        history.push('/dashboard');
+        navigate('/dashboard');
       }
     } else {
       setError('Invalid credentials.');
