@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Separator } from '@/components/ui/separator'
 import { Eye, EyeOff, LogIn } from 'lucide-react'
 import { LoginTestHelper } from '@/components/auth/LoginTestHelper'
+import { getDashboardPathForRole } from '@/lib/roleUtils'
 
 const safeText = (val?: string, fallback?: string) =>
   val && !val.startsWith('login.') ? val : fallback || ''
@@ -46,10 +47,12 @@ const LoginPage = () => {
   useEffect(() => {
     if (!loading && user) {
       const role = user.profile?.role
-      if (role === 'reviewer') navigate('/reviewer/dashboard')
-      else if (role === 'auditor') navigate('/auditor/dashboard')
-      else if (role === 'admin') navigate('/admin/dashboard')
-      else navigate('/applicant/dashboard')
+      const dashboardPath = getDashboardPathForRole(role)
+      if (dashboardPath === '/error/invalid-role') {
+        navigate('/error/invalid-role')
+      } else {
+        navigate(dashboardPath)
+      }
     }
   }, [user, loading, navigate])
 
@@ -65,9 +68,9 @@ const LoginPage = () => {
       return
     }
 
-    // นำทางแบบมองบวก เพื่อไม่ให้ผู้ใช้รู้สึกว่า “ไม่เกิดอะไรขึ้น”
-    navigate('/applicant/dashboard')
-    setIsLoading(false)
+  // Default fallback: if login succeeds but no user object, go to homepage
+  navigate('/')
+  setIsLoading(false)
   }
 
   if (loading) {

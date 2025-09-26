@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Eye, EyeOff, UserPlus } from 'lucide-react';
+import { getDashboardPathForRole, isFarmerRole, isDepartmentRole } from '@/lib/roleUtils';
 
 const mapSignUpError = (message?: string) => {
   if (!message) return 'ไม่สามารถสมัครสมาชิกได้ กรุณาลองใหม่';
@@ -65,8 +66,18 @@ const RegisterPage = () => {
       return;
     }
 
+
     if (data) {
-      navigate('/login?registered=1');
+      // If you want to auto-login after registration, implement here
+      // For now, redirect to the correct login page based on role
+      const dashboardPath = getDashboardPathForRole(formData.role);
+      if (isFarmerRole(formData.role)) {
+        navigate('/farmer/login?registered=1');
+      } else if (isDepartmentRole(formData.role)) {
+        navigate('/dept/login?registered=1');
+      } else {
+        navigate('/error/invalid-role');
+      }
     }
 
     setIsLoading(false);

@@ -7,6 +7,7 @@ import NotificationProvider from '@/providers/NotificationProvider';
 import ChatbotProvider from '@/providers/ChatbotProvider';
 import { SecurityMonitor } from '@/components/security/SecurityMonitor';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import InvalidRolePage from '@/pages/error/InvalidRolePage';
 import { PublicLayout } from '@/components/layout/PublicLayout';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { LoadingFallback, ErrorFallback } from '@/components/optimized/LazyComponents';
@@ -15,12 +16,53 @@ import { LoadingFallback, ErrorFallback } from '@/components/optimized/LazyCompo
 const PublicRoutes = lazy(() => import('@/components/routes/PublicRoutes'));
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
+const FarmerLoginPage = lazy(() => import('@/pages/auth/FarmerLoginPage'));
+const DeptLoginPage = lazy(() => import('@/pages/auth/DeptLoginPage'));
 
 // Lazy load dashboard routes
 const LazyApplicantRoutes = lazy(() => import('@/components/routes/ApplicantRoutes'));
 const LazyReviewerRoutes = lazy(() => import('@/components/routes/ReviewerRoutes'));
 const LazyAuditorRoutes = lazy(() => import('@/components/routes/AuditorRoutes'));
 const LazyAdminRoutes = lazy(() => import('@/components/routes/AdminRoutes'));
+const LazySuperAdminRoutes = lazy(() => import('@/components/routes/SuperAdminRoutes'));
+const LazyCSRRoutes = lazy(() => import('@/components/routes/CSRRoutes'));
+const LazyCMSRoutes = lazy(() => import('@/components/routes/CMSRoutes'));
+                <Route
+                  path="/dept/dashboard/cs/*"
+                  element={
+                    <ProtectedRoute requiredRole="cs">
+                      <DashboardLayout>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <LazyCSRRoutes />
+                        </Suspense>
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/dept/dashboard/cms/*"
+                  element={
+                    <ProtectedRoute requiredRole="cms">
+                      <DashboardLayout>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <LazyCMSRoutes />
+                        </Suspense>
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/dept/dashboard/super_admin/*"
+                  element={
+                    <ProtectedRoute requiredRole="super_admin">
+                      <DashboardLayout>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <LazySuperAdminRoutes />
+                        </Suspense>
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  }
+                />
 
 // Error boundary for better error handling
 class ErrorBoundary extends React.Component<
@@ -60,10 +102,11 @@ function App() {
                 <div className="min-h-screen bg-background">
                   <Routes>
                     {/* Protected dashboard routes - MUST come before public routes */}
+                {/* Farmer Portal */}
                 <Route
-                  path="/applicant/*"
+                  path="/farmer/*"
                   element={
-                    <ProtectedRoute requiredRole="applicant">
+                    <ProtectedRoute requiredRole="farmer">
                       <DashboardLayout>
                         <Suspense fallback={<LoadingFallback />}>
                           <LazyApplicantRoutes />
@@ -72,9 +115,10 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
-                
+
+                {/* Department Portal (all dept roles) - reviewer, auditor, admin, super_admin, cs, cms */}
                 <Route
-                  path="/reviewer/*"
+                  path="/dept/dashboard/reviewer/*"
                   element={
                     <ProtectedRoute requiredRole="reviewer">
                       <DashboardLayout>
@@ -85,9 +129,8 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
-                
                 <Route
-                  path="/auditor/*"
+                  path="/dept/dashboard/auditor/*"
                   element={
                     <ProtectedRoute requiredRole="auditor">
                       <DashboardLayout>
@@ -98,9 +141,8 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
-                
                 <Route
-                  path="/admin/*"
+                  path="/dept/dashboard/admin/*"
                   element={
                     <ProtectedRoute requiredRole="admin">
                       <DashboardLayout>
@@ -111,6 +153,10 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                {/* TODO: Add routes for super_admin, cs, cms as needed */}
+
+                {/* Invalid role error page */}
+                <Route path="/error/invalid-role" element={<InvalidRolePage />} />
 
                 {/* Auth routes (standalone layout) */}
                 <Route path="/login" element={
@@ -121,6 +167,16 @@ function App() {
                 <Route path="/register" element={
                   <Suspense fallback={<LoadingFallback />}>
                     <RegisterPage />
+                  </Suspense>
+                } />
+                <Route path="/farmer/login" element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <FarmerLoginPage />
+                  </Suspense>
+                } />
+                <Route path="/dept/login" element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <DeptLoginPage />
                   </Suspense>
                 } />
                 

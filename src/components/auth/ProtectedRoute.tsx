@@ -1,11 +1,14 @@
 import { useEffect, ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
+import { getDashboardPathForRole, isFarmerRole, isDepartmentRole } from '@/lib/roleUtils';
+
+import type { UserRole } from '@/lib/roleUtils';
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  requiredRole?: 'applicant' | 'reviewer' | 'auditor' | 'admin';
-  allowedRoles?: ('applicant' | 'reviewer' | 'auditor' | 'admin')[];
+  requiredRole?: UserRole;
+  allowedRoles?: UserRole[];
 }
 
 export const ProtectedRoute = ({
@@ -15,13 +18,20 @@ export const ProtectedRoute = ({
 }: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (loading) return;
 
-    // If no user, redirect to login
+    // If no user, redirect to correct login page
     if (!user) {
-      navigate('/login');
+      if (location.pathname.startsWith('/farmer')) {
+        navigate('/farmer/login');
+      } else if (location.pathname.startsWith('/dept')) {
+        navigate('/dept/login');
+      } else {
+        navigate('/login');
+      }
       return;
     }
 
@@ -30,20 +40,35 @@ export const ProtectedRoute = ({
       return; // keep showing the setup UI below
     }
 
-    // If role doesn't match the required route, send user to their correct dashboard instead of /login
     const currentRole = user.profile.role;
-    const goHomeForRole = () => navigate(`/${currentRole}/dashboard`);
+    const dashboardPath = getDashboardPathForRole(currentRole);
 
+    // Strict path separation
+    if (location.pathname.startsWith('/farmer') && !isFarmerRole(currentRole)) {
+      navigate(dashboardPath);
+      return;
+    }
+    if (location.pathname.startsWith('/dept') && !isDepartmentRole(currentRole)) {
+      navigate(dashboardPath);
+      return;
+    }
+
+    // If role is invalid, redirect to error page
+    if (dashboardPath === '/error/invalid-role') {
+      navigate('/error/invalid-role');
+      return;
+    }
+
+    // If role doesn't match the required route, send user to their correct dashboard
     if (requiredRole && currentRole !== requiredRole) {
-      goHomeForRole();
+      navigate(dashboardPath);
       return;
     }
-
     if (allowedRoles && !allowedRoles.includes(currentRole)) {
-      goHomeForRole();
+      navigate(dashboardPath);
       return;
     }
-  }, [user, loading, navigate, requiredRole, allowedRoles]);
+  }, [user, loading, navigate, requiredRole, allowedRoles, location]);
 
   // Loading UI
   if (loading) {
