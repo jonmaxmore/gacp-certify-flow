@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { DollarSign, Clock, CheckCircle, AlertCircle, ArrowLeft, Receipt, CreditCard, Download, Printer, FileText, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 import { InvoiceManager } from '@/components/invoices/InvoiceManager';
 import { ModernPaymentFlow } from '@/components/payments/ModernPaymentFlow';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -36,6 +36,13 @@ const PaymentsPage = () => {
   }, []);
 
   const fetchPayments = async () => {
+    if (!isSupabaseConfigured || !supabase) {
+      console.log('[Payments] Supabase not configured. Payment features disabled.');
+      setPayments([]);
+      setLoading(false);
+      return;
+    }
+
     try {
       // First, get applications for this user
       const { data: userApplications, error: appError } = await supabase
@@ -153,6 +160,28 @@ const PaymentsPage = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8 space-y-8">
+        {/* Configuration Warning - Show when Supabase not configured */}
+        {!isSupabaseConfigured && (
+          <Card className="border-amber-200 bg-amber-50/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-amber-800">
+                <AlertCircle className="h-5 w-5" />
+                บริการการชำระเงินไม่พร้อมใช้งาน
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-amber-700">
+                <p className="mb-2">
+                  ขณะนี้บริการการชำระเงินไม่พร้อมใช้งานเนื่องจากการกำหนดค่าระบบ
+                </p>
+                <p className="text-sm">
+                  กรุณาติดต่อผู้ดูแลระบบ หรือลองใหม่ภายหลัง
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Payment Overview Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
