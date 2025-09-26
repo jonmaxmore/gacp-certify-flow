@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { User, Session } from '@supabase/supabase-js'
-import { supabase } from '@/integrations/supabase/client'
+import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { validateInput, emailSchema, passwordSchema } from '@/utils/inputValidation'
 
@@ -62,6 +62,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let mounted = true;
     let timedOut = false;
 
+    // Early return if Supabase is not configured
+    if (!isSupabaseConfigured || !supabase) {
+      console.log('[Auth] Supabase not configured. Auth features disabled.');
+      setLoading(false);
+      return;
+    }
+
     // Safety timeout to prevent infinite loading on auth init
     const safetyTimeout = setTimeout(() => {
       if (mounted) {
@@ -74,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const initAuth = async () => {
       try {
         // Get initial session
-        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        const { data: { session: initialSession }, error } = await supabase!.auth.getSession();
         if (error) {
           console.error('Error getting initial session:', error);
           if (mounted) setLoading(false);
@@ -97,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, s) => {
+    const { data: { subscription } } = supabase!.auth.onAuthStateChange(async (_event, s) => {
       if (!mounted) return;
       setSession(s || null);
       if (s?.user) {
@@ -118,6 +125,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const handleUser = async (authUser: User) => {
+    if (!supabase) {
+      setUser({ ...authUser, profile: null } as AuthUser);
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data: profile, error } = await supabase
         .from('profiles')
@@ -182,6 +195,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     organization_name?: string;
     thai_id_number?: string;
   }) => {
+    if (!supabase) {
+      return { 
+        data: null, 
+        error: { message: 'Authentication service is not available. Please check your configuration.' }
+      };
+    }
+
     try {
       // Validate inputs (kept as-is)
       const emailValidation = validateInput(email, 'email');
@@ -206,6 +226,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
+    if (!supabase) {
+      return { 
+        data: null, 
+        error: { message: 'Authentication service is not available. Please check your configuration.' }
+      };
+    }
+
     try {
       const emailValidation = validateInput(email, 'email');
       emailSchema.parse(emailValidation.sanitized);
@@ -222,6 +249,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    if (!supabase) {
+      // If no supabase, just clear local state
+      setUser(null);
+      setSession(null);
+      return { error: null };
+    }
+
     try {
       const { error } = await supabase.auth.signOut();
       if (error && !error.message?.includes('session_not_found')) {
@@ -242,6 +276,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user?.profile?.id) {
       throw new Error('No user logged in');
     }
+    
+    if (!supabase) {
+      return { 
+        data: null, 
+        error: { message: 'Profile service is not available. Please check your configuration.' }
+      };
+    }
+
     try {
       const { data, error } = await supabase
         .from('profiles')
