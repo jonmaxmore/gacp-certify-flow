@@ -71,6 +71,16 @@ const HomePage = () => {
   };
 
   const loadStats = async () => {
+    if (!supabase) {
+      // Set default values when Supabase is not configured
+      setStats({
+        totalApplications: 0,
+        certifiedFarms: 0,
+        activeUsers: 0
+      });
+      return;
+    }
+
     try {
       // Load basic stats
       const { data: applications } = await supabase
@@ -88,6 +98,12 @@ const HomePage = () => {
       });
     } catch (error) {
       console.error('Error loading stats:', error);
+      // Set default values on error
+      setStats({
+        totalApplications: 0,
+        certifiedFarms: 0,
+        activeUsers: 0
+      });
     }
   };
 
