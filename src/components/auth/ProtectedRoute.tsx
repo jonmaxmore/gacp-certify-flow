@@ -64,7 +64,7 @@ export const ProtectedRoute = ({
       navigate(dashboardPath);
       return;
     }
-    if (allowedRoles && !allowedRoles.includes(currentRole)) {
+    if (allowedRoles && !allowedRoles.includes(currentRole as any)) {
       navigate(dashboardPath);
       return;
     }

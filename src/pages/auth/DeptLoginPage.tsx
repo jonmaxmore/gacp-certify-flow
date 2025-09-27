@@ -26,8 +26,11 @@ const DeptLoginPage = () => {
   }, [searchParams]);
 
   React.useEffect(() => {
-    if (!loading && user && user.profile?.role && user.profile.role !== 'farmer') {
-      navigate(`/dept/dashboard/${user.profile.role}`);
+    if (!loading && user && user.profile?.role) {
+      const role = user.profile.role as string;
+      if (role !== 'farmer') {
+        navigate(`/dept/dashboard/${role}`);
+      }
     }
   }, [user, loading, navigate]);
 

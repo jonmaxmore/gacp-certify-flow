@@ -26,8 +26,11 @@ const FarmerLoginPage = () => {
   }, [searchParams]);
 
   React.useEffect(() => {
-    if (!loading && user && user.profile?.role === 'farmer') {
-      navigate('/farmer/dashboard');
+    if (!loading && user && user.profile?.role) {
+      const role = user.profile.role as string;
+      if (role === 'farmer') {
+        navigate('/farmer/dashboard');
+      }
     }
   }, [user, loading, navigate]);
 

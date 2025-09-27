@@ -1,13 +1,13 @@
 // Centralized role-to-dashboard mapping and helpers
 
 export type UserRole =
-  | 'farmer'
-  | 'reviewer'
-  | 'auditor'
-  | 'admin'
-  | 'super_admin'
-  | 'cs'
-  | 'cms';
+  | 'farmer'          // เกษตรกร - Main applicant role
+  | 'reviewer'        // ผู้ตรวจสอบเอกสาร - Document reviewer
+  | 'auditor'         // ผู้ประเมิน - Field assessor
+  | 'admin'           // แอดมิน - System administrator
+  | 'super_admin'     // ซูปเปอร์แอดมิน - Super administrator
+  | 'cs'              // แผนกบริการลูกค้า - Customer service
+  | 'cms';            // แผนกคอนเท้นดู CMS - Content management
 
 export function getDashboardPathForRole(role?: string): string {
   switch (role) {

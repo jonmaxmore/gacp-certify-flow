@@ -27,42 +27,6 @@ const LazyAdminRoutes = lazy(() => import('@/components/routes/AdminRoutes'));
 const LazySuperAdminRoutes = lazy(() => import('@/components/routes/SuperAdminRoutes'));
 const LazyCSRRoutes = lazy(() => import('@/components/routes/CSRRoutes'));
 const LazyCMSRoutes = lazy(() => import('@/components/routes/CMSRoutes'));
-                <Route
-                  path="/dept/dashboard/cs/*"
-                  element={
-                    <ProtectedRoute requiredRole="cs">
-                      <DashboardLayout>
-                        <Suspense fallback={<LoadingFallback />}>
-                          <LazyCSRRoutes />
-                        </Suspense>
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/dept/dashboard/cms/*"
-                  element={
-                    <ProtectedRoute requiredRole="cms">
-                      <DashboardLayout>
-                        <Suspense fallback={<LoadingFallback />}>
-                          <LazyCMSRoutes />
-                        </Suspense>
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/dept/dashboard/super_admin/*"
-                  element={
-                    <ProtectedRoute requiredRole="super_admin">
-                      <DashboardLayout>
-                        <Suspense fallback={<LoadingFallback />}>
-                          <LazySuperAdminRoutes />
-                        </Suspense>
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
 
 // Error boundary for better error handling
 class ErrorBoundary extends React.Component<
@@ -102,95 +66,136 @@ function App() {
                 <div className="min-h-screen bg-background">
                   <Routes>
                     {/* Protected dashboard routes - MUST come before public routes */}
-                {/* Farmer Portal */}
-                <Route
-                  path="/farmer/*"
-                  element={
-                    <ProtectedRoute requiredRole="farmer">
-                      <DashboardLayout>
-                        <Suspense fallback={<LoadingFallback />}>
-                          <LazyApplicantRoutes />
-                        </Suspense>
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
+                    
+                    {/* Farmer Portal */}
+                    <Route
+                      path="/farmer/*"
+                      element={
+                        <ProtectedRoute requiredRole="farmer">
+                          <DashboardLayout>
+                            <Suspense fallback={<LoadingFallback />}>
+                              <LazyApplicantRoutes />
+                            </Suspense>
+                          </DashboardLayout>
+                        </ProtectedRoute>
+                      }
+                    />
 
-                {/* Department Portal (all dept roles) - reviewer, auditor, admin, super_admin, cs, cms */}
-                <Route
-                  path="/dept/dashboard/reviewer/*"
-                  element={
-                    <ProtectedRoute requiredRole="reviewer">
-                      <DashboardLayout>
-                        <Suspense fallback={<LoadingFallback />}>
-                          <LazyReviewerRoutes />
-                        </Suspense>
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/dept/dashboard/auditor/*"
-                  element={
-                    <ProtectedRoute requiredRole="auditor">
-                      <DashboardLayout>
-                        <Suspense fallback={<LoadingFallback />}>
-                          <LazyAuditorRoutes />
-                        </Suspense>
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/dept/dashboard/admin/*"
-                  element={
-                    <ProtectedRoute requiredRole="admin">
-                      <DashboardLayout>
-                        <Suspense fallback={<LoadingFallback />}>
-                          <LazyAdminRoutes />
-                        </Suspense>
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                {/* TODO: Add routes for super_admin, cs, cms as needed */}
+                    {/* Department Portal (all dept roles) */}
+                    <Route
+                      path="/dept/dashboard/reviewer/*"
+                      element={
+                        <ProtectedRoute requiredRole="reviewer">
+                          <DashboardLayout>
+                            <Suspense fallback={<LoadingFallback />}>
+                              <LazyReviewerRoutes />
+                            </Suspense>
+                          </DashboardLayout>
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    <Route
+                      path="/dept/dashboard/auditor/*"
+                      element={
+                        <ProtectedRoute requiredRole="auditor">
+                          <DashboardLayout>
+                            <Suspense fallback={<LoadingFallback />}>
+                              <LazyAuditorRoutes />
+                            </Suspense>
+                          </DashboardLayout>
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    <Route
+                      path="/dept/dashboard/admin/*"
+                      element={
+                        <ProtectedRoute requiredRole="admin">
+                          <DashboardLayout>
+                            <Suspense fallback={<LoadingFallback />}>
+                              <LazyAdminRoutes />
+                            </Suspense>
+                          </DashboardLayout>
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    <Route
+                      path="/dept/dashboard/super_admin/*"
+                      element={
+                        <ProtectedRoute requiredRole="super_admin">
+                          <DashboardLayout>
+                            <Suspense fallback={<LoadingFallback />}>
+                              <LazySuperAdminRoutes />
+                            </Suspense>
+                          </DashboardLayout>
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    <Route
+                      path="/dept/dashboard/cs/*"
+                      element={
+                        <ProtectedRoute requiredRole="cs">
+                          <DashboardLayout>
+                            <Suspense fallback={<LoadingFallback />}>
+                              <LazyCSRRoutes />
+                            </Suspense>
+                          </DashboardLayout>
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    <Route
+                      path="/dept/dashboard/cms/*"
+                      element={
+                        <ProtectedRoute requiredRole="cms">
+                          <DashboardLayout>
+                            <Suspense fallback={<LoadingFallback />}>
+                              <LazyCMSRoutes />
+                            </Suspense>
+                          </DashboardLayout>
+                        </ProtectedRoute>
+                      }
+                    />
 
-                {/* Invalid role error page */}
-                <Route path="/error/invalid-role" element={<InvalidRolePage />} />
+                    {/* Invalid role error page */}
+                    <Route path="/error/invalid-role" element={<InvalidRolePage />} />
 
-                {/* Auth routes (standalone layout) */}
-                <Route path="/login" element={
-                  <Suspense fallback={<LoadingFallback />}>
-                    <LoginPage />
-                  </Suspense>
-                } />
-                <Route path="/register" element={
-                  <Suspense fallback={<LoadingFallback />}>
-                    <RegisterPage />
-                  </Suspense>
-                } />
-                <Route path="/farmer/login" element={
-                  <Suspense fallback={<LoadingFallback />}>
-                    <FarmerLoginPage />
-                  </Suspense>
-                } />
-                <Route path="/dept/login" element={
-                  <Suspense fallback={<LoadingFallback />}>
-                    <DeptLoginPage />
-                  </Suspense>
-                } />
-                
-                {/* Public routes with public layout - MUST be last */}
-                <Route
-                  path="*"
-                  element={
-                    <PublicLayout>
+                    {/* Auth routes (standalone layout) */}
+                    <Route path="/login" element={
                       <Suspense fallback={<LoadingFallback />}>
-                        <PublicRoutes />
+                        <LoginPage />
                       </Suspense>
-                    </PublicLayout>
-                  }
-                />
+                    } />
+                    <Route path="/register" element={
+                      <Suspense fallback={<LoadingFallback />}>
+                        <RegisterPage />
+                      </Suspense>
+                    } />
+                    <Route path="/farmer/login" element={
+                      <Suspense fallback={<LoadingFallback />}>
+                        <FarmerLoginPage />
+                      </Suspense>
+                    } />
+                    <Route path="/dept/login" element={
+                      <Suspense fallback={<LoadingFallback />}>
+                        <DeptLoginPage />
+                      </Suspense>
+                    } />
+                    
+                    {/* Public routes with public layout - MUST be last */}
+                    <Route
+                      path="*"
+                      element={
+                        <PublicLayout>
+                          <Suspense fallback={<LoadingFallback />}>
+                            <PublicRoutes />
+                          </Suspense>
+                        </PublicLayout>
+                      }
+                    />
                   </Routes>
                   
                   <Toaster />
