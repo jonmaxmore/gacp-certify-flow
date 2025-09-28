@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Shield, FileText, Users, Cookie } from 'lucide-react';
 import { PDPA_TEXTS, THAI_REGULATIONS } from '@/lib/constants';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 
 interface PDPAConsentProps {
   userId: string;

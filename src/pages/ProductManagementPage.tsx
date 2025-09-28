@@ -10,27 +10,12 @@ import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, Edit, Trash2, Package, Save, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { PRODUCT_CATEGORIES } from '@/lib/constants';
 import { useToast } from '@/hooks/use-toast';
 
-// Match the actual database schema
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  currency: string;
-  category_id: string;
-  assessment_type: string;
-  duration_days: number;
-  features: any;
-  requirements: any;
-  metadata: any;
-  is_active: boolean;
-  sort_order: number;
-  created_at: string;
-  updated_at: string;
-}
+// Use the actual database schema type
+type Product = Database['public']['Tables']['products']['Row'];
 
 const ProductManagementPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -448,7 +433,7 @@ const ProductManagementPage = () => {
                   <div>
                     <p className="text-sm font-medium mb-1">ข้อกำหนด:</p>
                     <ul className="text-xs text-muted-foreground space-y-1">
-                      {product.requirements.map((req, index) => (
+                      {(product.requirements as string[])?.map((req, index) => (
                         <li key={index}>• {req}</li>
                       ))}
                     </ul>
