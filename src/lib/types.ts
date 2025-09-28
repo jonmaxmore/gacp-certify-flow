@@ -28,11 +28,15 @@ export interface UserProfile {
 export interface Product {
   id: string;
   name: string;
-  name_en: string;
-  category: 'cannabis' | 'kratom' | 'traditional_herbs' | 'medical_herbs';
   description: string;
-  description_en: string;
-  requirements: string[];
+  price: number;
+  currency: string;
+  category_id: string;
+  assessment_type: string;
+  duration_days: number;
+  features: any;
+  requirements: any;
+  metadata: any;
   is_active: boolean;
   sort_order: number;
   created_at: string;
