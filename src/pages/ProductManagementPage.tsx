@@ -13,14 +13,19 @@ import { supabase } from '@/integrations/supabase/client';
 import { PRODUCT_CATEGORIES } from '@/lib/constants';
 import { useToast } from '@/hooks/use-toast';
 
+// Match the actual database schema
 interface Product {
   id: string;
   name: string;
-  name_en: string;
-  category: keyof typeof PRODUCT_CATEGORIES;
   description: string;
-  description_en: string;
-  requirements: string[];
+  price: number;
+  currency: string;
+  category_id: string;
+  assessment_type: string;
+  duration_days: number;
+  features: any;
+  requirements: any;
+  metadata: any;
   is_active: boolean;
   sort_order: number;
   created_at: string;
@@ -36,11 +41,15 @@ const ProductManagementPage = () => {
 
   const [formData, setFormData] = useState({
     name: '',
-    name_en: '',
-    category: 'cannabis' as keyof typeof PRODUCT_CATEGORIES,
     description: '',
-    description_en: '',
-    requirements: [''],
+    price: 0,
+    currency: 'THB',
+    category_id: 'cannabis',
+    assessment_type: 'onsite',
+    duration_days: 365,
+    features: [],
+    requirements: [],
+    metadata: {},
     is_active: true,
     sort_order: 0
   });
@@ -75,11 +84,15 @@ const ProductManagementPage = () => {
   const resetForm = () => {
     setFormData({
       name: '',
-      name_en: '',
-      category: 'cannabis',
       description: '',
-      description_en: '',
-      requirements: [''],
+      price: 0,
+      currency: 'THB',
+      category_id: 'cannabis',
+      assessment_type: 'onsite',
+      duration_days: 365,
+      features: [],
+      requirements: [],
+      metadata: {},
       is_active: true,
       sort_order: products.length
     });
@@ -90,11 +103,15 @@ const ProductManagementPage = () => {
     setEditingProduct(product);
     setFormData({
       name: product.name,
-      name_en: product.name_en,
-      category: product.category,
       description: product.description,
-      description_en: product.description_en,
-      requirements: product.requirements.length > 0 ? product.requirements : [''],
+      price: product.price,
+      currency: product.currency,
+      category_id: product.category_id,
+      assessment_type: product.assessment_type,
+      duration_days: product.duration_days,
+      features: Array.isArray(product.features) ? product.features : [],
+      requirements: Array.isArray(product.requirements) ? product.requirements : [],
+      metadata: product.metadata || {},
       is_active: product.is_active,
       sort_order: product.sort_order
     });
@@ -116,11 +133,15 @@ const ProductManagementPage = () => {
     try {
       const productData = {
         name: formData.name,
-        name_en: formData.name_en || formData.name,
-        category: formData.category,
         description: formData.description,
-        description_en: formData.description_en || formData.description,
-        requirements: formData.requirements.filter(req => req.trim() !== ''),
+        price: formData.price,
+        currency: formData.currency,
+        category_id: formData.category_id,
+        assessment_type: formData.assessment_type,
+        duration_days: formData.duration_days,
+        features: formData.features,
+        requirements: formData.requirements,
+        metadata: formData.metadata,
         is_active: formData.is_active,
         sort_order: formData.sort_order
       };
@@ -240,32 +261,21 @@ const ProductManagementPage = () => {
             </DialogHeader>
             
             <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="name">ชื่อผลิตภัณฑ์ (ไทย) *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="เช่น กัญชาทางการแพทย์"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="name_en">ชื่อผลิตภัณฑ์ (อังกฤษ)</Label>
-                  <Input
-                    id="name_en"
-                    value={formData.name_en}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name_en: e.target.value }))}
-                    placeholder="e.g. Medical Cannabis"
-                  />
-                </div>
+              <div>
+                <Label htmlFor="name">ชื่อผลิตภัณฑ์ *</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="เช่น กัญชาทางการแพทย์"
+                />
               </div>
 
               <div>
-                <Label htmlFor="category">หมวดหมู่</Label>
+                <Label htmlFor="category_id">หมวดหมู่</Label>
                 <Select
-                  value={formData.category}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, category: value as keyof typeof PRODUCT_CATEGORIES }))}
+                  value={formData.category_id}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, category_id: value }))}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -280,27 +290,60 @@ const ProductManagementPage = () => {
                 </Select>
               </div>
 
+              <div>
+                <Label htmlFor="description">คำอธิบาย *</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="อธิบายผลิตภัณฑ์..."
+                  rows={3}
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="description">คำอธิบาย (ไทย) *</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="อธิบายผลิตภัณฑ์..."
-                    rows={3}
+                  <Label htmlFor="price">ราคา</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    value={formData.price}
+                    onChange={(e) => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
+                    placeholder="0"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="description_en">คำอธิบาย (อังกฤษ)</Label>
-                  <Textarea
-                    id="description_en"
-                    value={formData.description_en}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description_en: e.target.value }))}
-                    placeholder="Product description..."
-                    rows={3}
-                  />
+                  <Label htmlFor="currency">สกุลเงิน</Label>
+                  <Select
+                    value={formData.currency}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, currency: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="THB">บาท (THB)</SelectItem>
+                      <SelectItem value="USD">ดอลลาร์ (USD)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
+              </div>
+
+              <div>
+                <Label htmlFor="assessment_type">ประเภทการประเมิน</Label>
+                <Select
+                  value={formData.assessment_type}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, assessment_type: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="onsite">ในสถานที่</SelectItem>
+                    <SelectItem value="online">ออนไลน์</SelectItem>
+                    <SelectItem value="hybrid">แบบผสม</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
@@ -374,11 +417,11 @@ const ProductManagementPage = () => {
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle className="flex items-center gap-2">
-                    {PRODUCT_CATEGORIES[product.category]?.icon}
+                    {PRODUCT_CATEGORIES[product.category_id]?.icon || '📦'}
                     {product.name}
                   </CardTitle>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {product.name_en}
+                    {product.price} {product.currency}
                   </p>
                 </div>
                 <div className="flex gap-1">
@@ -401,7 +444,7 @@ const ProductManagementPage = () => {
                   {product.description}
                 </p>
                 
-                {product.requirements.length > 0 && (
+                {Array.isArray(product.requirements) && product.requirements.length > 0 && (
                   <div>
                     <p className="text-sm font-medium mb-1">ข้อกำหนด:</p>
                     <ul className="text-xs text-muted-foreground space-y-1">
@@ -412,6 +455,9 @@ const ProductManagementPage = () => {
                   </div>
                 )}
                 
+                <div className="text-xs text-muted-foreground">
+                  ประเภทการประเมิน: {product.assessment_type}
+                </div>
                 <div className="text-xs text-muted-foreground">
                   ลำดับ: {product.sort_order}
                 </div>

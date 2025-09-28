@@ -36,7 +36,7 @@ const PDPAConsent: React.FC<PDPAConsentProps> = ({ userId, onComplete }) => {
       description: 'ข้อมูลพื้นฐานสำหรับการสร้างบัญชีและการติดต่อ',
       icon: <Users className="h-5 w-5" />,
       required: true,
-      text: PDPA_TEXTS.consent_registration.th
+      text: PDPA_TEXTS?.consent_registration?.th || 'เราจะเก็บรวบรวมข้อมูลส่วนบุคคลที่จำเป็นสำหรับการสมัครสมาชิกและการติดต่อ'
     },
     {
       id: 'data_processing',
@@ -44,7 +44,7 @@ const PDPAConsent: React.FC<PDPAConsentProps> = ({ userId, onComplete }) => {
       description: 'ข้อมูลที่จำเป็นสำหรับกระบวนการตรวจสอบและรับรอง GACP',
       icon: <FileText className="h-5 w-5" />,
       required: true,
-      text: PDPA_TEXTS.consent_data_processing.th
+      text: PDPA_TEXTS?.consent_data_processing?.th || 'เราจะประมวลผลข้อมูลของท่านเพื่อการตรวจสอบและออกใบรับรอง GACP'
     },
     {
       id: 'marketing',
@@ -92,16 +92,20 @@ const PDPAConsent: React.FC<PDPAConsentProps> = ({ userId, onComplete }) => {
           consent_type: consent.type,
           consent_given: consent.consent_given,
           consent_text: consent.consent_text,
-          ip_address: null, // Could be captured from request
+          ip_address: null,
           user_agent: navigator.userAgent
         }));
 
-        const { error } = await supabase
-          .from('pdpa_consents')
-          .insert(consentRecords);
+        try {
+          const { error } = await supabase
+            .from('pdpa_consents')
+            .insert(consentRecords);
 
-        if (error) {
-          console.error('Error saving PDPA consents:', error);
+          if (error) {
+            console.error('Error saving PDPA consents:', error);
+          }
+        } catch (dbError) {
+          console.error('Database error:', dbError);
         }
       }
 
@@ -130,10 +134,10 @@ const PDPAConsent: React.FC<PDPAConsentProps> = ({ userId, onComplete }) => {
           <div className="bg-slate-50 p-4 rounded-lg">
             <h3 className="font-semibold mb-2">หน่วยงานผู้ควบคุมข้อมูล</h3>
             <p className="text-sm text-muted-foreground">
-              {THAI_REGULATIONS.department}
+              {THAI_REGULATIONS?.department || 'กรมการแพทย์แผนไทยและการแพทย์ทางเลือก'}
             </p>
             <p className="text-sm text-muted-foreground">
-              ดำเนินการตาม {THAI_REGULATIONS.act}
+              ดำเนินการตาม {THAI_REGULATIONS?.act || 'พระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562'}
             </p>
           </div>
 

@@ -727,6 +727,42 @@ export type Database = {
           },
         ]
       }
+      pdpa_consents: {
+        Row: {
+          consent_given: boolean
+          consent_text: string
+          consent_type: string
+          created_at: string | null
+          id: string
+          ip_address: unknown | null
+          updated_at: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          consent_given?: boolean
+          consent_text: string
+          consent_type: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          consent_given?: boolean
+          consent_text?: string
+          consent_type?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       pricing_tiers: {
         Row: {
           assessment_fee: number | null
