@@ -1,24 +1,68 @@
-{
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ],
-  "compilerOptions": {
-    "baseUrl": "src",
+{{
+
+  "compilerOptions": {  "files": [],
+
+    "target": "ES2020",  "references": [
+
+    "lib": ["ES2020"],    { "path": "./tsconfig.app.json" },
+
+    "module": "commonjs",    { "path": "./tsconfig.node.json" }
+
+    "moduleResolution": "node",  ],
+
+    "allowSyntheticDefaultImports": true,  "compilerOptions": {
+
+    "esModuleInterop": true,    "baseUrl": "src",
+
+    "allowJs": true,    "paths": {
+
+    "forceConsistentCasingInFileNames": true,      "@/*": ["*"]
+
+    "strict": true,    },
+
+    "noImplicitAny": true,    "jsx": "react-jsx",
+
+    "strictNullChecks": true,
+
+    "strictFunctionTypes": true,    // Relax rules to avoid noisy errors
+
+    "noImplicitThis": true,    "noImplicitAny": false,
+
+    "noImplicitReturns": true,    "noUnusedParameters": false,
+
+    "noFallthroughCasesInSwitch": true,    "noUnusedLocals": false,
+
+    "noUncheckedIndexedAccess": true,    "strictNullChecks": false,
+
+    "noImplicitOverride": true,
+
+    "exactOptionalPropertyTypes": true,    // Performance
+
+    "skipLibCheck": true,    "skipLibCheck": true,
+
+    "resolveJsonModule": true,    "allowJs": true
+
+    "isolatedModules": true,  }
+
+    "declaration": true,}
+
+    "outDir": "./dist",
+    "rootDir": "./services",
+    "baseUrl": "./",
     "paths": {
-      "@/*": ["*"]
-    },
-    "jsx": "react-jsx",
-
-    // Relax rules to avoid noisy errors
-    "noImplicitAny": false,
-    "noUnusedParameters": false,
-    "noUnusedLocals": false,
-    "strictNullChecks": false,
-
-    // Performance
-    "skipLibCheck": true,
-    "allowJs": true
-  }
+      "@/*": ["./services/*"]
+    }
+  },
+  "include": [
+    "services/**/*",
+    "migrations/**/*",
+    "config/**/*",
+    "security/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.js",
+    "**/*.spec.js"
+  ]
 }
