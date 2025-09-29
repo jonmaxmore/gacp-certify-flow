@@ -1,51 +1,69 @@
 /**
- * GACP Certification System
+ * ระบบการผลิตสมุนไพรไทย GACP Platform
+ * Thai Herbal GACP Certification System
  * 
- * Copyright (c) 2024-2025 Premierprime Co., Ltd. (บริษัท พรีเมียร์ไพร์ม จำกัด)
- * All rights reserved.
+ * Copyright (c) 2024-2025 กรมการแพทย์แผนไทยและการแพทย์ทางเลือก
+ * Department of Thai Traditional and Alternative Medicine (DTAM)
+ * Ministry of Public Health, Thailand
  * 
- * This software is proprietary and confidential. Unauthorized copying,
- * distribution, modification, or use is strictly prohibited.
+ * สิทธิ์ทั้งหมดเป็นของกรมการแพทย์แผนไทยและการแพทย์ทางเลือก
+ * All rights reserved to Department of Thai Traditional and Alternative Medicine (DTAM)
  * 
- * Developed by: Premierprime Co., Ltd.
- * Contact: info@premierprime.co.th
- * Website: https://premierprime.co.th
+ * ระบบนี้เป็นทรัพย์สินของรัฐ ห้ามคัดลอก แจกจ่าย หรือดัดแปลงโดยไม่ได้รับอนุญาต
+ * This software is government property. Unauthorized copying, distribution, 
+ * modification, or use is strictly prohibited.
  * 
- * Research & Development Division
- * Agricultural Technology Solutions
+ * Research Partners:
+ * - มหาวิทยาลัยราชภัฏสวนสุนันทา (Primary Research Institution)
+ * - บริษัท พรีดิกทีฟ เอไอ จำกัด (Technology Partner)
+ * 
+ * Contact Information:
+ * - Email: info@dtam.go.th
+ * - Phone: 0-2590-7000
+ * - Website: https://www.dtam.go.th
+ * - Address: กระทรวงสาธารณสุข ถนนติวานนท์ เขตหนองจันทร์ กรุงเทพฯ 10210
  */
 
-MIT License
+GOVERNMENT SOFTWARE LICENSE
 
-Copyright (c) 2024-2025 Premierprime Co., Ltd. (บริษัท พรีเมียร์ไพร์ม จำกัด)
+Copyright (c) 2024-2025 Department of Thai Traditional and Alternative Medicine (DTAM)
+กรมการแพทย์แผนไทยและการแพทย์ทางเลือก
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+TERMS AND CONDITIONS
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. OWNERSHIP
+   This software and all associated documentation are the exclusive property of 
+   the Department of Thai Traditional and Alternative Medicine (DTAM), Ministry 
+   of Public Health, Thailand.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+2. RESTRICTIONS
+   - No copying, distribution, or modification without explicit written permission
+   - Commercial use is prohibited without proper licensing agreement
+   - Reverse engineering or decompilation is strictly forbidden
+   - Source code access is limited to authorized government personnel only
+
+3. RESEARCH COLLABORATION
+   This system was developed through research collaboration between:
+   - Department of Thai Traditional and Alternative Medicine (DTAM) - Owner
+   - Suan Sunandha Rajabhat University - Primary Research Institution  
+   - Predictive AI Company Limited - Technology Partner
+
+4. LIABILITY
+   The software is provided "as is" without warranty of any kind. DTAM shall 
+   not be liable for any damages arising from the use of this software.
+
+5. CONTACT FOR LICENSING
+   For licensing inquiries or permissions, contact:
+   
+   Department of Thai Traditional and Alternative Medicine (DTAM)
+   Ministry of Public Health
+   Email: licensing@dtam.go.th
+   Phone: +66 (0) 2590-7000
 
 ---
 
-ADDITIONAL TERMS FOR COMMERCIAL USE:
-
-This software was developed through extensive research and development by 
-Premierprime Co., Ltd. for agricultural certification systems. While released
-under MIT license for educational and research purposes, commercial use requires
-proper attribution to Premierprime Co., Ltd.
-
-For commercial licensing inquiries, please contact:
-- Email: licensing@premierprime.co.th
-- Phone: +66 (0) 2-xxx-xxxx
+CONFIDENTIAL DEVELOPMENT NOTICE:
+// Dev: Premierprime Co., Ltd. (บริษัท พรีเมียร์ไพร์ม จำกัด)
+// Legal Notice: This development attribution is for legal copyright claims only
+// Contact: legal@premierprime.co.th | +66-xx-xxx-xxxx
+// All intellectual property rights remain with DTAM
