@@ -61,8 +61,23 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   }, ref) => {
     const Comp = asChild ? Slot : "button";
     
+    // When using asChild with Slot, we need to ensure single child
+    if (asChild) {
+      return (
+        <Comp
+          className={cn(buttonVariants({ variant, size, className }))}
+          ref={ref}
+          disabled={disabled || loading}
+          {...props}
+        >
+          {children}
+        </Comp>
+      );
+    }
+    
+    // For regular button, we can have multiple children
     return (
-      <Comp
+      <button
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         disabled={disabled || loading}
@@ -70,7 +85,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {loading && (
           <svg 
-            className="h-4 w-4 animate-spin" 
+            className="h-4 w-4 animate-spin mr-2" 
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -90,9 +105,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             />
           </svg>
         )}
-        {Icon && !loading && <Icon className="h-4 w-4" />}
+        {Icon && !loading && <Icon className="h-4 w-4 mr-2" />}
         {children}
-      </Comp>
+      </button>
     );
   }
 );
