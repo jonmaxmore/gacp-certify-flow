@@ -1,7 +1,7 @@
 {
-  "name": "gacp-core-certification",
+  "name": "thai-herbal-gacp-core-service",
   "version": "1.0.0",
-  "description": "GACP Core Certification Service with MongoDB",
+  "description": "ระบบหลักสำหรับการรับรองมาตรฐานสมุนไพรไทย GACP - Developed by Premierprime Co., Ltd.",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",

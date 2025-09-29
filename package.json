@@ -1,8 +1,8 @@
 {
-  "name": "gacp-certify-flow",
+  "name": "thai-herbal-gacp-platform",
   "private": true,
   "version": "2.0.0",
-  "description": "GACP Certification System - Microservices Architecture with MongoDB",
+  "description": "ระบบการผลิตสมุนไพรไทยตามแนวทางปฏิบัติทางการเกษตรและเก็บเกี่ยวที่ดีของพืชสมุนไพร เพื่อยกระดับมาตรฐานสู่สากล (GACP Platform)",
   "type": "module",
   "scripts": {
     "dev": "docker-compose up -d",
@@ -35,11 +35,16 @@
     "npm": ">=8.0.0"
   },
   "keywords": [
+    "สมุนไพรไทย",
+    "thai-herbal",
     "gacp",
     "certification",
     "microservices",
     "mongodb",
-    "agriculture"
+    "agriculture",
+    "herbal-medicine",
+    "quality-standard",
+    "international-standard"
   ],
   "author": "Department of Agriculture",
   "license": "MIT"
