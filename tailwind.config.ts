@@ -61,6 +61,10 @@ export default {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",
         },
+        info: {
+          DEFAULT: "hsl(var(--info))",
+          foreground: "hsl(var(--info-foreground))",
+        },
         pending: "hsl(var(--pending))",
         approved: "hsl(var(--approved))",
         certified: "hsl(var(--certified))",
