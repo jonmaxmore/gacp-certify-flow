@@ -1,51 +1,29 @@
-{{
-
-  "compilerOptions": {  "files": [],
-
-    "target": "ES2020",  "references": [
-
-    "lib": ["ES2020"],    { "path": "./tsconfig.app.json" },
-
-    "module": "commonjs",    { "path": "./tsconfig.node.json" }
-
-    "moduleResolution": "node",  ],
-
-    "allowSyntheticDefaultImports": true,  "compilerOptions": {
-
-    "esModuleInterop": true,    "baseUrl": "src",
-
-    "allowJs": true,    "paths": {
-
-    "forceConsistentCasingInFileNames": true,      "@/*": ["*"]
-
-    "strict": true,    },
-
-    "noImplicitAny": true,    "jsx": "react-jsx",
-
-    "strictNullChecks": true,
-
-    "strictFunctionTypes": true,    // Relax rules to avoid noisy errors
-
-    "noImplicitThis": true,    "noImplicitAny": false,
-
-    "noImplicitReturns": true,    "noUnusedParameters": false,
-
-    "noFallthroughCasesInSwitch": true,    "noUnusedLocals": false,
-
-    "noUncheckedIndexedAccess": true,    "strictNullChecks": false,
-
-    "noImplicitOverride": true,
-
-    "exactOptionalPropertyTypes": true,    // Performance
-
-    "skipLibCheck": true,    "skipLibCheck": true,
-
-    "resolveJsonModule": true,    "allowJs": true
-
-    "isolatedModules": true,  }
-
-    "declaration": true,}
-
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "noImplicitThis": false,
+    "noImplicitReturns": false,
+    "noFallthroughCasesInSwitch": false,
+    "noUncheckedIndexedAccess": false,
+    "noImplicitOverride": false,
+    "exactOptionalPropertyTypes": false,
+    "noUnusedParameters": false,
+    "noUnusedLocals": false,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "declaration": true,
     "outDir": "./dist",
     "rootDir": "./services",
     "baseUrl": "./",

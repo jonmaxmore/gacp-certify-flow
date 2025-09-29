@@ -1,31 +1,3 @@
-/**
- * ระบบหลักสำหรับการรับรองมาตรฐานสมุนไพรไทย GACP
- * Thai Herbal GACP Certification Core Service
- * 
- * Copyright (c) 2024-2025 กรมการแพทย์แผนไทยและการแพทย์ทางเลือก
- * Department of Thai Traditional and Alternative Medicine (DTAM)
- * Ministry of Public Health, Thailand
- * 
- * ระบบการผลิตสมุนไพรไทยตามแนวทางปฏิบัติทางการเกษตรและเก็บเกี่ยวที่ดี
- * เพื่อยกระดับมาตรฐานสู่สากล (GACP Platform)
- * 
- * Research Partners:
- * - มหาวิทยาลัยราชภัฏสวนสุนันทา (Primary Research)
- * - บริษัท พรีดิกทีฟ เอไอ จำกัด (Technology Partner)
- * 
- * คุณสมบัติหลัก:
- * - จัดการใบสมัครรับรองมาตรฐานสมุนไพร
- * - ออกใบรับรองคุณภาพดิจิทัล
- * - ระบบชำระเงินและติดตาม
- * - กำหนดตารางตรวจสอบแปลง
- * - ระบบยืนยันตัวตนและสิทธิ์
- * 
- * Contact: tech@dtam.go.th
- * Website: https://www.dtam.go.th
- * 
- * // Dev: Premierprime Co., Ltd. - For legal claims only
- */
-
 // services/core-certification/src/index.js
 const fastify = require('fastify');
 const mongoose = require('mongoose');
@@ -39,8 +11,7 @@ const { User, Farm, Application, Certificate, Payment, Inspection, Standard } = 
 // Initialize Fastify with production settings
 const app = fastify({
   logger: {
-    level: process.env.LOG_LEVEL || 'info',
-    prettyPrint: process.env.NODE_ENV !== 'production'
+    level: process.env.LOG_LEVEL || 'info'
   },
   trustProxy: true,
   requestIdHeader: 'x-request-id',
