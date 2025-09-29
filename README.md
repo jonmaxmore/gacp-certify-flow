@@ -1,46 +1,45 @@
-# GACP Certification System - Microservices Architecture
+# 🌿 ระบบการผลิตสมุนไพรไทยตามแนวทางปฏิบัติทางการเกษตรและเก็บเกี่ยวที่ดีของพืชสมุนไพร เพื่อยกระดับมาตรฐานสู่สากล (GACP)
 
-## Overview
+## 🏛️ Thai Herbal GACP Certification Platform
 
-GACP (Good Agricultural and Collection Practices) Certification System เป็นระบบรับรองมาตรฐานการปลูกและเก็บรวบรวมพืชสมุนไพรที่ออกแบบด้วยสถาปัตยกรรมแบบ Microservices เพื่อรองรับการทำงานในระดับ Enterprise
+**Department of Thai Traditional and Alternative Medicine (DTAM)**  
+*Ministry of Public Health, Kingdom of Thailand*
 
-## สถาปัตยกรรมระบบ
+ระบบรับรองมาตรฐาน GACP สำหรับสมุนไพรไทย ที่พัฒนาด้วยเทคโนโลยี Microservices Architecture เพื่อยกระดับการผลิตสมุนไพรไทยสู่มาตรฐานสากล
 
-### High-Level Architecture
+## 🏗️ สถาปัตยกรรมระบบ
 
-```
+### Microservices Architecture
+
+```ascii
 ┌─────────────────────────────────────────────────────────────────┐
-│                    Frontend Layer (Presentation)                 │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
-│  │ Farmer Portal│  │  DTAM Portal │  │ Public Portal│          │
-│  │ (React/Next) │  │ (React/Next) │  │ (Next.js SSR)│          │
-│  └──────────────┘  └──────────────┘  └──────────────┘          │
-└─────────────────────────────────────────────────────────────────┘
-                              ↓↑ HTTPS/REST API
-┌─────────────────────────────────────────────────────────────────┐
-│                      API Gateway Layer                           │
+│                     API Gateway Layer                            │
 │  ┌────────────────────────────────────────────────────────┐     │
-│  │  Kong API Gateway with Plugins:                        │     │
-│  │  • JWT Authentication  • Rate Limiting                 │     │
-│  │  • CORS Management    • Request/Response Logging       │     │
-│  │  • Circuit Breaker    • Load Balancing               │     │
+│  │  Kong API Gateway + Nginx Proxy                       │     │
+│  │  • JWT Authentication    • Rate Limiting              │     │
+│  │  • CORS Management      • Request Logging             │     │
+│  │  • Circuit Breaker      • Load Balancing             │     │
+│  │  • Defense-in-Depth Security (5 Layers)             │     │
 │  └────────────────────────────────────────────────────────┘     │
 └─────────────────────────────────────────────────────────────────┘
-                              ↓↑ Internal Services
+                              ↓↑ REST API / JSON
 ┌─────────────────────────────────────────────────────────────────┐
 │                    Microservices Layer                           │
 │  ┌────────────────┐ ┌────────────────┐ ┌────────────────┐      │
 │  │ Core           │ │ Standards      │ │ Survey         │      │
 │  │ Certification  │ │ Analysis       │ │ Management     │      │
 │  │ Service        │ │ Service        │ │ Service        │      │
+│  │ (Fastify)      │ │ (Node.js)      │ │ (Node.js)      │      │
+│  │ Port: 3001     │ │ Port: 3002     │ │ Port: 3003     │      │
 │  └────────────────┘ └────────────────┘ └────────────────┘      │
 └─────────────────────────────────────────────────────────────────┘
-                              ↓↑ Database Layer
+                              ↓↑ Database Connections
 ┌─────────────────────────────────────────────────────────────────┐
 │                      Data Layer                                  │
 │  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐   │
-│  │ PostgreSQL │ │   Redis    │ │ File Store │ │ Audit Logs │   │
-│  │ (Primary)  │ │  (Cache)   │ │ (MinIO/S3) │ │(Elasticsearch)│   │
+│  │  MongoDB   │ │   Redis    │ │Docker Vol. │ │ Audit Logs │   │
+│  │ 6.0 + Auth │ │ 7-Alpine   │ │(File Store)│ │  (MongoDB) │   │
+│  │Port: 27017 │ │Port: 6379  │ │ Persistent │ │ Collections│   │
 │  └────────────┘ └────────────┘ └────────────┘ └────────────┘   │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -106,47 +105,55 @@ GACP (Good Agricultural and Collection Practices) Certification System เป็
    - Intrusion Detection
    - Automated Response
 
-## Database Design
+## 🗄️ Database Design (MongoDB)
 
-### Core Tables
-- `user_profiles` - ข้อมูลผู้ใช้และสิทธิ์
-- `gacp_applications` - ใบสมัครรับรอง
-- `products` - ข้อมูลผลิตภัณฑ์สมุนไพร
-- `payments` - การชำระเงิน
-- `certificates` - ใบรับรอง
-- `audit_logs` - บันทึกการตรวจสอบ
+### Core Collections
+
+- `users` - ข้อมูลผู้ใช้และสิทธิ์ (farmer, dtam, admin)
+- `farms` - ข้อมูลฟาร์มและการปลูก
+- `applications` - ใบสมัครรับรอง GACP
+- `certificates` - ใบรับรองที่ออกแล้ว  
+- `payments` - การชำระเงินและสถานะ
+- `inspections` - การตรวจสอบและประเมิน
+- `standards` - มาตรฐาน GACP และเกณฑ์
 
 ### Security Features
-- Row Level Security (RLS) policies
-- Encrypted PII fields
-- Audit trail for all operations
-- Materialized views for performance
+
+- MongoDB Authentication & Authorization
+- Field-level encryption for PII data
+- Audit trail collections with timestamps
+- Index optimization for performance
+- Connection pooling and rate limiting
 
 ## Getting Started
 
 ### Prerequisites
+
 - Docker & Docker Compose
-- Node.js 18+ (for development)
-- PostgreSQL 15+
-- Redis 7+
+- Node.js 18+ LTS (สำหรับ development)  
+- MongoDB 6.0+ (หรือใช้ Docker)
+- Redis 7+ (หรือใช้ Docker)
 
 ### Installation
 
 1. **Clone Repository**
+
 ```bash
 git clone https://github.com/jonmaxmore/gacp-certify-flow.git
 cd gacp-certify-flow
 ```
 
 2. **Environment Setup**
+
 ```bash
 cp .env.example .env
-# แก้ไขค่า environment variables
+# แก้ไขค่า environment variables สำหรับ MongoDB และ Redis
 ```
 
 3. **Start Services**
+
 ```bash
-# Development mode
+# Development mode with Docker
 npm run dev
 
 # Production mode
@@ -154,32 +161,31 @@ npm run build
 npm start
 ```
 
-4. **Database Migration**
+4. **MongoDB Initialization**
+
 ```bash
-npm run migrate
-npm run seed
+# MongoDB จะ initialize อัตโนมัติผ่าน Docker
+# ข้อมูล initial setup ใน mongo-init/01-init-db.js
+docker-compose logs mongodb
 ```
 
 ### Development Commands
 
 ```bash
-# Start all services
+# Start all services with Docker
 npm run dev
 
-# View logs
+# View container logs  
 npm run logs
 
 # Stop all services
-npm stop
+npm run stop
+
+# Build production images
+npm run build
 
 # Run tests
 npm test
-
-# Security audit
-npm run security:audit
-
-# Generate documentation
-npm run docs
 ```
 
 ## API Endpoints
@@ -245,38 +251,54 @@ ELASTICSEARCH_URL=http://elasticsearch:9200
 OMISE_SECRET_KEY=your_omise_key
 ```
 
-## Testing
+## 🧪 Testing
 
 ### Unit Tests
+
 ```bash
 npm test
 ```
 
-### Integration Tests
+### Service Integration Tests
+
 ```bash
 npm run test:integration
 ```
 
-### Load Testing
+### API Load Testing
+
 ```bash
 npm run test:load
 ```
 
-## Contributing
+## 📞 Support & Contact
 
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+**กรมการแพทย์แผนไทยและการแพทย์ทางเลือก (DTAM)**  
+*กระทรวงสาธารณสุข ราชอาณาจักรไทย*
 
-## License
+- 🌐 **Website**: [https://dtam.moph.go.th](https://dtam.moph.go.th)
+- 📧 **Email**: <gacp@dtam.moph.go.th>
+- 📞 **Tel**: 02-590-4000 ต่อ 4200-4299
+- 📍 **Address**: ถนนติวานนท์ ตำบลตลาดขวัญ อำเภอเมือง นนทบุรี 11000
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+### 🤝 Research Partners
 
-## Support
+- **มหาวิทยาลยัมหิดล** - คณะเภสัชศาสตร์
+- **จุฬาลงกรณ์มหาวิทยาลัย** - คณะแพทยศาสตร์
+- **สถาบันวิจัยและพัฒนาผลิตภัณฑ์อาหาร** - มหิดล
 
-สำหรับการสนับสนุนและคำถาม:
-- Email: support@dtam.go.th
-- Documentation: [https://docs.gacp.dtam.go.th](https://docs.gacp.dtam.go.th)
-- Issues: [GitHub Issues](https://github.com/jonmaxmore/gacp-certify-flow/issues)
+## 📜 License
+
+Copyright (c) 2025 Department of Thai Traditional and Alternative Medicine (DTAM)  
+Ministry of Public Health, Kingdom of Thailand
+
+## Property Notice
+
+This project is property of the Royal Thai Government
+
+---
+
+### 🔧 Technical Development
+
+**Developed by**: Premierprime Co., Ltd.  
+**For any technical issues**: [GitHub Issues](https://github.com/jonmaxmore/gacp-certify-flow/issues)
