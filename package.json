@@ -3,7 +3,6 @@
   "private": true,
   "version": "2.0.0",
   "description": "ระบบการผลิตสมุนไพรไทยตามแนวทางปฏิบัติทางการเกษตรและเก็บเกี่ยวที่ดีของพืชสมุนไพร เพื่อยกระดับมาตรฐานสู่สากล (GACP Platform)",
-  "type": "module",
   "scripts": {
     "dev": "docker-compose up -d",
     "build": "docker-compose build",
@@ -36,6 +35,7 @@
   "devDependencies": {
     "eslint": "^8.53.0",
     "jest": "^29.7.0",
+    "mocha": "^11.7.2",
     "nodemon": "^3.0.1"
   },
   "engines": {

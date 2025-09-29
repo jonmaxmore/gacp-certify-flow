@@ -5,9 +5,9 @@
  * Supports PromptPay QR Code and Credit Card simulation
  */
 
-import express from 'express';
-import cors from 'cors';
-import { v4 as uuidv4 } from 'uuid';
+const express = require('express');
+const cors = require('cors');
+const { v4: uuidv4 } = require('uuid');
 
 class MockPaymentGateway {
   constructor() {
@@ -420,8 +420,10 @@ class MockPaymentGateway {
   }
 }
 
-export default MockPaymentGateway;
+module.exports = MockPaymentGateway;
 
 // Start server if run directly
-const gateway = new MockPaymentGateway();
-gateway.start();
+if (require.main === module) {
+  const gateway = new MockPaymentGateway();
+  gateway.start();
+}
