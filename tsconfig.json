@@ -25,7 +25,7 @@
     "isolatedModules": true,
     "declaration": true,
     "outDir": "./dist",
-    "rootDir": "./services",
+    "rootDir": "./",
     "baseUrl": "./",
     "paths": {
       "@/*": ["./services/*"]
