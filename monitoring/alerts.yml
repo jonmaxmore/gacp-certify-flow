@@ -1,0 +1,261 @@
+# monitoring/alerts.yml
+# GACP Platform Alert Rules
+# Thai Herbal Certification System - Production Alerts
+
+groups:
+  # Core Application Alerts
+  - name: gacp_application_alerts
+    interval: 30s
+    rules:
+    - alert: HighErrorRate
+      expr: |
+        (
+          rate(http_requests_total{status=~"5.."}[5m]) /
+          rate(http_requests_total[5m])
+        ) > 0.05
+      for: 2m
+      labels:
+        severity: critical
+        service: "{{ $labels.job }}"
+        team: gacp-platform
+      annotations:
+        summary: "High HTTP error rate detected in {{ $labels.job }}"
+        description: "Error rate is {{ $value | humanizePercentage }} for {{ $labels.job }} service for 2 minutes"
+        runbook_url: "https://docs.gacp.dtam.go.th/runbooks/high-error-rate"
+    
+    - alert: HighResponseTime
+      expr: |
+        histogram_quantile(0.95, 
+          rate(http_request_duration_seconds_bucket[5m])
+        ) > 0.5
+      for: 5m
+      labels:
+        severity: warning
+        service: "{{ $labels.job }}"
+        team: gacp-platform
+      annotations:
+        summary: "High response time in {{ $labels.job }}"
+        description: "95th percentile response time is {{ $value }}s for {{ $labels.job }}"
+        
+    - alert: ApplicationDown
+      expr: up{job=~"gacp-.*"} == 0
+      for: 1m
+      labels:
+        severity: critical
+        service: "{{ $labels.job }}"
+        team: gacp-platform
+      annotations:
+        summary: "GACP service {{ $labels.job }} is down"
+        description: "Service {{ $labels.job }} has been down for more than 1 minute"
+        action_required: "Immediate investigation required"
+
+  # Thai Business Logic Alerts
+  - name: thai_business_alerts
+    interval: 60s
+    rules:
+    - alert: HighApplicationSubmissionRate
+      expr: |
+        rate(gacp_applications_submitted_total[1h]) > 100
+      for: 5m
+      labels:
+        severity: warning
+        category: business
+        team: gacp-operations
+      annotations:
+        summary: "Unusually high application submission rate"
+        description: "{{ $value }} applications submitted per hour, above normal threshold"
+        
+    - alert: LowApplicationApprovalRate
+      expr: |
+        (
+          rate(gacp_applications_approved_total[24h]) /
+          rate(gacp_applications_reviewed_total[24h])
+        ) < 0.7
+      for: 30m
+      labels:
+        severity: warning
+        category: business
+        team: gacp-quality
+      annotations:
+        summary: "Low application approval rate detected"
+        description: "Only {{ $value | humanizePercentage }} of applications approved in last 24h"
+        
+    - alert: ProvinceApplicationImbalance
+      expr: |
+        (
+          max(rate(gacp_applications_by_province[1h])) /
+          min(rate(gacp_applications_by_province[1h]) > 0)
+        ) > 10
+      for: 2h
+      labels:
+        severity: info
+        category: business
+        team: gacp-analysis
+      annotations:
+        summary: "Uneven application distribution across Thai provinces"
+        description: "Significant imbalance in application rates between provinces"
+
+  # Infrastructure Alerts
+  - name: infrastructure_alerts
+    interval: 30s
+    rules:
+    - alert: HighMemoryUsage
+      expr: |
+        (
+          container_memory_usage_bytes{container!="",container!="POD"} /
+          container_spec_memory_limit_bytes
+        ) > 0.9
+      for: 5m
+      labels:
+        severity: warning
+        component: "{{ $labels.container }}"
+        namespace: "{{ $labels.namespace }}"
+        team: gacp-platform
+      annotations:
+        summary: "High memory usage in {{ $labels.container }}"
+        description: "Memory usage is {{ $value | humanizePercentage }} for {{ $labels.container }}"
+        
+    - alert: HighCPUUsage
+      expr: |
+        rate(container_cpu_usage_seconds_total{container!="",container!="POD"}[5m]) > 0.8
+      for: 10m
+      labels:
+        severity: warning
+        component: "{{ $labels.container }}"
+        team: gacp-platform
+      annotations:
+        summary: "High CPU usage in {{ $labels.container }}"
+        description: "CPU usage is {{ $value | humanizePercentage }} for {{ $labels.container }}"
+        
+    - alert: PodCrashLooping
+      expr: |
+        rate(kube_pod_container_status_restarts_total[15m]) > 0
+      for: 5m
+      labels:
+        severity: critical
+        pod: "{{ $labels.pod }}"
+        namespace: "{{ $labels.namespace }}"
+        team: gacp-platform
+      annotations:
+        summary: "Pod {{ $labels.pod }} is crash looping"
+        description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is restarting frequently"
+
+  # Database Alerts
+  - name: database_alerts
+    interval: 60s
+    rules:
+    - alert: PostgreSQLDown
+      expr: pg_up == 0
+      for: 1m
+      labels:
+        severity: critical
+        database: postgresql
+        team: gacp-database
+      annotations:
+        summary: "PostgreSQL database is down"
+        description: "PostgreSQL database has been down for more than 1 minute"
+        
+    - alert: HighDatabaseConnections
+      expr: |
+        (
+          pg_stat_database_numbackends /
+          pg_settings_max_connections
+        ) > 0.8
+      for: 5m
+      labels:
+        severity: warning
+        database: postgresql
+        team: gacp-database
+      annotations:
+        summary: "High PostgreSQL connection usage"
+        description: "PostgreSQL connection usage is {{ $value | humanizePercentage }}"
+        
+    - alert: MongoDBDown
+      expr: mongodb_up == 0
+      for: 1m
+      labels:
+        severity: critical
+        database: mongodb
+        team: gacp-database
+      annotations:
+        summary: "MongoDB is down"
+        description: "MongoDB has been down for more than 1 minute"
+        
+    - alert: RedisDown
+      expr: redis_up == 0
+      for: 1m
+      labels:
+        severity: critical
+        database: redis
+        team: gacp-database
+      annotations:
+        summary: "Redis is down"
+        description: "Redis has been down for more than 1 minute"
+
+  # Security Alerts
+  - name: security_alerts
+    interval: 30s
+    rules:
+    - alert: HighFailedLoginAttempts
+      expr: |
+        rate(gacp_auth_failed_attempts_total[5m]) > 10
+      for: 2m
+      labels:
+        severity: warning
+        category: security
+        team: gacp-security
+      annotations:
+        summary: "High number of failed login attempts"
+        description: "{{ $value }} failed login attempts per minute detected"
+        
+    - alert: SuspiciousAPIActivity
+      expr: |
+        rate(http_requests_total{status="429"}[5m]) > 5
+      for: 1m
+      labels:
+        severity: warning
+        category: security
+        team: gacp-security
+      annotations:
+        summary: "High rate of rate-limited requests"
+        description: "Possible DDoS or abuse attempt detected"
+        
+    - alert: UnauthorizedAPIAccess
+      expr: |
+        rate(http_requests_total{status="401"}[5m]) > 20
+      for: 3m
+      labels:
+        severity: warning
+        category: security
+        team: gacp-security
+      annotations:
+        summary: "High number of unauthorized access attempts"
+        description: "{{ $value }} unauthorized requests per minute"
+
+  # Thai Government Integration Alerts
+  - name: thai_integration_alerts
+    interval: 120s
+    rules:
+    - alert: GovernmentAPIDown
+      expr: |
+        probe_success{job="thai-gov-api-monitor"} == 0
+      for: 5m
+      labels:
+        severity: critical
+        category: integration
+        team: gacp-integration
+      annotations:
+        summary: "Thai Government API is unreachable"
+        description: "Unable to connect to Thai Government APIs for 5 minutes"
+        
+    - alert: SlowGovernmentAPIResponse
+      expr: |
+        probe_duration_seconds{job="thai-gov-api-monitor"} > 10
+      for: 10m
+      labels:
+        severity: warning
+        category: integration
+        team: gacp-integration
+      annotations:
+        summary: "Slow response from Thai Government API"
+        description: "Government API response time is {{ $value }}s"

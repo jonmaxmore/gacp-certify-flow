@@ -40,5 +40,5 @@ EXPOSE 3001
 # Use tini for proper signal handling
 ENTRYPOINT ["/sbin/tini", "--"]
 
-# Start application
-CMD ["node", "src/index.js"]
+# Start simple application server
+CMD ["node", "src/simple-server.js"]

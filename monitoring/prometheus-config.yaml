@@ -1,0 +1,136 @@
+# monitoring/prometheus-config.yaml
+# Prometheus Configuration for GACP Platform Monitoring
+# Thai Herbal Certification System - Production Monitoring
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'gacp-production'
+    region: 'ap-southeast-1'
+    environment: 'production'
+
+# Alert Manager Configuration
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets: 
+      - 'alertmanager.gacp-monitoring.svc.cluster.local:9093'
+    path_prefix: /
+    scheme: http
+    timeout: 10s
+
+# Rules for Thai-specific Alerts
+rule_files:
+  - 'alerts.yml'
+  - 'thai-business-rules.yml'
+  - 'database-rules.yml'
+
+# Scrape Configurations
+scrape_configs:
+  # GACP Core Services
+  - job_name: 'gacp-core-certification'
+    metrics_path: '/metrics'
+    static_configs:
+    - targets: 
+      - 'core-certification-service.gacp-production.svc.cluster.local:80'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    
+  - job_name: 'gacp-standards-analysis'
+    static_configs:
+    - targets: 
+      - 'standards-analysis-service.gacp-production.svc.cluster.local:80'
+    scrape_interval: 15s
+    
+  - job_name: 'gacp-survey-management'
+    static_configs:
+    - targets: 
+      - 'survey-management-service.gacp-production.svc.cluster.local:80'
+    scrape_interval: 15s
+  
+  # Database Monitoring
+  - job_name: 'postgresql-exporter'
+    static_configs:
+    - targets:
+      - 'postgres-exporter.gacp-database.svc.cluster.local:9187'
+    scrape_interval: 30s
+    
+  - job_name: 'mongodb-exporter'
+    static_configs:
+    - targets:
+      - 'mongodb-exporter.gacp-database.svc.cluster.local:9216'
+    scrape_interval: 30s
+    
+  - job_name: 'redis-exporter'
+    static_configs:
+    - targets:
+      - 'redis-exporter.gacp-database.svc.cluster.local:9121'
+    scrape_interval: 30s
+  
+  # Infrastructure Monitoring
+  - job_name: 'kubernetes-nodes'
+    scheme: https
+    tls_config:
+      ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      insecure_skip_verify: true
+    bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+    kubernetes_sd_configs:
+    - role: node
+    relabel_configs:
+    - source_labels: [__address__]
+      regex: '(.*):10250'
+      replacement: '${1}:9100'
+      target_label: __address__
+      
+  - job_name: 'kubernetes-pods'
+    kubernetes_sd_configs:
+    - role: pod
+    relabel_configs:
+    - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+      action: keep
+      regex: true
+    - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+      action: replace
+      target_label: __metrics_path__
+      regex: (.+)
+    - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+      action: replace
+      regex: ([^:]+)(?::\d+)?;(\d+)
+      replacement: $1:$2
+      target_label: __address__
+      
+  # NGINX Ingress Monitoring
+  - job_name: 'nginx-ingress'
+    static_configs:
+    - targets:
+      - 'nginx-controller-metrics.ingress-nginx.svc.cluster.local:9913'
+    scrape_interval: 10s
+    
+  # Thai Government API Integration Monitoring
+  - job_name: 'thai-gov-api-monitor'
+    metrics_path: '/api/health'
+    static_configs:
+    - targets:
+      - 'government-api-monitor.gacp-production.svc.cluster.local:80'
+    scrape_interval: 60s # Less frequent for external APIs
+    scrape_timeout: 30s
+
+# Storage Configuration
+storage:
+  tsdb:
+    path: /prometheus/data
+    retention.time: 30d
+    retention.size: 50GB
+    wal-compression: true
+
+# Remote Write for Long-term Storage (optional)
+remote_write:
+  - url: "https://prometheus-remote-storage.dtam.go.th/api/v1/write"
+    basic_auth:
+      username: gacp-prometheus
+      password_file: /etc/prometheus/secrets/remote-storage-password
+    write_relabel_configs:
+    - source_labels: [__name__]
+      regex: 'gacp_.*|http_requests_total|http_request_duration_seconds'
+      action: keep

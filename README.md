@@ -37,9 +37,9 @@
 ┌─────────────────────────────────────────────────────────────────┐
 │                      Data Layer                                  │
 │  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐   │
-│  │  MongoDB   │ │   Redis    │ │Docker Vol. │ │ Audit Logs │   │
-│  │ 6.0 + Auth │ │ 7-Alpine   │ │(File Store)│ │  (MongoDB) │   │
-│  │Port: 27017 │ │Port: 6379  │ │ Persistent │ │ Collections│   │
+│  │PostgreSQL  │ │  MongoDB   │ │   Redis    │ │Docker Vol. │   │
+│  │15 + ACID   │ │ 6.0 Docs   │ │ 7-Alpine   │ │(File Store)│   │
+│  │Port: 5432  │ │Port: 27017 │ │Port: 6379  │ │ Persistent │   │
 │  └────────────┘ └────────────┘ └────────────┘ └────────────┘   │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -47,13 +47,13 @@
 ## Core Services
 
 ### 1. Core Certification Service (Port 3001)
-- **หน้าที่**: จัดการใบสมัคร, การรับรอง, การชำระเงิน
+- **หน้าที่**: จัดการใบสมัคร, การรับรอง, การชำระเงิน (Hybrid Database)
 - **Features**:
-  - Application Management
-  - Payment Processing
+  - Application Management (PostgreSQL + MongoDB)
+  - Payment Processing (PostgreSQL ACID)
   - Certificate Generation
-  - Status Tracking
-  - Document Management
+  - Status Tracking (Distributed Transactions)
+  - Document Management (MongoDB GridFS)
 
 ### 2. Standards Analysis Service (Port 3002)
 - **หน้าที่**: วิเคราะห์มาตรฐาน GACP และการประเมิน
@@ -119,11 +119,11 @@
 
 ### Security Features
 
-- MongoDB Authentication & Authorization
-- Field-level encryption for PII data
-- Audit trail collections with timestamps
-- Index optimization for performance
-- Connection pooling and rate limiting
+- **PostgreSQL**: Row Level Security (RLS) policies with encrypted sensitive data
+- **MongoDB**: Field-level encryption for PII data with comprehensive audit trails  
+- **Redis**: Session management with automatic expiration and rate limiting
+- **Hybrid Transactions**: Distributed ACID compliance across PostgreSQL + MongoDB
+- **API Security**: Progressive rate limiting, JWT authentication, and audit logging
 
 ## Getting Started
 
@@ -131,6 +131,7 @@
 
 - Docker & Docker Compose
 - Node.js 18+ LTS (สำหรับ development)  
+- PostgreSQL 15+ (หรือใช้ Docker)
 - MongoDB 6.0+ (หรือใช้ Docker)
 - Redis 7+ (หรือใช้ Docker)
 

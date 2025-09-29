@@ -1,0 +1,193 @@
+# kubernetes/ingress.yaml
+# GACP Platform Ingress Configuration
+# Production-ready Ingress with SSL/TLS and Rate Limiting
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gacp-platform-ingress
+  namespace: gacp-production
+  labels:
+    app: gacp-platform
+    component: ingress
+  annotations:
+    # Ingress Controller
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    
+    # SSL/TLS Configuration
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    
+    # Rate Limiting for DDoS Protection
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    nginx.ingress.kubernetes.io/rate-limit-connections: "20"
+    
+    # Request Size Limits
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/client-max-body-size: "10m"
+    
+    # Security Headers
+    nginx.ingress.kubernetes.io/server-snippet: |
+      add_header X-Frame-Options "SAMEORIGIN" always;
+      add_header X-Content-Type-Options "nosniff" always;
+      add_header X-XSS-Protection "1; mode=block" always;
+      add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+      add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self';" always;
+    
+    # CORS Configuration for Thai Government APIs
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://dtam.go.th, https://api.dtam.go.th, https://gacp.dtam.go.th"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
+    
+    # Connection and Timeout Settings
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    
+    # Load Balancing
+    nginx.ingress.kubernetes.io/upstream-hash-by: "$remote_addr"
+    nginx.ingress.kubernetes.io/load-balance: "round_robin"
+
+spec:
+  tls:
+  - hosts:
+    - api.gacp.dtam.go.th
+    - gacp.dtam.go.th
+    secretName: gacp-tls-secret
+  
+  rules:
+  # Main API Domain
+  - host: api.gacp.dtam.go.th
+    http:
+      paths:
+      # Core Certification API
+      - path: /api/v1/applications
+        pathType: Prefix
+        backend:
+          service:
+            name: core-certification-service
+            port:
+              number: 80
+      
+      # Health and Status Endpoints
+      - path: /health
+        pathType: Exact
+        backend:
+          service:
+            name: core-certification-service
+            port:
+              number: 80
+      
+      - path: /ready
+        pathType: Exact
+        backend:
+          service:
+            name: core-certification-service
+            port:
+              number: 80
+      
+      # Statistics and Reports
+      - path: /api/v1/statistics
+        pathType: Prefix
+        backend:
+          service:
+            name: core-certification-service
+            port:
+              number: 80
+      
+      # Authentication Endpoints (future)
+      - path: /api/v1/auth
+        pathType: Prefix
+        backend:
+          service:
+            name: auth-service
+            port:
+              number: 80
+      
+      # File Upload and Documents (future)
+      - path: /api/v1/documents
+        pathType: Prefix
+        backend:
+          service:
+            name: document-service
+            port:
+              number: 80
+      
+      # Payment Gateway Integration (mock for testing)
+      - path: /api/v1/payments
+        pathType: Prefix
+        backend:
+          service:
+            name: payment-service
+            port:
+              number: 80
+  
+  # Web Interface Domain (future)
+  - host: gacp.dtam.go.th
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: web-frontend-service
+            port:
+              number: 80
+
+---
+
+# Certificate Issuer for Production SSL
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: admin@dtam.go.th
+    privateKeySecretRef:
+      name: letsencrypt-prod-private-key
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
+    - dns01:
+        route53:
+          region: ap-southeast-1
+          accessKeyID: AKIA...
+          secretAccessKeySecretRef:
+            name: route53-credentials
+            key: secret-access-key
+
+---
+
+# Rate Limiting ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-rate-limit-config
+  namespace: gacp-production
+data:
+  rate-limit.conf: |
+    # Thai Government API Rate Limits
+    # Farmer Portal: Higher limits for authenticated users
+    map $http_user_type $rate_limit_zone {
+        default "general";
+        "farmer" "farmer_zone";
+        "inspector" "inspector_zone";
+        "admin" "admin_zone";
+    }
+    
+    # Zone Definitions
+    limit_req_zone $binary_remote_addr zone=general:10m rate=10r/m;
+    limit_req_zone $binary_remote_addr zone=farmer_zone:10m rate=60r/m;
+    limit_req_zone $binary_remote_addr zone=inspector_zone:10m rate=120r/m;
+    limit_req_zone $binary_remote_addr zone=admin_zone:10m rate=300r/m;
+    
+    # Connection Limits
+    limit_conn_zone $binary_remote_addr zone=conn_limit_per_ip:10m;
+    limit_conn_zone $server_name zone=conn_limit_per_server:10m;

@@ -1,12 +1,14 @@
 // services/core-certification/src/index.js
-const fastify = require('fastify');
-const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
-const { v4: uuidv4 } = require('uuid');
+/**
+ * Main Application Entry Point - GACP Platform
+ * Fastify-based microservice with hybrid database integration
+ */
 
-// Import models
-const { User, Farm, Application, Certificate, Payment, Inspection, Standard } = require('./models');
+const fastify = require('fastify');
+
+// Import services
+const databaseService = require('../../../services/database/database-service');
+const ApplicationService = require('./application-service');
 
 // Initialize Fastify with production settings
 const app = fastify({

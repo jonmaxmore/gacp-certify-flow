@@ -359,8 +359,8 @@ WHERE a.created_at >= NOW() - INTERVAL '1 year';
 
 -- Refresh function
 CREATE OR REPLACE FUNCTION refresh_dashboard_statistics()
-RETURNS void AS $
+RETURNS void AS $$
 BEGIN
   REFRESH MATERIALIZED VIEW CONCURRENTLY mv_dashboard_statistics;
 END;
-$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;

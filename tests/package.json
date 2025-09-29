@@ -1,0 +1,136 @@
+{
+  "name": "gacp-certify-flow-testing",
+  "version": "2.0.0",
+  "description": "Testing suite for GACP Certification Platform",
+  "main": "test-runner.js",
+  "scripts": {
+    "test": "mocha 'integration/**/*.test.js' --timeout 10000 --recursive",
+    "test:unit": "mocha 'unit/**/*.test.js' --timeout 5000",
+    "test:integration": "mocha 'integration/**/*.test.js' --timeout 15000",
+    "test:e2e": "mocha 'tests/e2e/**/*.test.js' --timeout 30000",
+    "test:coverage": "nyc npm test",
+    "test:watch": "mocha 'tests/**/*.test.js' --watch --recursive",
+    "test:api": "newman run tests/api/gacp-api-collection.json -e tests/api/environments/test.json",
+    "test:load": "artillery run tests/load/load-test-config.yml",
+    "test:security": "npm audit && snyk test",
+    "test:db": "mocha 'tests/database/**/*.test.js' --timeout 20000",
+    "test:lint": "eslint tests/ --ext .js",
+    "test:format": "prettier --check 'tests/**/*.js'",
+    "setup:test-db": "node scripts/setup-test-database.js",
+    "cleanup:test-db": "node scripts/cleanup-test-database.js",
+    "generate:test-data": "node scripts/generate-test-data.js",
+    "test:ci": "npm run test:lint && npm run test:coverage && npm run test:security"
+  },
+  "devDependencies": {
+    "mocha": "^10.2.0",
+    "chai": "^4.3.10",
+    "sinon": "^17.0.1",
+    "supertest": "^6.3.3",
+    "nyc": "^15.1.0",
+    "newman": "^6.0.0",
+    "artillery": "^2.0.0",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.0",
+    "snyk": "^1.1260.0",
+    "@faker-js/faker": "^8.3.1",
+    "mongodb-memory-server": "^9.1.3",
+    "testcontainers": "^10.4.0",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.3.1"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "bcrypt": "^5.1.1",
+    "joi": "^17.11.0",
+    "axios": "^1.6.2",
+    "moment": "^2.29.4",
+    "lodash": "^4.17.21",
+    "uuid": "^9.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "nyc": {
+    "include": [
+      "services/**/*.js",
+      "routes/**/*.js",
+      "models/**/*.js",
+      "config/**/*.js"
+    ],
+    "exclude": [
+      "tests/**",
+      "node_modules/**",
+      "coverage/**",
+      "*.config.js"
+    ],
+    "reporter": [
+      "text",
+      "lcov",
+      "html",
+      "json"
+    ],
+    "check-coverage": true,
+    "lines": 80,
+    "functions": 80,
+    "branches": 70,
+    "statements": 80
+  },
+  "mocha": {
+    "timeout": 10000,
+    "recursive": true,
+    "reporter": "spec",
+    "bail": false,
+    "exit": true
+  },
+  "eslintConfig": {
+    "extends": ["eslint:recommended"],
+    "env": {
+      "node": true,
+      "es2022": true,
+      "mocha": true
+    },
+    "parserOptions": {
+      "ecmaVersion": 2022,
+      "sourceType": "module"
+    },
+    "rules": {
+      "no-console": "warn",
+      "no-unused-vars": "error",
+      "no-undef": "error",
+      "prefer-const": "error",
+      "no-var": "error"
+    }
+  },
+  "prettier": {
+    "semi": true,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "es5",
+    "printWidth": 100,
+    "bracketSpacing": true,
+    "arrowParens": "avoid"
+  },
+  "keywords": [
+    "gacp",
+    "certification",
+    "testing",
+    "api",
+    "nodejs",
+    "mongodb",
+    "postgresql",
+    "integration-tests",
+    "thai-herbal"
+  ],
+  "author": "DTAM Development Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dtam/gacp-certify-flow.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dtam/gacp-certify-flow/issues"
+  },
+  "homepage": "https://github.com/dtam/gacp-certify-flow#readme"
+}
