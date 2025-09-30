@@ -71,6 +71,13 @@ class PDPAComplianceManager {
             user_agent: userData.user_agent
         };
 
+        // Check if user has given explicit consent
+        if (userData.pdpa_consent === true || userData.pdpa_consent === 'true') {
+            consentRecord.consent_given = true;
+            consentRecord.consent_source = 'user_form';
+            consentRecord.consent_timestamp = userData.consent_timestamp || new Date().toISOString();
+        }
+
         // ตรวจสอบประเภทข้อมูลที่ต้องการความยินยอม
         const requiresExplicitConsent = dataTypes.some(type => 
             this.personalDataTypes.SENSITIVE_PERSONAL.includes(type)
@@ -92,12 +99,17 @@ class PDPAComplianceManager {
     encryptPersonalData(data, dataType) {
         const crypto = require('crypto');
         const algorithm = 'aes-256-gcm';
-        const key = process.env.PDPA_ENCRYPTION_KEY || 'default-key-for-development';
+        const key = process.env.PDPA_ENCRYPTION_KEY || 'default-key-for-development-only-32b';
+        
+        // Ensure key is 32 bytes for AES-256
+        const keyBuffer = Buffer.from(key.padEnd(32, '0').slice(0, 32));
         const iv = crypto.randomBytes(16);
 
         try {
-            const cipher = crypto.createCipher(algorithm, key);
+            const cipher = crypto.createCipherGCM(algorithm, keyBuffer, iv);
             let encrypted = cipher.update(JSON.stringify(data), 'utf8', 'hex');
+            encrypted += cipher.final('hex');
+            const authTag = cipher.getAuthTag();
             encrypted += cipher.final('hex');
 
             return {

@@ -109,6 +109,13 @@ class GACPFeeCalculator {
       });
     }
     
+    // ตรวจสอบข้อมูลสถานที่ก่อนใช้งาน
+    const locationData = applicationData.location || applicationData.farm_location || {
+      region: 'ไม่ระบุ',
+      province: 'ไม่ระบุ',
+      district: 'ไม่ระบุ'
+    };
+    
     return {
       base_amount: baseFee,
       herb_multiplier: herbMultiplier,
@@ -121,7 +128,7 @@ class GACPFeeCalculator {
       estimated_audit_date: this.calculateAuditDate(),
       herb_details: applicationData.herbs ? this.getHerbDetails(applicationData.herbs) : [],
       gacp_requirements: applicationData.herbs ? this.herbalDatabase.getGACPRequirements(applicationData.herbs) : null,
-      location_details: this.getLocationDetails(applicationData.location)
+      location_details: this.getLocationDetails(locationData)
     };
   }
 
@@ -288,13 +295,27 @@ class GACPFeeCalculator {
    * รายละเอียดการเดินทาง
    */
   getLocationDetails(location) {
+    // ตรวจสอบข้อมูลสถานที่ว่ามีครบถ้วนหรือไม่
+    if (!location || typeof location !== 'object') {
+      return {
+        region: 'ไม่ระบุ',
+        province: 'ไม่ระบุ',
+        district: 'ไม่ระบุ',
+        estimated_travel_time: '1 วัน',
+        audit_team_size: 2,
+        accommodation_required: false,
+        status: 'LOCATION_DATA_INCOMPLETE'
+      };
+    }
+
     return {
-      region: location.region,
-      province: location.province,
-      district: location.district,
+      region: location.region || 'ไม่ระบุ',
+      province: location.province || 'ไม่ระบุ',
+      district: location.district || 'ไม่ระบุ',
       estimated_travel_time: this.calculateTravelTime(location),
       audit_team_size: this.calculateTeamSize(location),
-      accommodation_required: this.requiresAccommodation(location)
+      accommodation_required: this.requiresAccommodation(location),
+      status: 'LOCATION_DATA_COMPLETE'
     };
   }
 
@@ -335,6 +356,10 @@ class GACPFeeCalculator {
       'ภาคตะวันออก': '3-5 ชั่วโมง'
     };
 
+    if (!location || !location.region) {
+      return '4-6 ชั่วโมง'; // default เมื่อไม่มีข้อมูล
+    }
+
     return travelTimes[location.region] || '4-6 ชั่วโมง';
   }
 
@@ -344,6 +369,11 @@ class GACPFeeCalculator {
   calculateTeamSize(location) {
     // ทีมใหญ่ขึ้นสำหรับพื้นที่ห่างไกลหรือแปลงใหญ่
     const baseTeam = 2;
+    
+    if (!location || !location.region) {
+      return baseTeam; // default เมื่อไม่มีข้อมูล
+    }
+    
     const remoteBonus = ['ภาคเหนือ', 'ภาคใต้'].includes(location.region) ? 1 : 0;
     
     return baseTeam + remoteBonus;
@@ -462,6 +492,9 @@ class GACPFeeCalculator {
    * ต้องพักค้างคืน
    */
   requiresAccommodation(location) {
+    if (!location || !location.region) {
+      return false; // default เมื่อไม่มีข้อมูล
+    }
     return ['ภาคเหนือ', 'ภาคใต้'].includes(location.region);
   }
 
