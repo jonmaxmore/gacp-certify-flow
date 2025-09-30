@@ -1,12 +1,79 @@
 services:
+  # Main application server
+  gacp-app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: gacp-app
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      MONGODB_URI: mongodb://admin:${MONGO_PASSWORD}@mongodb:27017/gacp_certification?authSource=admin
+      REDIS_URL: redis://redis:6379
+      PG_HOST: postgres
+      PG_DATABASE: gacp_licenses
+      PG_USER: postgres
+      PG_PASSWORD: ${PG_PASSWORD}
+    volumes:
+      - ./uploads:/app/uploads
+      - ./certificates:/app/certificates
+      - ./logs:/app/logs
+      - ./keys:/app/keys
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - gacp_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Background worker
+  gacp-worker:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: gacp-worker
+    command: node worker.js
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: mongodb://admin:${MONGO_PASSWORD}@mongodb:27017/gacp_certification?authSource=admin
+      REDIS_URL: redis://redis:6379
+      WORKER_TYPE: background
+    volumes:
+      - ./uploads:/app/uploads
+      - ./certificates:/app/certificates
+      - ./logs:/app/logs
+      - ./keys:/app/keys
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - gacp_network
+    restart: unless-stopped
+
+  # MongoDB database
   mongodb:
     image: mongo:6.0
+    container_name: gacp-mongodb
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
-      MONGO_INITDB_DATABASE: gacp_db
+      MONGO_INITDB_DATABASE: gacp_certification
     volumes:
       - mongodb_data:/data/db
+      - ./mongo-init:/docker-entrypoint-initdb.d
     ports:
       - "27017:27017"
     networks:
@@ -16,8 +83,32 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
     command: mongod --auth
 
+  # PostgreSQL database (optional)
+  postgres:
+    image: postgres:15-alpine
+    container_name: gacp-postgres
+    environment:
+      POSTGRES_DB: gacp_licenses
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - gacp_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d gacp_licenses"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis cache
   redis:
     image: redis:7-alpine
     container_name: gacp-redis
@@ -25,9 +116,72 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - gacp_network
+    restart: unless-stopped
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: gacp-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./public:/usr/share/nginx/html
+    depends_on:
+      - gacp-app
+    networks:
+      - gacp_network
+    restart: unless-stopped
+
+  # Monitoring with Prometheus (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: gacp-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus-config.yaml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - gacp_network
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+  # Grafana dashboard (optional)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: gacp-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - gacp_network
+    restart: unless-stopped
+    profiles:
+      - monitoring
       interval: 30s
       timeout: 10s
       retries: 3
