@@ -1,0 +1,212 @@
+version: '3.8'
+
+services:
+  # Databases
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: gacp_auth
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./microservices/auth-service/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - gacp-network
+
+  mongodb:
+    image: mongo:7.0
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - gacp-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - gacp-network
+
+  # Microservices
+  auth-service:
+    build: ./microservices/auth-service
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - JWT_SECRET=your-super-secret-jwt-key-min-32-characters
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=gacp_auth
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - gacp-network
+    volumes:
+      - ./microservices/auth-service/logs:/app/logs
+
+  certification-service:
+    build: ./microservices/certification-service
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - PORT=3002
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/gacp_certification?authSource=admin
+      - AUTH_SERVICE_URL=http://auth-service:3001
+    depends_on:
+      - mongodb
+      - auth-service
+    networks:
+      - gacp-network
+    volumes:
+      - ./microservices/certification-service/logs:/app/logs
+      - ./microservices/certification-service/uploads:/app/uploads
+
+  survey-service:
+    build: ./microservices/survey-service
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+      - PORT=3003
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/gacp_surveys?authSource=admin
+      - AUTH_SERVICE_URL=http://auth-service:3001
+    depends_on:
+      - mongodb
+      - auth-service
+    networks:
+      - gacp-network
+
+  standards-service:
+    build: ./microservices/standards-service
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=development
+      - PORT=3004
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=gacp_standards
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - AUTH_SERVICE_URL=http://auth-service:3001
+    depends_on:
+      - postgres
+      - auth-service
+    networks:
+      - gacp-network
+
+  track-trace-service:
+    build: ./microservices/track-trace-service
+    ports:
+      - "3005:3005"
+    environment:
+      - NODE_ENV=development
+      - PORT=3005
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/gacp_tracking?authSource=admin
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=gacp_tracking
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - AUTH_SERVICE_URL=http://auth-service:3001
+    depends_on:
+      - mongodb
+      - postgres
+      - auth-service
+    networks:
+      - gacp-network
+
+  cms-service:
+    build: ./microservices/cms-service
+    ports:
+      - "3006:3006"
+    environment:
+      - NODE_ENV=development
+      - PORT=3006
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/gacp_cms?authSource=admin
+      - AUTH_SERVICE_URL=http://auth-service:3001
+    depends_on:
+      - mongodb
+      - auth-service
+    networks:
+      - gacp-network
+    volumes:
+      - ./microservices/cms-service/uploads:/app/uploads
+
+  # API Gateway
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - CERTIFICATION_SERVICE_URL=http://certification-service:3002
+      - SURVEY_SERVICE_URL=http://survey-service:3003
+      - STANDARDS_SERVICE_URL=http://standards-service:3004
+      - TRACK_TRACE_SERVICE_URL=http://track-trace-service:3005
+      - CMS_SERVICE_URL=http://cms-service:3006
+    depends_on:
+      - auth-service
+      - certification-service
+      - survey-service
+      - standards-service
+      - track-trace-service
+      - cms-service
+    networks:
+      - gacp-network
+
+  # Frontend
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:8080"
+    environment:
+      - VUE_APP_API_BASE_URL=http://localhost:3000
+    depends_on:
+      - api-gateway
+    networks:
+      - gacp-network
+
+  # Nginx Load Balancer
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - api-gateway
+      - frontend
+    networks:
+      - gacp-network
+
+networks:
+  gacp-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  mongodb_data:
+  redis_data:
