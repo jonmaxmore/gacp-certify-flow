@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GACP Online Audit System - ระบบตรวจประเมินออนไลน์</title>
+    <style>
+        /* Modern CSS Variables */
+        :root {
+            /* Color System */
+            --primary-50: #ecfdf5;
+            --primary-100: #d1fae5;
+            --primary-500: #10b981;
+            --primary-600: #059669;
+            --primary-700: #047857;
+            
+            /* Neutral Colors */
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            
+            /* Semantic Colors */
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #3b82f6;
+            
+            /* Typography */
+            --font-sans: 'Inter', 'Sarabun', system-ui, sans-serif;
+            --font-size-xs: 0.75rem;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            
+            /* Spacing */
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+            
+            /* Border Radius */
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-2xl: 1.5rem;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Reset & Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-4);
+            color: var(--gray-900);
+        }
+
+        .audit-container {
+            background: white;
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-xl);
+            width: 100%;
+            max-width: 1400px;
+            min-height: 90vh;
+            display: grid;
+            overflow: hidden;
+            position: relative;
+            
+            /* Mobile First Grid */
+            grid-template-columns: 1fr;
+            grid-template-rows: auto auto 1fr auto;
+            grid-template-areas:
+                "header"
+                "progress"
+                "main"
+                "controls";
+        }
+
+        /* Tablet Layout */
+        @media (min-width: 768px) {
+            .audit-container {
+                grid-template-columns: 300px 1fr;
+                grid-template-rows: auto 1fr auto;
+                grid-template-areas:
+                    "sidebar header"
+                    "sidebar main"
+                    "sidebar controls";
+                
+                .progress-panel {
+                    position: absolute;
+                    top: var(--space-6);
+                    right: var(--space-6);
+                    width: 280px;
+                    background: white;
+                    border-radius: var(--radius-xl);
+                    box-shadow: var(--shadow-lg);
+                    padding: var(--space-6);
+                    z-index: 10;
+                }
+            }
+        }
+
+        /* Desktop Layout */
+        @media (min-width: 1024px) {
+            .audit-container {
+                grid-template-columns: 280px 1fr 320px;
+                grid-template-areas:
+                    "sidebar header progress"
+                    "sidebar main progress"
+                    "sidebar controls progress";
+            }
+            
+            .progress-panel {
+                position: static;
+                width: auto;
+                box-shadow: none;
+                border-radius: 0;
+                border-left: 1px solid var(--gray-200);
+            }
+        }
+
+        /* Modern Header */
+        .audit-header {
+            grid-area: header;
+            background: white;
+            padding: var(--space-6);
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .header-subtitle {
+            font-size: var(--font-size-sm);
+            color: var(--gray-500);
+            margin-top: var(--space-1);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: var(--space-3);
+        }
+
+        /* Modern Sidebar */
+        .checklist-sidebar {
+            grid-area: sidebar;
+            background: var(--gray-50);
+            border-right: 1px solid var(--gray-200);
+            padding: var(--space-6);
+            overflow-y: auto;
+        }
+
+        .sidebar-title {
+            font-size: var(--font-size-lg);
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--space-6);
+        }
+
+        .progress-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: conic-gradient(var(--primary-500) 0deg, var(--primary-500) var(--progress-deg, 270deg), var(--gray-200) var(--progress-deg, 270deg));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto var(--space-4);
+            position: relative;
+        }
+
+        .progress-circle::before {
+            content: '';
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: white;
+            position: absolute;
+        }
+
+        .progress-text {
+            position: relative;
+            z-index: 1;
+            font-weight: 700;
+            font-size: var(--font-size-lg);
+            color: var(--gray-900);
+        }
+
+        .category-section {
+            margin-bottom: var(--space-6);
+        }
+
+        .category-title {
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            margin-bottom: var(--space-3);
+            font-weight: 600;
+            font-size: var(--font-size-sm);
+            color: var(--gray-900);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .category-title:hover {
+            border-color: var(--primary-300);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .category-progress {
+            background: var(--primary-100);
+            color: var(--primary-700);
+            padding: var(--space-1) var(--space-3);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+        }
+
+        .checkpoint-item {
+            background: white;
+            margin: var(--space-2) 0;
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: var(--font-size-sm);
+            border: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .checkpoint-item:hover {
+            border-color: var(--primary-300);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .checkpoint-item.passed {
+            background: var(--primary-50);
+            border-color: var(--success);
+            border-left: 4px solid var(--success);
+        }
+
+        .checkpoint-item.failed {
+            background: #fef2f2;
+            border-color: var(--error);
+            border-left: 4px solid var(--error);
+        }
+
+        .checkpoint-item.suspicious {
+            background: #fffbeb;
+            border-color: var(--warning);
+            border-left: 4px solid var(--warning);
+        }
+
+        .checkpoint-status {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .checkpoint-status.passed {
+            background: var(--success);
+        }
+
+        .checkpoint-status.failed {
+            background: var(--error);
+        }
+
+        .checkpoint-status.suspicious {
+            background: var(--warning);
+        }
+
+        .checkpoint-status.pending {
+            background: var(--gray-400);
+        }
+
+        /* Modern Video Interface */
+        .video-section {
+            grid-area: main;
+            background: var(--gray-50);
+            display: flex;
+            flex-direction: column;
+            padding: var(--space-6);
+            gap: var(--space-6);
+            overflow-y: auto;
+        }
+
+        .video-header {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .assessment-info h2 {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--space-1);
+        }
+
+        .assessment-info p {
+            color: var(--gray-500);
+            font-size: var(--font-size-sm);
+        }
+
+        .video-container {
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            position: relative;
+            aspect-ratio: 16/9;
+            min-height: 400px;
+        }
+
+        .video-screen {
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: var(--font-size-lg);
+            position: relative;
+        }
+
+        .video-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            padding: var(--space-6);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .recording-indicator {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-size: var(--font-size-sm);
+        }
+
+        .recording-dot {
+            width: 12px;
+            height: 12px;
+            background: var(--error);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .video-status {
+            font-size: var(--font-size-sm);
+        }
+
+        .video-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .control-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn.video {
+            background: #3498db;
+            color: white;
+        }
+
+        .control-btn.photo {
+            background: #e67e22;
+            color: white;
+        }
+
+        .control-btn.zoom {
+            background: #9b59b6;
+            color: white;
+        }
+
+        .video-main {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .video-container {
+            background: #2c3e50;
+            border-radius: 12px;
+            height: 60%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            position: relative;
+        }
+
+        .zoom-placeholder {
+            text-align: center;
+        }
+
+        .zoom-info {
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .photo-capture {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            flex: 1;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .photo-item {
+            background: #ecf0f1;
+            border: 2px dashed #bdc3c7;
+            border-radius: 8px;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .photo-item:hover {
+            border-color: #3498db;
+            background: #d5dbdb;
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        /* Assessment Panel */
+        .assessment-panel {
+            background: white;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .assessment-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .current-checkpoint {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+
+        .checkpoint-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .checkpoint-description {
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+
+        .assessment-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .option-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .option-btn.pass {
+            background: #d5f4e6;
+            border-color: #27ae60;
+            color: #229954;
+        }
+
+        .option-btn.fail {
+            background: #fadbd8;
+            border-color: #e74c3c;
+            color: #c0392b;
+        }
+
+        .option-btn.suspicious {
+            background: #fef5e7;
+            border-color: #f39c12;
+            color: #d68910;
+        }
+
+        .option-btn.active {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .notes-section {
+            margin: 15px 0;
+        }
+
+        .notes-textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn.next {
+            background: #3498db;
+            color: white;
+        }
+
+        .action-btn.complete {
+            background: #27ae60;
+            color: white;
+        }
+
+        .decision-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .decision-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .decision-btn {
+            padding: 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .decision-btn:hover {
+            border-color: #3498db;
+            background: #ebf3fd;
+        }
+
+        .decision-btn.approve {
+            border-color: #27ae60;
+            color: #229954;
+        }
+
+        .decision-btn.online-followup {
+            border-color: #3498db;
+            color: #2980b9;
+        }
+
+        .decision-btn.field-audit {
+            border-color: #f39c12;
+            color: #d68910;
+        }
+
+        .decision-btn.reject {
+            border-color: #e74c3c;
+            color: #c0392b;
+        }
+
+        @media (max-width: 1200px) {
+            .audit-container {
+                grid-template-columns: 250px 1fr 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .audit-container {
+                grid-template-columns: 1fr;
+                height: auto;
+                max-height: none;
+            }
+            
+            .checklist-sidebar,
+            .assessment-panel {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="audit-container">
+        <!-- Modern Header -->
+        <header class="audit-header">
+            <div>
+                <h1 class="header-title">ระบบตรวจประเมิน GACP ออนไลน์</h1>
+                <p class="header-subtitle">วันที่ 30 กันยายน 2568 | เวลา 14:30 น.</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary">
+                    <span>💾</span>
+                    บันทึกอัตโนมัติ
+                </button>
+                <button class="btn btn-primary">
+                    <span>📋</span>
+                    ส่งผลการประเมิน
+                </button>
+            </div>
+        </header>
+
+        <!-- Modern Sidebar -->
+        <aside class="checklist-sidebar">
+            <div class="progress-header">
+                <div class="progress-circle" style="--progress-deg: 270deg;">
+                    <div class="progress-text">75%</div>
+                </div>
+                <h2 class="sidebar-title">รายการตรวจสอบ</h2>
+            </div>
+            
+            <!-- Infrastructure Category -->
+            <div class="category-section">
+                <div class="category-title">
+                    <span>🏢 โครงสร้างฟาร์ม</span>
+                    <span class="category-progress">4/5</span>
+                </div>
+                
+                <div class="checkpoint-item passed">
+                    <div class="checkpoint-status passed">✓</div>
+                    <span>พื้นที่เพาะปลูกสะอาด</span>
+                </div>
+                
+                <div class="checkpoint-item passed">
+                    <div class="checkpoint-status passed">✓</div>
+                    <span>ระบบระบายน้ำเหมาะสม</span>
+                </div>
+                
+                <div class="checkpoint-item failed">
+                    <div class="checkpoint-status failed">✗</div>
+                    <span>ป้ายบอกขอบเขตชัดเจน</span>
+                </div>
+                
+                <div class="checkpoint-item passed">
+                    <div class="checkpoint-status passed">✓</div>
+                    <span>แยกพื้นที่จากสิ่งปนเปื้อน</span>
+                </div>
+                
+                <div class="checkpoint-item suspicious">
+                    <div class="checkpoint-status suspicious">?</div>
+                    <span>มีแนวกันตามมาตรฐาน</span>
+                </div>
+            </div>
+
+            <!-- Water Management Category -->
+            <div class="category-section">
+                <div class="category-title">
+                    <span>💧 การจัดการน้ำ</span>
+                    <span class="category-progress">3/4</span>
+                </div>
+                
+                <div class="checkpoint-item passed">
+                    <div class="checkpoint-status passed">✓</div>
+                    <span>แหล่งน้ำปลอดภัย</span>
+                </div>
+                
+                <div class="checkpoint-item passed">
+                    <div class="checkpoint-status passed">✓</div>
+                    <span>คุณภาพน้ำเหมาะสม</span>
+                </div>
+                
+                <div class="checkpoint-item passed">
+                    <div class="checkpoint-status passed">✓</div>
+                    <span>ระบบกักเก็บน้ำ</span>
+                </div>
+                
+                <div class="checkpoint-item pending">
+                    <div class="checkpoint-status pending">○</div>
+                    <span>ระบบกรองน้ำ</span>
+                </div>
+            </div>
+
+            <!-- Cultivation Category -->
+            <div class="category-section">
+                <div class="category-title">
+                    <span>🌱 การเพาะปลูก</span>
+                    <span class="category-progress">4/5</span>
+                </div>
+                
+                <div class="checkpoint-item passed">
+                    <div class="checkpoint-status passed">✓</div>
+                    <span>พันธุ์สมุนไพรถูกต้อง</span>
+                </div>
+                
+                <div class="checkpoint-item passed">
+                    <div class="checkpoint-status passed">✓</div>
+                    <span>ใช้ปุ่ยอินทรีย์</span>
+                </div>
+                
+                <div class="checkpoint-item failed">
+                    <div class="checkpoint-status failed">✗</div>
+                    <span>การควบคุมศัตรูพืช</span>
+                </div>
+                
+                <div class="checkpoint-item passed">
+                    <div class="checkpoint-status passed">✓</div>
+                    <span>ระยะปลูกเหมาะสม</span>
+                </div>
+                
+                <div class="checkpoint-item passed">
+                    <div class="checkpoint-status passed">✓</div>
+                    <span>การดูแลรักษา</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Modern Video Section -->
+        <main class="video-section">
+            <!-- Video Header -->
+            <div class="video-header">
+                <div class="assessment-info">
+                    <h2>การประเมิน GACP - ฟาร์มออร์แกนิค</h2>
+                    <p>เกษตรกร: นาย สมชาย ใจดี | พื้นที่: 5 ไร่ | จังหวัด: เชียงใหม่</p>
+                </div>
+                <div class="video-controls">
+                    <button class="control-btn secondary" title="เปิด/ปิดไมโครโฟน">🎤</button>
+                    <button class="control-btn secondary" title="เปิด/ปิดกล้อง">📹</button>
+                    <button class="control-btn secondary" title="แชร์หน้าจอ">📺</button>
+                </div>
+            </div>
+
+            <!-- Video Container -->
+            <div class="video-container">
+                <div class="video-screen">
+                    <div style="text-align: center;">
+                        <h3>🎥 การเชื่อมต่อ Zoom</h3>
+                        <p style="margin-top: 1rem; opacity: 0.8;">Meeting ID: 123-456-789</p>
+                        <p style="opacity: 0.8;">กำลังรอเกษตรกรเข้าร่วม...</p>
+                    </div>
+                    
+                    <!-- Video Overlay -->
+                    <div class="video-overlay" style="opacity: 0.9;">
+                        <div class="recording-indicator">
+                            <div class="recording-dot"></div>
+                            <span>กำลังบันทึก 25:30</span>
+                        </div>
+                        <div class="video-status">
+                            <span>🔊 เสียงดี | 📶 สัญญาณแรง</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assessment Panel -->
+            <div class="assessment-panel">
+                <div class="assessment-title">
+                    📋 การตัดสินใจผลการประเมิน
+                </div>
+                
+                <div class="assessment-grid">
+                    <div class="assessment-option">
+                        <div class="option-icon">✅</div>
+                        <div class="option-title">อนุมัติทันที</div>
+                        <div class="option-description">ผ่านการประเมินครบถ้วน</div>
+                    </div>
+                    
+                    <div class="assessment-option selected">
+                        <div class="option-icon">📅</div>
+                        <div class="option-title">นัดออนไลน์อีกครั้ง</div>
+                        <div class="option-description">ต้องการตรวจสอบเพิ่มเติม</div>
+                    </div>
+                    
+                    <div class="assessment-option">
+                        <div class="option-icon">🚗</div>
+                        <div class="option-title">ตรวจสอบในพื้นที่</div>
+                        <div class="option-description">ต้องการตรวจสอบภาคสนาม</div>
+                    </div>
+                    
+                    <div class="assessment-option">
+                        <div class="option-icon">❌</div>
+                        <div class="option-title">ไม่อนุมัติ</div>
+                        <div class="option-description">ไม่ผ่านการประเมิน</div>
+                    </div>
+                </div>
+                
+                <div class="assessment-notes">
+                    <label class="notes-label">📝 หมายเหตุและข้อเสนอแนะ</label>
+                    <textarea class="notes-textarea" placeholder="ระบุรายละเอียดการตรวจสอบ ข้อสังเกต และข้อเสนอแนะสำหรับเกษตรกร..."></textarea>
+                </div>
+            </div>
+        </main>
+
+        <!-- Modern Progress Panel -->
+        <aside class="progress-panel">
+            <div class="progress-header">
+                <h3 style="font-size: var(--font-size-lg); font-weight: 700; color: var(--gray-900); margin-bottom: var(--space-4);">
+                    📊 สรุปผลการประเมิน
+                </h3>
+            </div>
+            
+            <div class="progress-stats">
+                <div class="stat-card success">
+                    <span class="stat-number">15</span>
+                    <span class="stat-label">ผ่าน</span>
+                </div>
+                
+                <div class="stat-card error">
+                    <span class="stat-number">3</span>
+                    <span class="stat-label">ไม่ผ่าน</span>
+                </div>
+                
+                <div class="stat-card warning">
+                    <span class="stat-number">1</span>
+                    <span class="stat-label">ต้องติดตาม</span>
+                </div>
+                
+                <div class="stat-card">
+                    <span class="stat-number">1</span>
+                    <span class="stat-label">รอตรวจ</span>
+                </div>
+            </div>
+
+            <!-- Farmer Information -->
+            <div style="background: var(--gray-50); border-radius: var(--radius-lg); padding: var(--space-4); margin-top: var(--space-6); border: 1px solid var(--gray-200);">
+                <h4 style="font-size: var(--font-size-base); font-weight: 700; color: var(--gray-900); margin-bottom: var(--space-3);">
+                    👨‍🌾 ข้อมูลเกษตรกร
+                </h4>
+                <div style="font-size: var(--font-size-sm); color: var(--gray-600); line-height: 1.6;">
+                    <p style="margin-bottom: var(--space-2);"><strong>ชื่อ:</strong> นาย สมชาย ใจดี</p>
+                    <p style="margin-bottom: var(--space-2);"><strong>ฟาร์ม:</strong> ฟาร์มออร์แกนิค</p>
+                    <p style="margin-bottom: var(--space-2);"><strong>พื้นที่:</strong> 5 ไร่</p>
+                    <p style="margin-bottom: var(--space-2);"><strong>ตำบล:</strong> บ้านไผ่ อำเภอเมือง</p>
+                    <p style="margin-bottom: var(--space-2);"><strong>โทรศัพท์:</strong> 081-234-5678</p>
+                    <p><strong>เริ่มประเมิน:</strong> 14:05 น.</p>
+                </div>
+            </div>
+
+            <!-- Assessment History -->
+            <div style="background: white; border-radius: var(--radius-lg); padding: var(--space-4); margin-top: var(--space-4); border: 1px solid var(--gray-200);">
+                <h4 style="font-size: var(--font-size-base); font-weight: 700; color: var(--gray-900); margin-bottom: var(--space-3);">
+                    📋 ประวัติการประเมิน
+                </h4>
+                <div style="font-size: var(--font-size-sm); color: var(--gray-600); line-height: 1.6;">
+                    <p style="margin-bottom: var(--space-2);"><strong>ครั้งแรก:</strong> ผ่าน 85% (มกราคม 2568)</p>
+                    <p style="margin-bottom: var(--space-2);"><strong>ติดตาม:</strong> ผ่าน 92% (มิถุนายน 2568)</p>
+                    <p><strong>ครั้งนี้:</strong> กำลังประเมิน 75%</p>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Notification System -->
+    <div class="notification success" id="notification">
+        <div class="notification-icon">✅</div>
+        <div class="notification-content">
+            <div class="notification-title">บันทึกสำเร็จ</div>
+            <div class="notification-message">ความคืบหน้าได้รับการบันทึกแล้ว</div>
+        </div>
+    </div>
+            <div class="checklist-header">
+                <div class="progress-circle" id="progressCircle">
+                    <span class="progress-text" id="progressText">0%</span>
+                </div>
+                <h3>รายการตรวจสอบ</h3>
+                <div style="font-size: 12px; color: #bdc3c7;">SOP Checklist</div>
+            </div>
+
+            <div id="checklistContainer">
+                <!-- Categories will be populated here -->
+            </div>
+        </div>
+
+        <!-- Video Section -->
+        <div class="video-section">
+            <div class="video-header">
+                <div>
+                    <h2>🌿 การตรวจประเมิน GACP ออนไลน์</h2>
+                    <div style="font-size: 14px; color: #7f8c8d;">Session ID: <span id="sessionId">ONLINE_AUDIT_001</span></div>
+                </div>
+                <div class="video-controls">
+                    <button class="control-btn video" onclick="toggleVideo()">📹 วิดีโอ</button>
+                    <button class="control-btn photo" onclick="capturePhoto()">📷 ถ่ายภาพ</button>
+                    <button class="control-btn zoom" onclick="openZoom()">🔗 Zoom</button>
+                </div>
+            </div>
+
+            <div class="video-main">
+                <div class="video-container">
+                    <div class="zoom-placeholder">
+                        <div style="font-size: 48px; margin-bottom: 20px;">📹</div>
+                        <div>Zoom Video Call Area</div>
+                        <div class="zoom-info">
+                            <div><strong>Meeting ID:</strong> <span id="meetingId">123-456-789</span></div>
+                            <div><strong>Password:</strong> <span id="meetingPassword">abc123</span></div>
+                            <div><strong>Join URL:</strong> <a href="#" id="zoomUrl" target="_blank" style="color: #3498db;">เข้าร่วมประชุม</a></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="photo-capture">
+                    <h3>📷 รูปภาพหลักฐาน</h3>
+                    <div style="font-size: 14px; color: #7f8c8d; margin-bottom: 10px;">
+                        จุดตรวจสอบปัจจุบัน: <span id="currentCheckpointName">โครงสร้างพื้นฐานฟาร์ม</span>
+                    </div>
+                    <div class="photo-grid" id="photoGrid">
+                        <div class="photo-item" onclick="uploadPhoto()">
+                            <div style="text-align: center; color: #7f8c8d;">
+                                <div style="font-size: 24px;">+</div>
+                                <div style="font-size: 12px;">เพิ่มรูป</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assessment Panel -->
+        <div class="assessment-panel">
+            <div class="assessment-header">
+                <h3>📋 การประเมิน</h3>
+                <div style="font-size: 14px; color: #7f8c8d;">Checkpoint Assessment</div>
+            </div>
+
+            <div class="current-checkpoint">
+                <div class="checkpoint-title" id="currentCheckpointTitle">
+                    พื้นที่แปลงปลูกชัดเจน
+                </div>
+                <div class="checkpoint-description" id="currentCheckpointDescription">
+                    ตรวจสอบว่าขอบเขตแปลงปลูกมีความชัดเจน ไม่เกินล้ำพื้นที่ข้างเคียง
+                </div>
+                <div style="font-size: 12px; color: #e74c3c;">
+                    <span id="requiredIndicator">⚠️ จำเป็นต้องผ่าน</span>
+                </div>
+            </div>
+
+            <div class="assessment-options">
+                <div class="option-btn pass" onclick="selectOption('PASS')">
+                    ✅ ผ่าน
+                </div>
+                <div class="option-btn fail" onclick="selectOption('FAIL')">
+                    ❌ ไม่ผ่าน
+                </div>
+                <div class="option-btn suspicious" onclick="selectOption('SUSPICIOUS')">
+                    ⚠️ น่าสงสัย
+                </div>
+            </div>
+
+            <div class="notes-section">
+                <label for="assessmentNotes" style="font-weight: bold; margin-bottom: 5px; display: block;">
+                    📝 หมายเหตุ:
+                </label>
+                <textarea id="assessmentNotes" class="notes-textarea" placeholder="เพิ่มหมายเหตุการประเมิน..."></textarea>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn next" onclick="nextCheckpoint()">ถัดไป</button>
+                <button class="action-btn complete" onclick="completeAssessment()" style="display: none;">เสร็จสิ้น</button>
+            </div>
+
+            <!-- Decision Panel -->
+            <div class="decision-panel" id="decisionPanel">
+                <h3>🎯 การตัดสินใจ</h3>
+                <div style="font-size: 14px; color: #7f8c8d; margin-bottom: 15px;">
+                    เลือกขั้นตอนต่อไปสำหรับการตรวจประเมินนี้
+                </div>
+                
+                <div class="decision-options">
+                    <div class="decision-btn approve" onclick="makeDecision('APPROVE_IMMEDIATELY')">
+                        ✅ อนุมัติทันที<br>
+                        <small>ไม่มีข้อสงสัย</small>
+                    </div>
+                    <div class="decision-btn online-followup" onclick="makeDecision('SCHEDULE_ONLINE_FOLLOWUP')">
+                        💻 นัดออนไลน์อีกครั้ง<br>
+                        <small>ต้องชี้แจงเพิ่ม</small>
+                    </div>
+                    <div class="decision-btn field-audit" onclick="makeDecision('SCHEDULE_FIELD_AUDIT')">
+                        🚗 ลงพื้นที่ตรวจจริง<br>
+                        <small>ต้องตรวจสอบภาคสนาม</small>
+                    </div>
+                    <div class="decision-btn reject" onclick="makeDecision('REJECT_APPLICATION')">
+                        ❌ ปฏิเสธ<br>
+                        <small>ไม่ผ่านเกณฑ์</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for photo upload -->
+    <input type="file" id="photoInput" accept="image/*" style="display: none;" onchange="handlePhotoUpload(event)">
+
+    <script>
+        // Modern GACP Audit Interface
+        class ModernAuditInterface {
+            constructor() {
+                // Session data
+                this.currentSession = {
+                    session_id: 'ONLINE_AUDIT_001',
+                    zoom_meeting: {
+                        id: '123-456-789',
+                        password: 'abc123',
+                        join_url: 'https://zoom.us/j/123456789?pwd=abc123'
+                    },
+                    checkpoints: [],
+                    currentCheckpointIndex: 0,
+                    selectedOption: null,
+                    photos: [],
+                    startTime: Date.now(),
+                    assessorId: 'assessor-001',
+                    farmerId: 'farmer-001'
+                };
+
+                // SOP Criteria
+                this.sopCriteria = {
+                    FARM_INFRASTRUCTURE: {
+                        name: 'โครงสร้างพื้นฐานฟาร์ม',
+                        checkpoints: [
+                            { id: 'FI001', item: 'พื้นที่แปลงปลูกชัดเจน', required: true },
+                            { id: 'FI002', item: 'ขอบเขตแปลงชัดเจน', required: true },
+                            { id: 'FI003', item: 'ป้ายแสดงชื่อแปลง', required: false },
+                            { id: 'FI004', item: 'ทางเข้า-ออกเหมาะสม', required: true }
+                        ]
+                    },
+                    WATER_MANAGEMENT: {
+                        name: 'การจัดการน้ำ',
+                        checkpoints: [
+                            { id: 'WM001', item: 'แหล่งน้ำเพียงพอ', required: true },
+                            { id: 'WM002', item: 'คุณภาพน้ำดี', required: true },
+                            { id: 'WM003', item: 'ระบบชลประทานเหมาะสม', required: true },
+                            { id: 'WM004', item: 'การระบายน้ำดี', required: true }
+                        ]
+                    },
+                    CULTIVATION_PRACTICES: {
+                        name: 'วิธีการปลูก',
+                        checkpoints: [
+                            { id: 'CP001', item: 'ระยะปลูกเหมาะสม', required: true },
+                            { id: 'CP002', item: 'การดูแลรักษาสม่ำเสมอ', required: true },
+                            { id: 'CP003', item: 'การใช้ปุ่ยถูกต้อง', required: true },
+                            { id: 'CP004', item: 'ไม่มีสารเคมีห้าม', required: true }
+                        ]
+                    },
+                    STORAGE_CONDITIONS: {
+                        name: 'การเก็บรักษา',
+                        checkpoints: [
+                            { id: 'SC001', item: 'โกดังเก็บสินค้าเหมาะสม', required: true },
+                            { id: 'SC002', item: 'อุณหภูมิและความชื้นเหมาะสม', required: true },
+                            { id: 'SC003', item: 'การป้องกันแมลงศัตรูพืช', required: true },
+                            { id: 'SC004', item: 'การจัดเรียงสินค้า', required: false }
+                        ]
+                    },
+                    DOCUMENTATION: {
+                        name: 'การบันทึกข้อมูล',
+                        checkpoints: [
+                            { id: 'DOC001', item: 'บันทึกการปลูก', required: true },
+                            { id: 'DOC002', item: 'บันทึกการใช้ปุ่ย', required: true },
+                            { id: 'DOC003', item: 'บันทึกการเก็บเกี่ยว', required: true },
+                            { id: 'DOC004', item: 'บันทึกการขาย', required: false }
+                        ]
+                    }
+                };
+
+                this.isDirty = false;
+                this.autoSaveInterval = null;
+                this.init();
+            }
+
+            init() {
+                this.generateChecklist();
+                this.loadCurrentCheckpoint();
+                this.updateSessionInfo();
+                this.setupEventListeners();
+                this.startAutoSave();
+                this.setupAccessibility();
+                this.startClock();
+                this.loadSavedProgress();
+                this.updateProgress();
+                
+                setTimeout(() => this.showNotification('ระบบพร้อมใช้งาน', 'success'), 1000);
+            }
+
+            setupEventListeners() {
+                // Global keyboard navigation
+                document.addEventListener('keydown', (e) => this.handleKeyboardNavigation(e));
+
+                // Auto-save on textarea input
+                const textarea = document.querySelector('.notes-textarea');
+                if (textarea) {
+                    textarea.addEventListener('input', () => this.markDirty());
+                }
+
+                // Control buttons
+                document.querySelectorAll('.control-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.handleControlAction(e));
+                });
+
+                // Action buttons
+                document.querySelectorAll('.action-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.handleActionButton(e));
+                });
+
+                // Assessment options
+                document.querySelectorAll('.option-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.selectOption(e));
+                });
+
+                // Decision options
+                document.querySelectorAll('.decision-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.makeDecision(e));
+                });
+            }
+
+            generateChecklist() {
+                const container = document.getElementById('checklistContainer');
+                this.currentSession.checkpoints = [];
+                
+                Object.keys(this.sopCriteria).forEach(categoryKey => {
+                    const category = this.sopCriteria[categoryKey];
+                    
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'category-section';
+                    categoryDiv.innerHTML = `<div class="category-title">${category.name}</div>`;
+                    
+                    category.checkpoints.forEach(checkpoint => {
+                        const checkpointDiv = document.createElement('div');
+                        checkpointDiv.className = 'checkpoint-item pending';
+                        checkpointDiv.id = `checkpoint-${checkpoint.id}`;
+                        checkpointDiv.setAttribute('tabindex', '0');
+                        checkpointDiv.setAttribute('role', 'checkbox');
+                        checkpointDiv.innerHTML = `
+                            <span>${checkpoint.item}</span>
+                            <div class="checkpoint-status pending">○</div>
+                            <div style="font-size: 11px; color: var(--gray-500);">
+                                ${checkpoint.required ? '⚠️ จำเป็น' : '📝 เสริม'}
+                            </div>
+                        `;
+                        
+                        checkpointDiv.addEventListener('click', () => 
+                            this.jumpToCheckpoint(this.currentSession.checkpoints.length));
+                        checkpointDiv.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                this.jumpToCheckpoint(this.currentSession.checkpoints.length);
+                            }
+                        });
+                        
+                        categoryDiv.appendChild(checkpointDiv);
+                        
+                        this.currentSession.checkpoints.push({
+                            ...checkpoint,
+                            category: categoryKey,
+                            category_name: category.name,
+                            status: 'PENDING',
+                            notes: '',
+                            photos: []
+                        });
+                    });
+                    
+                    container.appendChild(categoryDiv);
+                });
+            }
+
+            loadCurrentCheckpoint() {
+                const checkpoint = this.currentSession.checkpoints[this.currentSession.currentCheckpointIndex];
+                if (!checkpoint) return;
+
+                // Update current checkpoint display
+                document.getElementById('currentCheckpointTitle').textContent = checkpoint.item;
+                document.getElementById('currentCheckpointDescription').textContent = 
+                    `หมวด: ${checkpoint.category_name}`;
+                document.getElementById('requiredIndicator').innerHTML = 
+                    checkpoint.required ? '⚠️ จำเป็นต้องผ่าน' : '📝 รายการเสริม';
+                document.getElementById('currentCheckpointName').textContent = checkpoint.item;
+
+                // Update sidebar highlighting
+                document.querySelectorAll('.checkpoint-item').forEach(item => {
+                    item.classList.remove('current');
+                });
+                const currentElement = document.getElementById(`checkpoint-${checkpoint.id}`);
+                if (currentElement) {
+                    currentElement.classList.add('current');
+                    currentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+
+                // Clear previous selection
+                this.clearOptionSelection();
+                const notesTextarea = document.getElementById('assessmentNotes');
+                if (notesTextarea) {
+                    notesTextarea.value = checkpoint.notes;
+                }
+
+                // Update button visibility
+                this.updateActionButtons();
+                this.updatePhotoGrid();
+            }
+
+            updateActionButtons() {
+                const nextBtn = document.querySelector('.action-btn.next');
+                const completeBtn = document.querySelector('.action-btn.complete');
+                
+                const isLastCheckpoint = this.currentSession.currentCheckpointIndex === this.currentSession.checkpoints.length - 1;
+                
+                if (nextBtn) nextBtn.style.display = isLastCheckpoint ? 'none' : 'block';
+                if (completeBtn) completeBtn.style.display = isLastCheckpoint ? 'block' : 'none';
+            }
+
+            selectOption(e) {
+                const option = e.currentTarget.classList.contains('pass') ? 'PASS' :
+                              e.currentTarget.classList.contains('fail') ? 'FAIL' : 'SUSPICIOUS';
+                
+                this.currentSession.selectedOption = option;
+                
+                // Update UI
+                document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                
+                this.markDirty();
+                this.showNotification(`เลือก: ${this.getOptionText(option)}`, 'info');
+            }
+
+            getOptionText(option) {
+                const texts = { 'PASS': 'ผ่าน', 'FAIL': 'ไม่ผ่าน', 'SUSPICIOUS': 'น่าสงสัย' };
+                return texts[option] || option;
+            }
+
+            clearOptionSelection() {
+                this.currentSession.selectedOption = null;
+                document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('active'));
+            }
+
+            handleActionButton(e) {
+                const btn = e.currentTarget;
+                this.addButtonFeedback(btn);
+                
+                if (btn.classList.contains('next')) {
+                    this.nextCheckpoint();
+                } else if (btn.classList.contains('complete')) {
+                    this.completeAssessment();
+                }
+            }
+
+            nextCheckpoint() {
+                if (!this.currentSession.selectedOption) {
+                    this.showNotification('กรุณาเลือกผลการประเมิน', 'error');
+                    return;
+                }
+
+                this.saveCurrentCheckpoint();
+                this.currentSession.currentCheckpointIndex++;
+                
+                if (this.currentSession.currentCheckpointIndex < this.currentSession.checkpoints.length) {
+                    this.loadCurrentCheckpoint();
+                } else {
+                    this.completeAssessment();
+                }
+
+                this.updateProgress();
+            }
+
+            completeAssessment() {
+                if (!this.currentSession.selectedOption) {
+                    this.showNotification('กรุณาเลือกผลการประเมินสำหรับจุดสุดท้าย', 'error');
+                    return;
+                }
+
+                this.saveCurrentCheckpoint();
+                this.updateProgress();
+                
+                // Show decision panel
+                const decisionPanel = document.getElementById('decisionPanel');
+                if (decisionPanel) {
+                    decisionPanel.style.display = 'block';
+                    decisionPanel.scrollIntoView({ behavior: 'smooth' });
+                }
+                
+                this.showAssessmentSummary();
+                this.showNotification('การประเมินเสร็จสิ้น กรุณาเลือกการตัดสินใจ', 'success');
+            }
+
+            saveCurrentCheckpoint() {
+                const checkpoint = this.currentSession.checkpoints[this.currentSession.currentCheckpointIndex];
+                checkpoint.status = this.currentSession.selectedOption;
+                
+                const notesTextarea = document.getElementById('assessmentNotes');
+                if (notesTextarea) {
+                    checkpoint.notes = notesTextarea.value;
+                }
+
+                // Update sidebar visual status
+                const checkpointElement = document.getElementById(`checkpoint-${checkpoint.id}`);
+                if (checkpointElement) {
+                    checkpointElement.classList.remove('current', 'pending', 'pass', 'fail', 'suspicious');
+                    checkpointElement.classList.add(checkpoint.status.toLowerCase());
+                    
+                    const statusElement = checkpointElement.querySelector('.checkpoint-status');
+                    if (statusElement) {
+                        statusElement.classList.remove('pending', 'pass', 'fail', 'suspicious');
+                        statusElement.classList.add(checkpoint.status.toLowerCase());
+                        statusElement.textContent = checkpoint.status === 'PASS' ? '✓' :
+                                                   checkpoint.status === 'FAIL' ? '✗' :
+                                                   checkpoint.status === 'SUSPICIOUS' ? '?' : '○';
+                    }
+                }
+
+                this.markDirty();
+            }
+
+            updateProgress() {
+                const completed = this.currentSession.checkpoints.filter(cp => cp.status !== 'PENDING').length;
+                const passed = this.currentSession.checkpoints.filter(cp => cp.status === 'PASS').length;
+                const failed = this.currentSession.checkpoints.filter(cp => cp.status === 'FAIL').length;
+                const suspicious = this.currentSession.checkpoints.filter(cp => cp.status === 'SUSPICIOUS').length;
+                const pending = this.currentSession.checkpoints.filter(cp => cp.status === 'PENDING').length;
+                const total = this.currentSession.checkpoints.length;
+                
+                const percentage = Math.round((passed / total) * 100);
+                
+                // Update progress text
+                const progressText = document.getElementById('progressText');
+                if (progressText) {
+                    progressText.textContent = `${percentage}%`;
+                }
+                
+                // Update progress circle
+                const progressCircle = document.getElementById('progressCircle');
+                if (progressCircle) {
+                    const degrees = (percentage / 100) * 360;
+                    progressCircle.style.background = `conic-gradient(var(--success-color) ${degrees}deg, var(--gray-300) ${degrees}deg)`;
+                }
+
+                // Update stats in sidebar
+                const stats = document.querySelectorAll('.stat-number');
+                if (stats.length >= 4) {
+                    stats[0].textContent = passed;
+                    stats[1].textContent = failed;
+                    stats[2].textContent = suspicious;
+                    stats[3].textContent = pending;
+                }
+            }
+
+            showAssessmentSummary() {
+                const passed = this.currentSession.checkpoints.filter(cp => cp.status === 'PASS').length;
+                const failed = this.currentSession.checkpoints.filter(cp => cp.status === 'FAIL').length;
+                const suspicious = this.currentSession.checkpoints.filter(cp => cp.status === 'SUSPICIOUS').length;
+                const failedRequired = this.currentSession.checkpoints.filter(cp => 
+                    cp.required && cp.status === 'FAIL').length;
+
+                let recommendation = '';
+                if (failedRequired > 0) {
+                    recommendation = 'แนะนำ: ปฏิเสธใบสมัคร (มีรายการจำเป็นที่ไม่ผ่าน)';
+                } else if (suspicious > 0) {
+                    recommendation = 'แนะนำ: ตรวจสอบเพิ่มเติม (มีรายการน่าสงสัย)';
+                } else {
+                    recommendation = 'แนะนำ: อนุมัติได้ (ผ่านเกณฑ์ทั้งหมด)';
+                }
+
+                const summary = `สรุปผลการประเมิน:
+• ผ่าน: ${passed} รายการ
+• ไม่ผ่าน: ${failed} รายการ  
+• น่าสงสัย: ${suspicious} รายการ
+• รายการจำเป็นที่ไม่ผ่าน: ${failedRequired} รายการ
+
+${recommendation}`;
+
+                console.log(summary);
+                this.showNotification('คำนวณสรุปผลเรียบร้อย', 'success');
+            }
+
+            makeDecision(e) {
+                const btn = e.currentTarget;
+                const decision = btn.classList.contains('approve') ? 'APPROVE_IMMEDIATELY' :
+                               btn.classList.contains('online-followup') ? 'SCHEDULE_ONLINE_FOLLOWUP' :
+                               btn.classList.contains('field-audit') ? 'SCHEDULE_FIELD_AUDIT' : 'REJECT_APPLICATION';
+
+                const decisions = {
+                    'APPROVE_IMMEDIATELY': 'อนุมัติทันที - ออกใบรับรองได้เลย',
+                    'SCHEDULE_ONLINE_FOLLOWUP': 'นัดประชุมออนไลน์เพิ่มเติม',
+                    'SCHEDULE_FIELD_AUDIT': 'ลงพื้นที่ตรวจสอบภาคสนาม', 
+                    'REJECT_APPLICATION': 'ปฏิเสธใบสมัคร'
+                };
+
+                this.addButtonFeedback(btn);
+
+                if (confirm(`ยืนยันการตัดสินใจ: ${decisions[decision]}?`)) {
+                    this.submitAssessment(decision);
+                }
+            }
+
+            submitAssessment(decision = null) {
+                const formData = this.getFormData();
+                if (decision) formData.decision = decision;
+
+                this.showNotification('กำลังส่งผลการประเมิน...', 'info');
+                
+                // Simulate API submission
+                setTimeout(() => {
+                    this.showNotification('ส่งผลการประเมินเรียบร้อย', 'success');
+                    
+                    // Clear saved progress
+                    localStorage.removeItem('gacp_audit_progress');
+                    
+                    // Redirect after delay
+                    setTimeout(() => {
+                        window.location.href = '/assessment-complete.html';
+                    }, 2000);
+                }, 1500);
+            }
+
+            // Utility methods
+            jumpToCheckpoint(index) {
+                if (index >= 0 && index < this.currentSession.checkpoints.length) {
+                    this.currentSession.currentCheckpointIndex = index;
+                    this.loadCurrentCheckpoint();
+                }
+            }
+
+            handleControlAction(e) {
+                const btn = e.currentTarget;
+                this.addButtonFeedback(btn);
+                
+                if (btn.textContent.includes('📹')) {
+                    this.toggleVideo(btn);
+                } else if (btn.textContent.includes('📷')) {
+                    this.capturePhoto();
+                } else if (btn.textContent.includes('🔗')) {
+                    this.openZoom();
+                }
+            }
+
+            toggleVideo(btn) {
+                const isOff = btn.classList.contains('camera-off');
+                btn.classList.toggle('camera-off');
+                btn.textContent = isOff ? '📹 วิดีโอ' : '📷 ปิดกล้อง';
+                this.showNotification(isOff ? 'เปิดกล้อง' : 'ปิดกล้อง', 'info');
+            }
+
+            capturePhoto() {
+                this.showNotification('เปิดกล้องถ่ายภาพ', 'info');
+                const photoInput = document.getElementById('photoInput');
+                if (photoInput) photoInput.click();
+            }
+
+            openZoom() {
+                window.open(this.currentSession.zoom_meeting.join_url, '_blank');
+                this.showNotification('เปิด Zoom Meeting', 'info');
+            }
+
+            updatePhotoGrid() {
+                const checkpoint = this.currentSession.checkpoints[this.currentSession.currentCheckpointIndex];
+                const grid = document.getElementById('photoGrid');
+                if (!grid || !checkpoint) return;
+                
+                grid.innerHTML = '';
+                
+                checkpoint.photos.forEach(photo => {
+                    const photoDiv = document.createElement('div');
+                    photoDiv.className = 'photo-item';
+                    photoDiv.innerHTML = `<img src="${photo.url}" alt="หลักฐาน" style="width: 100%; height: 100%; object-fit: cover;">`;
+                    grid.appendChild(photoDiv);
+                });
+                
+                const uploadDiv = document.createElement('div');
+                uploadDiv.className = 'photo-item';
+                uploadDiv.style.cursor = 'pointer';
+                uploadDiv.innerHTML = `
+                    <div style="text-align: center; color: var(--gray-500);">
+                        <div style="font-size: 24px;">+</div>
+                        <div style="font-size: 12px;">เพิ่มรูป</div>
+                    </div>
+                `;
+                uploadDiv.addEventListener('click', () => this.capturePhoto());
+                grid.appendChild(uploadDiv);
+            }
+
+            updateSessionInfo() {
+                const sessionElements = {
+                    'sessionId': this.currentSession.session_id,
+                    'meetingId': this.currentSession.zoom_meeting.id,
+                    'meetingPassword': this.currentSession.zoom_meeting.password
+                };
+
+                Object.entries(sessionElements).forEach(([id, value]) => {
+                    const element = document.getElementById(id);
+                    if (element) element.textContent = value;
+                });
+
+                const zoomUrl = document.getElementById('zoomUrl');
+                if (zoomUrl) zoomUrl.href = this.currentSession.zoom_meeting.join_url;
+            }
+
+            // Auto-save and persistence
+            startAutoSave() {
+                this.autoSaveInterval = setInterval(() => {
+                    if (this.isDirty) {
+                        this.saveProgress();
+                        this.isDirty = false;
+                    }
+                }, 30000);
+            }
+
+            markDirty() {
+                this.isDirty = true;
+            }
+
+            saveProgress() {
+                const formData = this.getFormData();
+                localStorage.setItem('gacp_audit_progress', JSON.stringify(formData));
+            }
+
+            loadSavedProgress() {
+                const saved = localStorage.getItem('gacp_audit_progress');
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        if (data.checkpoints) {
+                            // Restore checkpoint states
+                            Object.entries(data.checkpoints).forEach(([text, status]) => {
+                                const checkpoint = this.currentSession.checkpoints.find(cp => cp.item === text);
+                                if (checkpoint) checkpoint.status = status;
+                            });
+                            this.updateProgress();
+                        }
+                    } catch (e) {
+                        console.warn('Could not load saved progress:', e);
+                    }
+                }
+            }
+
+            getFormData() {
+                const checkpoints = {};
+                this.currentSession.checkpoints.forEach(cp => {
+                    checkpoints[cp.item] = cp.status;
+                });
+
+                return {
+                    timestamp: new Date().toISOString(),
+                    sessionDuration: Date.now() - this.currentSession.startTime,
+                    checkpoints,
+                    notes: document.querySelector('.notes-textarea')?.value || '',
+                    farmerId: this.currentSession.farmerId,
+                    assessorId: this.currentSession.assessorId
+                };
+            }
+
+            // UI helpers
+            addButtonFeedback(btn) {
+                btn.style.transform = 'scale(0.95)';
+                setTimeout(() => btn.style.transform = '', 150);
+            }
+
+            showNotification(message, type = 'success') {
+                const notification = document.getElementById('notification');
+                if (!notification) return;
+
+                const titleEl = notification.querySelector('.notification-title');
+                const messageEl = notification.querySelector('.notification-message');
+                const iconEl = notification.querySelector('.notification-icon');
+                
+                const config = {
+                    success: { title: 'สำเร็จ', icon: '✅' },
+                    error: { title: 'เกิดข้อผิดพลาด', icon: '❌' },
+                    info: { title: 'ข้อมูล', icon: 'ℹ️' }
+                };
+
+                const { title, icon } = config[type] || config.info;
+                
+                if (titleEl) titleEl.textContent = title;
+                if (messageEl) messageEl.textContent = message;
+                if (iconEl) iconEl.textContent = icon;
+                
+                notification.className = `notification ${type} show`;
+                
+                setTimeout(() => notification.classList.remove('show'), 3000);
+            }
+
+            setupAccessibility() {
+                // Add ARIA labels
+                document.querySelectorAll('.checkpoint-item').forEach((item, index) => {
+                    item.setAttribute('aria-label', `รายการตรวจสอบ ${index + 1}`);
+                });
+
+                document.querySelectorAll('.option-btn').forEach((option, index) => {
+                    option.setAttribute('role', 'radio');
+                    option.setAttribute('tabindex', '0');
+                    option.setAttribute('aria-label', `ตัวเลือกการประเมิน ${index + 1}`);
+                });
+            }
+
+            handleKeyboardNavigation(e) {
+                if (e.ctrlKey || e.metaKey) {
+                    switch(e.key) {
+                        case 's':
+                            e.preventDefault();
+                            this.saveProgress();
+                            this.showNotification('บันทึกความคืบหน้า', 'success');
+                            break;
+                    }
+                }
+                
+                if (e.key === 'Escape') {
+                    const notification = document.querySelector('.notification.show');
+                    if (notification) notification.classList.remove('show');
+                }
+            }
+
+            startClock() {
+                const updateTime = () => {
+                    const now = new Date();
+                    const timeString = now.toLocaleTimeString('th-TH');
+                    const dateString = now.toLocaleDateString('th-TH');
+                    
+                    const timeElement = document.querySelector('.header-subtitle');
+                    if (timeElement) {
+                        timeElement.textContent = `${dateString} | เวลา ${timeString}`;
+                    }
+                };
+                
+                updateTime();
+                setInterval(updateTime, 1000);
+            }
+
+            destroy() {
+                if (this.autoSaveInterval) {
+                    clearInterval(this.autoSaveInterval);
+                }
+            }
+        }
+
+        // Global functions for backward compatibility
+        function selectOption(option) {
+            if (window.auditInterface) {
+                window.auditInterface.currentSession.selectedOption = option;
+                const btn = document.querySelector(`.option-btn.${option.toLowerCase()}`);
+                if (btn) {
+                    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                }
+            }
+        }
+
+        function nextCheckpoint() {
+            if (window.auditInterface) {
+                window.auditInterface.nextCheckpoint();
+            }
+        }
+
+        function completeAssessment() {
+            if (window.auditInterface) {
+                window.auditInterface.completeAssessment();
+            }
+        }
+
+        function makeDecision(decision) {
+            if (window.auditInterface) {
+                window.auditInterface.submitAssessment(decision);
+            }
+        }
+
+        function capturePhoto() {
+            if (window.auditInterface) {
+                window.auditInterface.capturePhoto();
+            }
+        }
+
+        function uploadPhoto() {
+            if (window.auditInterface) {
+                window.auditInterface.capturePhoto();
+            }
+        }
+
+        function toggleVideo() {
+            if (window.auditInterface) {
+                const btn = document.querySelector('.control-btn.video');
+                window.auditInterface.toggleVideo(btn);
+            }
+        }
+
+        function openZoom() {
+            if (window.auditInterface) {
+                window.auditInterface.openZoom();
+            }
+        }
+
+        function handlePhotoUpload(event) {
+            const file = event.target.files[0];
+            if (!file || !window.auditInterface) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const checkpoint = window.auditInterface.currentSession.checkpoints[
+                    window.auditInterface.currentSession.currentCheckpointIndex
+                ];
+                if (checkpoint) {
+                    checkpoint.photos.push({
+                        id: `PHOTO_${Date.now()}`,
+                        url: e.target.result,
+                        timestamp: new Date().toISOString()
+                    });
+                    window.auditInterface.updatePhotoGrid();
+                    window.auditInterface.showNotification('เพิ่มรูปภาพเรียบร้อย', 'success');
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.auditInterface = new ModernAuditInterface();
+        });
+
+        // Save before page unload
+        window.addEventListener('beforeunload', (e) => {
+            if (window.auditInterface && window.auditInterface.isDirty) {
+                window.auditInterface.saveProgress();
+            }
+        });
+    </script>
+</body>
+</html>
